@@ -4,4 +4,4 @@ The `masmr` package is designed to allow users to build custom image processing 
 
 For queries / comments, kindly direct them to Eugene Kwa (<kwaje@gis.a-star.edu.sg>). 
 
-Full tutorial: [Link text](https://eugenekwaneuromics.github.io/masmr/)
+Full tutorial: [https://eugenekwaneuromics.github.io/masmr/](https://eugenekwaneuromics.github.io/masmr/)
