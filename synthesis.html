@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 6 Synthesis | Introduction to the masmr project</title>
+  <meta name="description" content="This is a quick introduction to building piplines for MERFISH decoding using our masmr package." />
+  <meta name="generator" content="bookdown 0.42 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 6 Synthesis | Introduction to the masmr project" />
+  <meta property="og:type" content="book" />
+  <meta property="og:image" content="/./images/masmr.png" />
+  <meta property="og:description" content="This is a quick introduction to building piplines for MERFISH decoding using our masmr package." />
+  <meta name="github-repo" content="rstudio/bookdown-demo" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 6 Synthesis | Introduction to the masmr project" />
+  
+  <meta name="twitter:description" content="This is a quick introduction to building piplines for MERFISH decoding using our masmr package." />
+  <meta name="twitter:image" content="/./images/masmr.png" />
+
+<meta name="author" content="Eugene Kwa" />
+
+
+<meta name="date" content="2025-02-17" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="stitching.html"/>
+<link rel="next" href="troubleshooting.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Modular Algorithms for Spotcalling in MERFISH in R</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> url: your book url like https://bookdown.org/yihui/bookdown</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#installation"><i class="fa fa-check"></i><b>1.1</b> Installation</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>2</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="introduction.html"><a href="introduction.html#background"><i class="fa fa-check"></i><b>2.1</b> Background</a></li>
+<li class="chapter" data-level="2.2" data-path="introduction.html"><a href="introduction.html#quick-start-scripts"><i class="fa fa-check"></i><b>2.2</b> Quick start scripts</a>
+<ul>
+<li class="chapter" data-level="2.2.1" data-path="introduction.html"><a href="introduction.html#quick-start-spotcalling"><i class="fa fa-check"></i><b>2.2.1</b> Quick start: Spotcalling</a></li>
+<li class="chapter" data-level="2.2.2" data-path="introduction.html"><a href="introduction.html#quick-start-cell-segmentation"><i class="fa fa-check"></i><b>2.2.2</b> Quick start: Cell segmentation</a></li>
+<li class="chapter" data-level="2.2.3" data-path="introduction.html"><a href="introduction.html#quick-start-stitching"><i class="fa fa-check"></i><b>2.2.3</b> Quick start: Stitching</a></li>
+<li class="chapter" data-level="2.2.4" data-path="introduction.html"><a href="introduction.html#quick-start-synthesis"><i class="fa fa-check"></i><b>2.2.4</b> Quick start: Synthesis</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="spotcalling.html"><a href="spotcalling.html"><i class="fa fa-check"></i><b>3</b> Spotcalling</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="spotcalling.html"><a href="spotcalling.html#pre-processing"><i class="fa fa-check"></i><b>3.1</b> Pre-processing</a>
+<ul>
+<li class="chapter" data-level="3.1.1" data-path="spotcalling.html"><a href="spotcalling.html#establishing-parameters"><i class="fa fa-check"></i><b>3.1.1</b> Establishing parameters</a></li>
+<li class="chapter" data-level="3.1.2" data-path="spotcalling.html"><a href="spotcalling.html#getting-parameters-from-image-metadata"><i class="fa fa-check"></i><b>3.1.2</b> Getting parameters from image metadata</a></li>
+<li class="chapter" data-level="3.1.3" data-path="spotcalling.html"><a href="spotcalling.html#preparing-the-codebook"><i class="fa fa-check"></i><b>3.1.3</b> Preparing the codebook</a></li>
+<li class="chapter" data-level="3.1.4" data-path="spotcalling.html"><a href="spotcalling.html#house-keeping"><i class="fa fa-check"></i><b>3.1.4</b> House-keeping</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="spotcalling.html"><a href="spotcalling.html#handling-images"><i class="fa fa-check"></i><b>3.2</b> Handling images</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="spotcalling.html"><a href="spotcalling.html#image-reading"><i class="fa fa-check"></i><b>3.2.1</b> Image reading</a></li>
+<li class="chapter" data-level="3.2.2" data-path="spotcalling.html"><a href="spotcalling.html#establishing-global-image-parameters"><i class="fa fa-check"></i><b>3.2.2</b> Establishing global image parameters</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="spotcalling.html"><a href="spotcalling.html#looping-through-images"><i class="fa fa-check"></i><b>3.3</b> Looping through images</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="spotcalling.html"><a href="spotcalling.html#image-processing-building-blocks"><i class="fa fa-check"></i><b>3.3.1</b> Image processing: building blocks</a></li>
+<li class="chapter" data-level="3.3.2" data-path="spotcalling.html"><a href="spotcalling.html#image-processing-combining-functions"><i class="fa fa-check"></i><b>3.3.2</b> Image processing: combining functions</a></li>
+<li class="chapter" data-level="3.3.3" data-path="spotcalling.html"><a href="spotcalling.html#image-registration"><i class="fa fa-check"></i><b>3.3.3</b> Image registration</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="spotcalling.html"><a href="spotcalling.html#working-with-pixel-wise-metrics"><i class="fa fa-check"></i><b>3.4</b> Working with pixel-wise metrics</a>
+<ul>
+<li class="chapter" data-level="3.4.1" data-path="spotcalling.html"><a href="spotcalling.html#moving-from-image-lists-to-a-dataframe"><i class="fa fa-check"></i><b>3.4.1</b> Moving from image lists to a dataframe</a></li>
+<li class="chapter" data-level="3.4.2" data-path="spotcalling.html"><a href="spotcalling.html#decoding"><i class="fa fa-check"></i><b>3.4.2</b> Decoding</a></li>
+<li class="chapter" data-level="3.4.3" data-path="spotcalling.html"><a href="spotcalling.html#annotating-blanks"><i class="fa fa-check"></i><b>3.4.3</b> Annotating blanks</a></li>
+<li class="chapter" data-level="3.4.4" data-path="spotcalling.html"><a href="spotcalling.html#binarising-continuous-values"><i class="fa fa-check"></i><b>3.4.4</b> Binarising continuous values</a></li>
+<li class="chapter" data-level="3.4.5" data-path="spotcalling.html"><a href="spotcalling.html#obtaining-other-qc-metrics"><i class="fa fa-check"></i><b>3.4.5</b> Obtaining other QC metrics</a></li>
+<li class="chapter" data-level="3.4.6" data-path="spotcalling.html"><a href="spotcalling.html#clustering"><i class="fa fa-check"></i><b>3.4.6</b> Clustering</a></li>
+</ul></li>
+<li class="chapter" data-level="3.5" data-path="spotcalling.html"><a href="spotcalling.html#saving-spot-calls"><i class="fa fa-check"></i><b>3.5</b> Saving spot calls</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="cell-segmentation.html"><a href="cell-segmentation.html"><i class="fa fa-check"></i><b>4</b> Cell segmentation</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#pre-processing-1"><i class="fa fa-check"></i><b>4.1</b> Pre-processing</a>
+<ul>
+<li class="chapter" data-level="4.1.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#establishing-parameters-1"><i class="fa fa-check"></i><b>4.1.1</b> Establishing parameters</a></li>
+<li class="chapter" data-level="4.1.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#establishing-the-cell-segmentation-model"><i class="fa fa-check"></i><b>4.1.2</b> Establishing the cell segmentation model</a></li>
+</ul></li>
+<li class="chapter" data-level="4.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#running-cell-segmentation"><i class="fa fa-check"></i><b>4.2</b> Running cell segmentation</a></li>
+<li class="chapter" data-level="4.3" data-path="cell-segmentation.html"><a href="cell-segmentation.html#running-segmentation-model"><i class="fa fa-check"></i><b>4.3</b> Running segmentation model</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#cellpose"><i class="fa fa-check"></i><b>4.3.1</b> <code>cellpose</code></a></li>
+<li class="chapter" data-level="4.3.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#stardist"><i class="fa fa-check"></i><b>4.3.2</b> <code>stardist</code></a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="cell-segmentation.html"><a href="cell-segmentation.html#saving-cell-masks"><i class="fa fa-check"></i><b>4.4</b> Saving cell masks</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="stitching.html"><a href="stitching.html"><i class="fa fa-check"></i><b>5</b> Stitching</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="stitching.html"><a href="stitching.html#pre-processing-2"><i class="fa fa-check"></i><b>5.1</b> Pre-processing</a></li>
+<li class="chapter" data-level="5.2" data-path="stitching.html"><a href="stitching.html#loading-images-for-stitching"><i class="fa fa-check"></i><b>5.2</b> Loading images for stitching</a></li>
+<li class="chapter" data-level="5.3" data-path="stitching.html"><a href="stitching.html#performing-stitching"><i class="fa fa-check"></i><b>5.3</b> Performing stitching</a></li>
+<li class="chapter" data-level="5.4" data-path="stitching.html"><a href="stitching.html#saving-stitch-vectors"><i class="fa fa-check"></i><b>5.4</b> Saving stitch vectors</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="synthesis.html"><a href="synthesis.html"><i class="fa fa-check"></i><b>6</b> Synthesis</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="synthesis.html"><a href="synthesis.html#unifying-outputs"><i class="fa fa-check"></i><b>6.1</b> Unifying outputs</a></li>
+<li class="chapter" data-level="6.2" data-path="synthesis.html"><a href="synthesis.html#qc-plotting"><i class="fa fa-check"></i><b>6.2</b> QC plotting</a>
+<ul>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#fpkmcorrelation"><i class="fa fa-check"></i><code>FPKMCorrelation</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#cosinedistancedistribution"><i class="fa fa-check"></i><code>CosineDistanceDistribution</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#spotfovdistribution"><i class="fa fa-check"></i><code>SpotFOVDistribution</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#cosinespatialdistribution"><i class="fa fa-check"></i><code>CosineSpatialDistribution</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#bitdetectionrate"><i class="fa fa-check"></i><code>BitDetectionRate</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#bitwiseerrorrates"><i class="fa fa-check"></i><code>BitwiseErrorRates</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#fovmetrics"><i class="fa fa-check"></i><code>FOVMetrics</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#cellmetrics"><i class="fa fa-check"></i><code>CellMetrics</code></a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="synthesis.html"><a href="synthesis.html#next-steps"><i class="fa fa-check"></i><b>6.3</b> Next steps</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="troubleshooting.html"><a href="troubleshooting.html"><i class="fa fa-check"></i><b>7</b> Troubleshooting</a>
+<ul>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#too-few-spots"><i class="fa fa-check"></i>Too few spots</a></li>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#too-few-cellular-spots"><i class="fa fa-check"></i>Too few cellular spots</a></li>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#weak-correlation-to-fpkm-high-blank"><i class="fa fa-check"></i>Weak correlation to FPKM / high blank %</a></li>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#issues-with-image-handling"><i class="fa fa-check"></i>Issues with image handling</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="./">Modular Algorithms for Spotcalling in MERFISH in R</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Introduction to the masmr project</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="synthesis" class="section level1 hasAnchor" number="6">
+<h1><span class="header-section-number">Chapter 6</span> Synthesis<a href="synthesis.html#synthesis" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Synthesis involves the consolidation of disparate outputs and is the final task. This will be the focus of this Chapter.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="synthesis.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(masmr)</span>
+<span id="cb1-2"><a href="synthesis.html#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.3.2</code></pre>
+<div id="unifying-outputs" class="section level2 hasAnchor" number="6.1">
+<h2><span class="header-section-number">6.1</span> Unifying outputs<a href="synthesis.html#unifying-outputs" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>As a consequence of running scripts from preceding chapters, we expect three subdirectories in the user-specified output directory: one for spotcalling outputs (<code>IM</code>), one for cell segmentation (<code>DAPI</code>), and one for stitching (<code>STITCH</code>). The outputs from these three subdirectories will be combined, and output into a final <code>OUT</code> subdirectory.</p>
+<p>For illustrative purposes, we have processed just nine FOVs below. Also note the <code>removeRedundancy</code> parameter currently set to <code>FALSE</code> – this will be explained later.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="synthesis.html#cb3-1" aria-hidden="true" tabindex="-1"></a>data_dir <span class="ot">=</span> <span class="st">&#39;C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/&#39;</span></span>
+<span id="cb3-2"><a href="synthesis.html#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">establishParams</span>(</span>
+<span id="cb3-3"><a href="synthesis.html#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageDirs =</span> <span class="fu">paste0</span>(data_dir, <span class="st">&#39;S10/&#39;</span>),</span>
+<span id="cb3-4"><a href="synthesis.html#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageFormat =</span> <span class="st">&#39;.ome.tif&#39;</span>,</span>
+<span id="cb3-5"><a href="synthesis.html#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">codebookFileName =</span> <span class="fu">list.files</span>(<span class="fu">paste0</span>(data_dir, <span class="st">&#39;codebook/&#39;</span>), <span class="at">pattern=</span><span class="st">&#39;codebook&#39;</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-6"><a href="synthesis.html#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">codebookColumnNames =</span> <span class="fu">paste0</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">3</span>), <span class="dv">4</span>), <span class="st">&#39;_&#39;</span>, <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&#39;cy3&#39;</span>, <span class="st">&#39;alexa594&#39;</span>, <span class="st">&#39;cy5&#39;</span>, <span class="st">&#39;cy7&#39;</span>), <span class="at">each=</span><span class="dv">4</span>) ),</span>
+<span id="cb3-7"><a href="synthesis.html#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">outDir =</span> <span class="st">&#39;C:/Users/kwaje/Downloads/JYOUT/&#39;</span>,</span>
+<span id="cb3-8"><a href="synthesis.html#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">dapiDir =</span> <span class="fu">paste0</span>(data_dir, <span class="st">&#39;DAPI_1/&#39;</span>),</span>
+<span id="cb3-9"><a href="synthesis.html#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">pythonLocation =</span> <span class="st">&#39;C:/Users/kwaje/AppData/Local/anaconda3/envs/scipyenv/&#39;</span>,</span>
+<span id="cb3-10"><a href="synthesis.html#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">fpkmFileName =</span> <span class="fu">list.files</span>(<span class="fu">paste0</span>(data_dir, <span class="st">&#39;FPKM_data/&#39;</span>), <span class="at">pattern=</span><span class="st">&#39;FPKM&#39;</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-11"><a href="synthesis.html#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">nProbesFileName =</span> <span class="fu">list.files</span>(<span class="fu">paste0</span>(data_dir), <span class="at">pattern=</span><span class="st">&#39;ProbesPerGene.csv&#39;</span>, <span class="at">recursive =</span> T, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-12"><a href="synthesis.html#cb3-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## Assuming .ome.tif is extension for meta files...</code></pre>
+<pre><code>## resumeMode = TRUE...</code></pre>
+<pre><code>## 100 images across 16 cycles ( 4 ON-bit codes )...</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="synthesis.html#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">synthesiseData</span>(<span class="at">removeRedundancy =</span> F)</span></code></pre></div>
+<pre><code>## Reference FOV not specified...Choosing FOV with most spots...</code></pre>
+<pre><code>## FOV chosen: MMStack_1-Pos_002_002...</code></pre>
+<pre><code>## Updating global coordinates...</code></pre>
+<pre><code>## Synthesising data...</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## 1 of 100...No spotcall file found...Skipping...
+## 2 of 100...No spotcall file found...Skipping...
+## 3 of 100...No spotcall file found...Skipping...
+## 4 of 100...No spotcall file found...Skipping...
+## 5 of 100...No spotcall file found...Skipping...
+## 6 of 100...No spotcall file found...Skipping...
+## 7 of 100...No spotcall file found...Skipping...
+## 8 of 100...No spotcall file found...Skipping...
+## 9 of 100...No spotcall file found...Skipping...
+## 10 of 100...No spotcall file found...Skipping...
+## 11 of 100...No spotcall file found...Skipping...
+## 12 of 100...No spotcall file found...Skipping...
+## 13 of 100...No spotcall file found...Skipping...
+## 14 of 100...No spotcall file found...Skipping...
+## 15 of 100...No spotcall file found...Skipping...
+## 16 of 100...No spotcall file found...Skipping...
+## 17 of 100...No spotcall file found...Skipping...
+## 18 of 100...No spotcall file found...Skipping...
+## 19 of 100...No spotcall file found...Skipping...
+## 20 of 100...No spotcall file found...Skipping...
+## 21 of 100...No spotcall file found...Skipping...
+## 22 of 100...Done!
+## 23 of 100...Done!
+## 24 of 100...Done!
+## 25 of 100...No spotcall file found...Skipping...
+## 26 of 100...No spotcall file found...Skipping...
+## 27 of 100...No spotcall file found...Skipping...
+## 28 of 100...No spotcall file found...Skipping...
+## 29 of 100...No spotcall file found...Skipping...
+## 30 of 100...No spotcall file found...Skipping...
+## 31 of 100...No spotcall file found...Skipping...
+## 32 of 100...No spotcall file found...Skipping...
+## 33 of 100...No spotcall file found...Skipping...
+## 34 of 100...No spotcall file found...Skipping...
+## 35 of 100...No spotcall file found...Skipping...
+## 36 of 100...No spotcall file found...Skipping...
+## 37 of 100...Done!
+## 38 of 100...Done!
+## 39 of 100...Done!
+## 40 of 100...No spotcall file found...Skipping...
+## 41 of 100...No spotcall file found...Skipping...
+## 42 of 100...Done!
+## 43 of 100...Done!
+## 44 of 100...Done!
+## 45 of 100...No spotcall file found...Skipping...
+## 46 of 100...No spotcall file found...Skipping...
+## 47 of 100...No spotcall file found...Skipping...
+## 48 of 100...No spotcall file found...Skipping...
+## 49 of 100...No spotcall file found...Skipping...
+## 50 of 100...No spotcall file found...Skipping...
+## 51 of 100...No spotcall file found...Skipping...
+## 52 of 100...No spotcall file found...Skipping...
+## 53 of 100...No spotcall file found...Skipping...
+## 54 of 100...No spotcall file found...Skipping...
+## 55 of 100...No spotcall file found...Skipping...
+## 56 of 100...No spotcall file found...Skipping...
+## 57 of 100...No spotcall file found...Skipping...
+## 58 of 100...No spotcall file found...Skipping...
+## 59 of 100...No spotcall file found...Skipping...
+## 60 of 100...No spotcall file found...Skipping...
+## 61 of 100...No spotcall file found...Skipping...
+## 62 of 100...No spotcall file found...Skipping...
+## 63 of 100...No spotcall file found...Skipping...
+## 64 of 100...No spotcall file found...Skipping...
+## 65 of 100...No spotcall file found...Skipping...
+## 66 of 100...No spotcall file found...Skipping...
+## 67 of 100...No spotcall file found...Skipping...
+## 68 of 100...No spotcall file found...Skipping...
+## 69 of 100...No spotcall file found...Skipping...
+## 70 of 100...No spotcall file found...Skipping...
+## 71 of 100...No spotcall file found...Skipping...
+## 72 of 100...No spotcall file found...Skipping...
+## 73 of 100...No spotcall file found...Skipping...
+## 74 of 100...No spotcall file found...Skipping...
+## 75 of 100...No spotcall file found...Skipping...
+## 76 of 100...No spotcall file found...Skipping...
+## 77 of 100...No spotcall file found...Skipping...
+## 78 of 100...No spotcall file found...Skipping...
+## 79 of 100...No spotcall file found...Skipping...
+## 80 of 100...No spotcall file found...Skipping...
+## 81 of 100...No spotcall file found...Skipping...
+## 82 of 100...No spotcall file found...Skipping...
+## 83 of 100...No spotcall file found...Skipping...
+## 84 of 100...No spotcall file found...Skipping...
+## 85 of 100...No spotcall file found...Skipping...
+## 86 of 100...No spotcall file found...Skipping...
+## 87 of 100...No spotcall file found...Skipping...
+## 88 of 100...No spotcall file found...Skipping...
+## 89 of 100...No spotcall file found...Skipping...
+## 90 of 100...No spotcall file found...Skipping...
+## 91 of 100...No spotcall file found...Skipping...
+## 92 of 100...No spotcall file found...Skipping...
+## 93 of 100...No spotcall file found...Skipping...
+## 94 of 100...No spotcall file found...Skipping...
+## 95 of 100...No spotcall file found...Skipping...
+## 96 of 100...No spotcall file found...Skipping...
+## 97 of 100...No spotcall file found...Skipping...
+## 98 of 100...No spotcall file found...Skipping...
+## 99 of 100...No spotcall file found...Skipping...
+## 100 of 100...No spotcall file found...Skipping...
+## Cleaning up...</code></pre>
+<p>The files created in the <code>OUT</code> subdirectory are as follows:</p>
+<ul>
+<li><code>OUT_CELLEXPRESSION.csv.gz</code>: Gene expression per cell. [Only created if there are matching spotcall and cell segmentation files for that FOV.]</li>
+<li><code>OUT_CELLS.csv.gz</code>: Cellular coordinates, sizes, and other metadata.</li>
+<li><code>OUT_CELLSEG_PIXELS.csv.gz</code>: Concatenated cell segmentation masks across all FOVs, with a unified coordinate system.</li>
+<li><code>OUT_GLOBALCOORD.csv</code>: Updated global coordinates for each FOV.</li>
+<li><code>OUT_SPOTCALL_PIXELS.csv.gz</code>: Concatenated spotcall dataframes across all FOVs, with a unified coordinate system.</li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="synthesis.html#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">list.files</span>( <span class="fu">paste0</span>(params<span class="sc">$</span>parent_out_dir, <span class="st">&#39;/OUT/&#39;</span>) )</span></code></pre></div>
+<pre><code>## [1] &quot;OUT_CELLEXPRESSION.csv.gz&quot;  &quot;OUT_CELLS.csv.gz&quot;          
+## [3] &quot;OUT_CELLSEG_PIXELS.csv.gz&quot;  &quot;OUT_GLOBALCOORD.csv&quot;       
+## [5] &quot;OUT_SPOTCALL_PIXELS.csv.gz&quot;</code></pre>
+<p>Currently, with <code>removeRedundancy</code> turned off, dataframes are simply concatenated. This is problematic because FOVs overlap, causing spots to be counted more than once. This can be seen at FOV boundaries, that have higher count densities.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="synthesis.html#cb16-1" aria-hidden="true" tabindex="-1"></a>spotcalldf <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="fu">paste0</span>(params<span class="sc">$</span>parent_out_dir, <span class="st">&#39;/OUT/OUT_SPOTCALL_PIXELS.csv.gz&#39;</span>), <span class="at">data.table =</span> F)</span>
+<span id="cb16-2"><a href="synthesis.html#cb16-2" aria-hidden="true" tabindex="-1"></a>cowplot<span class="sc">::</span><span class="fu">plot_grid</span>( <span class="at">plotlist=</span><span class="fu">list</span>(</span>
+<span id="cb16-3"><a href="synthesis.html#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb16-4"><a href="synthesis.html#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hex</span>(<span class="at">data=</span>spotcalldf, <span class="fu">aes</span>(<span class="at">x=</span>Xm, <span class="at">y=</span>Ym), <span class="at">bins=</span><span class="dv">100</span>) <span class="sc">+</span></span>
+<span id="cb16-5"><a href="synthesis.html#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_viridis_c</span>(<span class="at">option=</span><span class="st">&#39;turbo&#39;</span>) <span class="sc">+</span></span>
+<span id="cb16-6"><a href="synthesis.html#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb16-7"><a href="synthesis.html#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size=</span><span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb16-8"><a href="synthesis.html#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">&#39;X (microns)&#39;</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">&#39;Y (microns)&#39;</span>) <span class="sc">+</span></span>
+<span id="cb16-9"><a href="synthesis.html#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;none&#39;</span>) <span class="sc">+</span></span>
+<span id="cb16-10"><a href="synthesis.html#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb16-11"><a href="synthesis.html#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Spot density&#39;</span>), </span>
+<span id="cb16-12"><a href="synthesis.html#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb16-13"><a href="synthesis.html#cb16-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">data=</span>spotcalldf, <span class="fu">aes</span>(<span class="at">x=</span>Xm, <span class="at">y=</span>Ym, <span class="at">colour=</span>fov), <span class="at">shape=</span><span class="st">&#39;.&#39;</span>, <span class="at">alpha=</span><span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb16-14"><a href="synthesis.html#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_colour_viridis_d</span>(<span class="at">name =</span> <span class="st">&#39;&#39;</span>, <span class="at">option=</span><span class="st">&#39;turbo&#39;</span>) <span class="sc">+</span></span>
+<span id="cb16-15"><a href="synthesis.html#cb16-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb16-16"><a href="synthesis.html#cb16-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size=</span><span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb16-17"><a href="synthesis.html#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">&#39;X (microns)&#39;</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">&#39;Y (microns)&#39;</span>) <span class="sc">+</span></span>
+<span id="cb16-18"><a href="synthesis.html#cb16-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">colour=</span><span class="fu">guide_legend</span>(<span class="at">override.aes =</span> <span class="fu">list</span>(<span class="at">size=</span><span class="dv">5</span>, <span class="at">shape=</span><span class="dv">16</span>), <span class="at">ncol=</span><span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb16-19"><a href="synthesis.html#cb16-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb16-20"><a href="synthesis.html#cb16-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;none&#39;</span>) <span class="sc">+</span></span>
+<span id="cb16-21"><a href="synthesis.html#cb16-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Spots by FOV&#39;</span>)</span>
+<span id="cb16-22"><a href="synthesis.html#cb16-22" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow=</span><span class="dv">1</span>)</span></code></pre></div>
+<p><img src="_main_files/figure-html/syn-removeredundancyjustification-boundaries-1.png" width="672" /></p>
+<p>We would expect there to be more cells, and more counts per cell.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="synthesis.html#cb17-1" aria-hidden="true" tabindex="-1"></a>cellExp <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="fu">paste0</span>(params<span class="sc">$</span>parent_out_dir, <span class="st">&#39;/OUT/OUT_CELLEXPRESSION.csv.gz&#39;</span>), <span class="at">data.table =</span> F)</span>
+<span id="cb17-2"><a href="synthesis.html#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(cellExp) <span class="ot">&lt;-</span> cellExp[,<span class="dv">1</span>]</span>
+<span id="cb17-3"><a href="synthesis.html#cb17-3" aria-hidden="true" tabindex="-1"></a>cellExp[,<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb17-4"><a href="synthesis.html#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="synthesis.html#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">log10</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">colSums</span>(cellExp)), </span>
+<span id="cb17-6"><a href="synthesis.html#cb17-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="fu">paste0</span>( </span>
+<span id="cb17-7"><a href="synthesis.html#cb17-7" aria-hidden="true" tabindex="-1"></a>       <span class="st">&#39;Cells x genes: &#39;</span>, <span class="fu">paste</span>( <span class="fu">dim</span>(cellExp), <span class="at">collapse=</span><span class="st">&#39; x &#39;</span>), </span>
+<span id="cb17-8"><a href="synthesis.html#cb17-8" aria-hidden="true" tabindex="-1"></a>       <span class="st">&#39;, Median nCounts: &#39;</span>, <span class="fu">median</span>(<span class="fu">colSums</span>(cellExp))), </span>
+<span id="cb17-9"><a href="synthesis.html#cb17-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">breaks=</span><span class="dv">25</span>, <span class="at">xlab =</span> <span class="st">&#39;Log10 nCounts per cell&#39;</span>); </span>
+<span id="cb17-10"><a href="synthesis.html#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span><span class="fu">log10</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">median</span>(<span class="fu">colSums</span>(cellExp))), <span class="at">col=</span><span class="st">&#39;red&#39;</span>)</span></code></pre></div>
+<p><img src="_main_files/figure-html/syn-removeredundancyjustification-cellmetrics-1.png" width="672" /></p>
+<p>To address this problem, we can turn <code>removeRedundancy</code> on (this is <code>TRUE</code> as default), which has the effect of:</p>
+<ul>
+<li><em>Removing redundant spots:</em> Spots per FOV in the overlapping region are counted. The FOV contributing fewer spots in the overlapping region is ignored.</li>
+<li><em>Removing redundant cells:</em> If cells from different FOVs overlap &lt;<span class="math inline">\(X\)</span>%, overlapping pixels are simply disregarded. However, if overlap &gt;<span class="math inline">\(X\)</span>%, then one of the cells has to be removed. In general, we drop smaller cells or cells that overlap with more than one cell in another FOV. The choice of <span class="math inline">\(X\)</span> depends on the <code>cellOverlapFraction</code> parameter (default is 0.25, i.e. 25%).</li>
+</ul>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="synthesis.html#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">synthesiseData</span>(<span class="at">removeRedundancy =</span> T, <span class="at">cellOverlapFraction =</span> <span class="fl">0.25</span>)</span></code></pre></div>
+<pre><code>## Warning in synthesiseData(removeRedundancy = T, cellOverlapFraction = 0.25):
+## Overwriting existing files</code></pre>
+<pre><code>## Reference FOV not specified...Choosing FOV with most spots...</code></pre>
+<pre><code>## FOV chosen: MMStack_1-Pos_002_002...</code></pre>
+<pre><code>## Updating global coordinates...</code></pre>
+<pre><code>## Synthesising data...</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## 1 of 100...No spotcall file found...Skipping...
+## 2 of 100...No spotcall file found...Skipping...
+## 3 of 100...No spotcall file found...Skipping...
+## 4 of 100...No spotcall file found...Skipping...
+## 5 of 100...No spotcall file found...Skipping...
+## 6 of 100...No spotcall file found...Skipping...
+## 7 of 100...No spotcall file found...Skipping...
+## 8 of 100...No spotcall file found...Skipping...
+## 9 of 100...No spotcall file found...Skipping...
+## 10 of 100...No spotcall file found...Skipping...
+## 11 of 100...No spotcall file found...Skipping...
+## 12 of 100...No spotcall file found...Skipping...
+## 13 of 100...No spotcall file found...Skipping...
+## 14 of 100...No spotcall file found...Skipping...
+## 15 of 100...No spotcall file found...Skipping...
+## 16 of 100...No spotcall file found...Skipping...
+## 17 of 100...No spotcall file found...Skipping...
+## 18 of 100...No spotcall file found...Skipping...
+## 19 of 100...No spotcall file found...Skipping...
+## 20 of 100...No spotcall file found...Skipping...
+## 21 of 100...No spotcall file found...Skipping...
+## 22 of 100...Removing redundant spot calls...Removing redundant cell calls...Done!
+## 23 of 100...Removing redundant spot calls...Removing redundant cell calls...Done!
+## 24 of 100...Removing redundant spot calls...Removing redundant cell calls...Done!
+## 25 of 100...No spotcall file found...Skipping...
+## 26 of 100...No spotcall file found...Skipping...
+## 27 of 100...No spotcall file found...Skipping...
+## 28 of 100...No spotcall file found...Skipping...
+## 29 of 100...No spotcall file found...Skipping...
+## 30 of 100...No spotcall file found...Skipping...
+## 31 of 100...No spotcall file found...Skipping...
+## 32 of 100...No spotcall file found...Skipping...
+## 33 of 100...No spotcall file found...Skipping...
+## 34 of 100...No spotcall file found...Skipping...
+## 35 of 100...No spotcall file found...Skipping...
+## 36 of 100...No spotcall file found...Skipping...
+## 37 of 100...Removing redundant spot calls...Removing redundant cell calls...Done!
+## 38 of 100...Removing redundant spot calls...Removing redundant cell calls...Done!
+## 39 of 100...Removing redundant spot calls...Removing redundant cell calls...Done!
+## 40 of 100...No spotcall file found...Skipping...
+## 41 of 100...No spotcall file found...Skipping...
+## 42 of 100...Removing redundant spot calls...Removing redundant cell calls...Done!
+## 43 of 100...Removing redundant spot calls...Removing redundant cell calls...Done!
+## 44 of 100...Removing redundant spot calls...Removing redundant cell calls...Done!
+## 45 of 100...No spotcall file found...Skipping...
+## 46 of 100...No spotcall file found...Skipping...
+## 47 of 100...No spotcall file found...Skipping...
+## 48 of 100...No spotcall file found...Skipping...
+## 49 of 100...No spotcall file found...Skipping...
+## 50 of 100...No spotcall file found...Skipping...
+## 51 of 100...No spotcall file found...Skipping...
+## 52 of 100...No spotcall file found...Skipping...
+## 53 of 100...No spotcall file found...Skipping...
+## 54 of 100...No spotcall file found...Skipping...
+## 55 of 100...No spotcall file found...Skipping...
+## 56 of 100...No spotcall file found...Skipping...
+## 57 of 100...No spotcall file found...Skipping...
+## 58 of 100...No spotcall file found...Skipping...
+## 59 of 100...No spotcall file found...Skipping...
+## 60 of 100...No spotcall file found...Skipping...
+## 61 of 100...No spotcall file found...Skipping...
+## 62 of 100...No spotcall file found...Skipping...
+## 63 of 100...No spotcall file found...Skipping...
+## 64 of 100...No spotcall file found...Skipping...
+## 65 of 100...No spotcall file found...Skipping...
+## 66 of 100...No spotcall file found...Skipping...
+## 67 of 100...No spotcall file found...Skipping...
+## 68 of 100...No spotcall file found...Skipping...
+## 69 of 100...No spotcall file found...Skipping...
+## 70 of 100...No spotcall file found...Skipping...
+## 71 of 100...No spotcall file found...Skipping...
+## 72 of 100...No spotcall file found...Skipping...
+## 73 of 100...No spotcall file found...Skipping...
+## 74 of 100...No spotcall file found...Skipping...
+## 75 of 100...No spotcall file found...Skipping...
+## 76 of 100...No spotcall file found...Skipping...
+## 77 of 100...No spotcall file found...Skipping...
+## 78 of 100...No spotcall file found...Skipping...
+## 79 of 100...No spotcall file found...Skipping...
+## 80 of 100...No spotcall file found...Skipping...
+## 81 of 100...No spotcall file found...Skipping...
+## 82 of 100...No spotcall file found...Skipping...
+## 83 of 100...No spotcall file found...Skipping...
+## 84 of 100...No spotcall file found...Skipping...
+## 85 of 100...No spotcall file found...Skipping...
+## 86 of 100...No spotcall file found...Skipping...
+## 87 of 100...No spotcall file found...Skipping...
+## 88 of 100...No spotcall file found...Skipping...
+## 89 of 100...No spotcall file found...Skipping...
+## 90 of 100...No spotcall file found...Skipping...
+## 91 of 100...No spotcall file found...Skipping...
+## 92 of 100...No spotcall file found...Skipping...
+## 93 of 100...No spotcall file found...Skipping...
+## 94 of 100...No spotcall file found...Skipping...
+## 95 of 100...No spotcall file found...Skipping...
+## 96 of 100...No spotcall file found...Skipping...
+## 97 of 100...No spotcall file found...Skipping...
+## 98 of 100...No spotcall file found...Skipping...
+## 99 of 100...No spotcall file found...Skipping...
+## 100 of 100...No spotcall file found...Skipping...
+## Cleaning up...</code></pre>
+<p>Accordingly, removing duplicate calls reduces spot density at FOV boundaries…</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="synthesis.html#cb26-1" aria-hidden="true" tabindex="-1"></a>spotcalldf <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="fu">paste0</span>(params<span class="sc">$</span>parent_out_dir, <span class="st">&#39;/OUT/OUT_SPOTCALL_PIXELS.csv.gz&#39;</span>), <span class="at">data.table =</span> F)</span>
+<span id="cb26-2"><a href="synthesis.html#cb26-2" aria-hidden="true" tabindex="-1"></a>cowplot<span class="sc">::</span><span class="fu">plot_grid</span>( <span class="at">plotlist=</span><span class="fu">list</span>(</span>
+<span id="cb26-3"><a href="synthesis.html#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb26-4"><a href="synthesis.html#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hex</span>(<span class="at">data=</span>spotcalldf, <span class="fu">aes</span>(<span class="at">x=</span>Xm, <span class="at">y=</span>Ym), <span class="at">bins=</span><span class="dv">100</span>) <span class="sc">+</span></span>
+<span id="cb26-5"><a href="synthesis.html#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_viridis_c</span>(<span class="at">option=</span><span class="st">&#39;turbo&#39;</span>) <span class="sc">+</span></span>
+<span id="cb26-6"><a href="synthesis.html#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb26-7"><a href="synthesis.html#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size=</span><span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb26-8"><a href="synthesis.html#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">&#39;X (microns)&#39;</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">&#39;Y (microns)&#39;</span>) <span class="sc">+</span></span>
+<span id="cb26-9"><a href="synthesis.html#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;none&#39;</span>) <span class="sc">+</span></span>
+<span id="cb26-10"><a href="synthesis.html#cb26-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb26-11"><a href="synthesis.html#cb26-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Spot density&#39;</span>), </span>
+<span id="cb26-12"><a href="synthesis.html#cb26-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb26-13"><a href="synthesis.html#cb26-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">data=</span>spotcalldf, <span class="fu">aes</span>(<span class="at">x=</span>Xm, <span class="at">y=</span>Ym, <span class="at">colour=</span>fov), <span class="at">shape=</span><span class="st">&#39;.&#39;</span>, <span class="at">alpha=</span><span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb26-14"><a href="synthesis.html#cb26-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_colour_viridis_d</span>(<span class="at">name =</span> <span class="st">&#39;&#39;</span>, <span class="at">option=</span><span class="st">&#39;turbo&#39;</span>) <span class="sc">+</span></span>
+<span id="cb26-15"><a href="synthesis.html#cb26-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb26-16"><a href="synthesis.html#cb26-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size=</span><span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb26-17"><a href="synthesis.html#cb26-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">&#39;X (microns)&#39;</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">&#39;Y (microns)&#39;</span>) <span class="sc">+</span></span>
+<span id="cb26-18"><a href="synthesis.html#cb26-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">colour=</span><span class="fu">guide_legend</span>(<span class="at">override.aes =</span> <span class="fu">list</span>(<span class="at">size=</span><span class="dv">5</span>, <span class="at">shape=</span><span class="dv">16</span>), <span class="at">ncol=</span><span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb26-19"><a href="synthesis.html#cb26-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb26-20"><a href="synthesis.html#cb26-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;none&#39;</span>) <span class="sc">+</span></span>
+<span id="cb26-21"><a href="synthesis.html#cb26-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Spots by FOV&#39;</span>)</span>
+<span id="cb26-22"><a href="synthesis.html#cb26-22" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow=</span><span class="dv">1</span>)</span></code></pre></div>
+<p><img src="_main_files/figure-html/syn-synproper-result-1.png" width="672" /></p>
+<p>…and reduces the number of cells and counts per cell.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="synthesis.html#cb27-1" aria-hidden="true" tabindex="-1"></a>cellExp <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="fu">paste0</span>(params<span class="sc">$</span>parent_out_dir, <span class="st">&#39;/OUT/OUT_CELLEXPRESSION.csv.gz&#39;</span>), <span class="at">data.table =</span> F)</span>
+<span id="cb27-2"><a href="synthesis.html#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(cellExp) <span class="ot">&lt;-</span> cellExp[,<span class="dv">1</span>]</span>
+<span id="cb27-3"><a href="synthesis.html#cb27-3" aria-hidden="true" tabindex="-1"></a>cellExp[,<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb27-4"><a href="synthesis.html#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="synthesis.html#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">log10</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">colSums</span>(cellExp)), </span>
+<span id="cb27-6"><a href="synthesis.html#cb27-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="fu">paste0</span>( </span>
+<span id="cb27-7"><a href="synthesis.html#cb27-7" aria-hidden="true" tabindex="-1"></a>       <span class="st">&#39;Cells x genes: &#39;</span>, <span class="fu">paste</span>( <span class="fu">dim</span>(cellExp), <span class="at">collapse=</span><span class="st">&#39; x &#39;</span>), </span>
+<span id="cb27-8"><a href="synthesis.html#cb27-8" aria-hidden="true" tabindex="-1"></a>       <span class="st">&#39;, Median nCounts: &#39;</span>, <span class="fu">median</span>(<span class="fu">colSums</span>(cellExp))), </span>
+<span id="cb27-9"><a href="synthesis.html#cb27-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">breaks=</span><span class="dv">25</span>, <span class="at">xlab =</span> <span class="st">&#39;Log10 nCounts per cell&#39;</span>); </span>
+<span id="cb27-10"><a href="synthesis.html#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span><span class="fu">log10</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">median</span>(<span class="fu">colSums</span>(cellExp))), <span class="at">col=</span><span class="st">&#39;red&#39;</span>)</span></code></pre></div>
+<p><img src="_main_files/figure-html/syn-synproper-cellwise-1.png" width="672" /></p>
+</div>
+<div id="qc-plotting" class="section level2 hasAnchor" number="6.2">
+<h2><span class="header-section-number">6.2</span> QC plotting<a href="synthesis.html#qc-plotting" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We have provided a <code>plotQC</code> function that returns several default QC plots as <code>.png</code> files. This function depends on parameters input during <code>establishParams</code>: e.g. if <code>fpkmFileName</code> is missing, then FPKM correlations will not be plotted. Additionally, if users ran <code>prepareCodebook</code> with <code>exhaustiveBlanks</code>, the newly added blanks will be flagged. [Users wishing to ignore these new blanks can set <code>includeNewBlanks</code> in <code>plotQC</code> to <code>FALSE</code> (see below).]</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="synthesis.html#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotQC</span>( <span class="at">includeNewBlanks=</span>T )</span></code></pre></div>
+<pre><code>## FPKMCorrelation...</code></pre>
+<pre><code>## CosineDistanceDistribution...</code></pre>
+<pre><code>## SpotFOVDistribution...</code></pre>
+<pre><code>## Warning: Removed 50 rows containing missing values (`geom_hex()`).</code></pre>
+<pre><code>## CosineSpatialDistribution...</code></pre>
+<pre><code>## Warning: Removed 50 rows containing missing values (`geom_hex()`).</code></pre>
+<pre><code>## BitDetectionRateAll...</code></pre>
+<pre><code>## BitDetectionRateNonBlank...</code></pre>
+<pre><code>## BitwiseErrorRates...</code></pre>
+<pre><code>## FOVMetrics...</code></pre>
+<pre><code>## CellMetrics...</code></pre>
+<pre><code>## Warning: Transformation introduced infinite values in discrete y-axis</code></pre>
+<pre><code>## Done!</code></pre>
+<p>The interpretation of these plots will be covered briefly below.</p>
+<div id="fpkmcorrelation" class="section level3 unnumbered hasAnchor">
+<h3><code>FPKMCorrelation</code><a href="synthesis.html#fpkmcorrelation" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>This plot returns the correlation between expected expression and the number of spots actually observed (bot log-transformed); strong correlations are ideal. In the title of this plot, we also report the percentage of spots that are blanks (specifically those with <code>blank</code> in their names), and the percentage of spots that overlap a cell mask.</p>
+<p><img src="images/FPKMCorrelation.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cosinedistancedistribution" class="section level3 unnumbered hasAnchor">
+<h3><code>CosineDistanceDistribution</code><a href="synthesis.html#cosinedistancedistribution" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>This shows a distribution of cosine distances (<code>COS</code>) per gene. Lower cosine distances implies higher confidence in the decoding of that spot.</p>
+<p><img src="images/CosineDistanceDistribution.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="spotfovdistribution" class="section level3 unnumbered hasAnchor">
+<h3><code>SpotFOVDistribution</code><a href="synthesis.html#spotfovdistribution" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>This shows the distribution of spots, averaged across FOVs. This is used to check if spot coordinate in a given FOV influences its detection rate – ideally, this should not occur. This plot is less useful if only a handful of FOVs were processed.</p>
+<p><img src="images/SpotFOVDistribution.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cosinespatialdistribution" class="section level3 unnumbered hasAnchor">
+<h3><code>CosineSpatialDistribution</code><a href="synthesis.html#cosinespatialdistribution" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>This plot shows the average cosine distances per 2D bin, across the entire tissue. Ideally, spatial location should not influence confidence in spot calls.</p>
+<p><img src="images/CosineSpatialDistribution.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="bitdetectionrate" class="section level3 unnumbered hasAnchor">
+<h3><code>BitDetectionRate</code><a href="synthesis.html#bitdetectionrate" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>This shows how the ON / OFF status for each bit influences the number of spots called. We tabulate the number of spots per gene, and then split the genes into two groups for each bit: if they have a ON (1), or an OFF (0). This provides some indication as to whether separation of 0 vs 1 is clearer / more ambiguous for certain bits. Ideally, there should be no obvious bias in detection rate for any bits.</p>
+<p><img src="images/BitDetectionRateAll.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Below shows the same, but this time for spots that are non-blanks (<code>BitDetectionRateNonBlank.png</code>, instead of <code>BitDetectionRateAll.png</code>).</p>
+<p><img src="images/BitDetectionRateNonBlank.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="bitwiseerrorrates" class="section level3 unnumbered hasAnchor">
+<h3><code>BitwiseErrorRates</code><a href="synthesis.html#bitwiseerrorrates" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>This barplot shows the percentage of ON to OFF and OFF to ON errors for every bit. Only reported if <code>bitsFromDecode</code> was run during spotcalling.</p>
+<p>From <span class="citation">(<a href="#ref-chen2015spatially" role="doc-biblioref">Chen et al. 2015</a>)</span>, ON to OFF error rate is expected to be about 10%, and OFF to ON is about 4%. Of course, this might vary depending on data set and choice of hyperparameters during decoding.</p>
+<p><img src="images/BitwiseErrorRates.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="fovmetrics" class="section level3 unnumbered hasAnchor">
+<h3><code>FOVMetrics</code><a href="synthesis.html#fovmetrics" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>This shows some statistics averaged per FOV. Useful for determining if there are systematic failures in spot calling for certain FOVs.</p>
+<p><img src="images/FOVMetrics.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cellmetrics" class="section level3 unnumbered hasAnchor">
+<h3><code>CellMetrics</code><a href="synthesis.html#cellmetrics" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>This shows cell-wise metrics. Below, we show average cell size (in pixels) per 2D bin.</p>
+<p><img src="images/CellMetrics_CellSize.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Below shows average number of spots per 2D bin.</p>
+<p><img src="images/CellMetrics_nCounts.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="next-steps" class="section level2 hasAnchor" number="6.3">
+<h2><span class="header-section-number">6.3</span> Next steps<a href="synthesis.html#next-steps" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Yay! Your MERFISH pipeline is now done. If satisfied with the results, downstream analysis can be done on <code>OUT_CELLEXPRESSION.csv.gz</code> matrix – which contains cell-wise gene expression – using standard single cell RNA-sequencing pipelines. [More advanced bioinformaticians may wish to perform custom analysis to address e.g. lower counts per cell in spatial technologies (that violates assumptions of some normalisation algorithms used in scRNA-seq).]</p>
+<p>If unsatisfied, users can go back and re-process their data with tweaked parameters. Suggestions for troubleshooting are provided in the next chapter.</p>
+
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-chen2015spatially" class="csl-entry">
+Chen, Kok Hao, Alistair N Boettiger, Jeffrey R Moffitt, Siyuan Wang, and Xiaowei Zhuang. 2015. <span>“Spatially Resolved, Highly Multiplexed RNA Profiling in Single Cells.”</span> <em>Science</em> 348 (6233): aaa6090.
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="stitching.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="troubleshooting.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/USERNAME/REPO/edit/BRANCH/05-synthesising.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["_main.pdf", "_main.epub"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
