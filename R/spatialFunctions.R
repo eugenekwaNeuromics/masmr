@@ -23,10 +23,7 @@ spatialHNNDist <- function(
     message(paste0(i, ' of ', nrow(codebook), '...'), appendLF = F)
     subcoords <- coords[g==rownames(codebook)[i]]
     if(length(subcoords) <=1 ){ next }
-    dt <- suppressWarnings(tripack::tri.mesh(Re(subcoords), Im(subcoords)))
-
-    if( inherits(dt, 'try-error') ){
-      # Cannot build DT, calculate NN the old-fashioned way
+    if(length(subcoords) <=9 ){
       subdists <- rep(0, length(subcoords))
       for(j in 1:length(subcoords)){
         d <- Mod(subcoords - subcoords[j])
@@ -34,10 +31,23 @@ spatialHNNDist <- function(
         subdists[j] <- min(d, na.rm = T)
       }
     }else{
-      nns <- tripack::neighbours(dt)
-      subdists <- sapply(1:length(nns), function(j){
-        min(Mod(subcoords[nns[[j]]] - subcoords[j]))
-      })
+      dt <- suppressWarnings(tripack::tri.mesh(Re(subcoords), Im(subcoords)))
+
+      if( inherits(dt, 'try-error') ){
+        # Cannot build DT, calculate NN the old-fashioned way
+        subdists <- rep(0, length(subcoords))
+        for(j in 1:length(subcoords)){
+          d <- Mod(subcoords - subcoords[j])
+          d[d==0] <- NA
+          subdists[j] <- min(d, na.rm = T)
+        }
+      }else{
+        nns <- tripack::neighbours(dt)
+        subdists <- sapply(1:length(nns), function(j){
+          min(Mod(subcoords[nns[[j]]] - subcoords[j]))
+        })
+      }
+
     }
     hnndist[g==rownames(codebook)[i]] <- subdists
   }
