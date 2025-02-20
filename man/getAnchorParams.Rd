@@ -42,7 +42,7 @@ getAnchorParams(
 \details{
   "Anchors" are a subset of FOVs for which global parameters are derived: for instance, background fluorescence intensity across images (\code{brightness_min}), or fluorescence intensity cap above which saturation is assumed (\code{brightness_max}).
 
-  When unspecified, anchors are selected from evenly spaced FOVs interior to the edge (\code{anchorMode = 'grid'}, default), or sampled from all existing FOVs ( \code{anchorMode = 'sample'} ).
+  When unspecified, anchors are selected from evenly spaced FOVs interior to the edge (\code{anchorMode = 'grid'}), or sampled from all existing FOVs ( \code{anchorMode = 'sample'} ).
 
   Function returns several outputs:
 
