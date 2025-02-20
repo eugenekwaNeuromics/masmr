@@ -16,10 +16,10 @@ getAnchorParams(
       'brightness_min' = conservativeMean,
       'brightness_max' = conservativeMean
     ),
-    anchorMode = c('grid', 'sample'),
+    anchorMode = c('sample', 'grid'),
+    nSamples = 10,
     anchorSpacing = 3,
     anchorOffset = 2,
-    nSamples = 10,
     params = get('params', envir = globalenv())
     ...
 )
@@ -29,10 +29,10 @@ getAnchorParams(
 \item{ out_dir }{ Character. Output directory. If unspecified, read from \code{params$out_dir}. }
 \item{ imageFunctions }{ Named list of functions, with names also shared by \code{summaryFunctions}. Functions chosen must return a single numeric per image. Currently defaults to \code{imsBrightnessMin} and \code{imsBrightnessMax}. }
 \item{ summaryFunctions }{ Named list of functions, with names also shared by \code{imageFunctions}. Functions chosen to summarise one or more values. Currently defaults to \code{conservativeMean}. }
-\item{ anchorMode }{ Character. Determines if anchor FOVs are to be selected from regularly spaced FOVs (\code{'grid'}, default) or randomly sampled (\code{'sample'}). }
+\item{ anchorMode }{ Character. Determines if anchor FOVs are to be selected from regularly spaced FOVs (\code{'grid'}) or randomly sampled (\code{'sample', default}). }
+\item{ nSamples }{ Integer. Number of FOVs to sample. Used when \code{anchors} is unspecified, and \code{anchorMode} is \code{sample}. }
 \item{ anchorSpacing }{ Integer. Number of FOVs between anchor FOVs in same row. Used when \code{anchors} is unspecified and \code{anchorMode} is \code{grid}. }
 \item{ anchorOffset }{ Integer. Number of FOVs to offset by for even numbered rows. Used when \code{anchors} is unspecified and \code{anchorMode} is \code{grid}. }
-\item{ nSamples }{ Integer. Number of FOVs to sample. Used when \code{anchors} is unspecified, and \code{anchorMode} is \code{sample}. }
 \item{ params }{ The parameters environment. }
 \item{ ... }{  Other arguments passed to \code{readImageList}, \code{imageFunctions}, and \code{summaryFunctions}. }
 }

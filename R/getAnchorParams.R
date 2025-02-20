@@ -15,10 +15,10 @@ getAnchorParams <- function(
       'brightness_min' = conservativeMean,
       'brightness_max' = conservativeMean
     ),
-    anchorMode = 'grid',
+    anchorMode = 'sample',
+    nSamples = 10,
     anchorSpacing = 3,
     anchorOffset = 2,
-    nSamples = 10,
     params = get('params', envir = globalenv()),
     ...
 ){
@@ -88,11 +88,14 @@ getAnchorParams <- function(
       tileCx$Y <- as.integer(factor(round(tileCx$y_microns)))
       tileCx$IDX <- tileCx$X + (tileCx$Y - 1) * (max(tileCx$X))
       tileCx$FOV <- as.integer(factor(tileCx$fov, levels=params$fov_names))
-      tileMatrix <- matrix(
-        tileCx[match(1:max(tileCx$IDX), tileCx$IDX), 'FOV'],
-        nrow=max(tileCx$X), ncol=max(tileCx$Y), byrow=T)
 
       if( anchorMode=='grid' ){
+        tileMatrix <- try( suppressWarnings( matrix(
+          tileCx[match(1:max(tileCx$IDX), tileCx$IDX), 'FOV'],
+          nrow=max(tileCx$X), ncol=max(tileCx$Y), byrow=T) ) )
+        if(inherits(t, 'try-error')){
+          stop('Unable to perform grid based selection of FOVs: consider random sampling or user input instead!')
+        }
         m <- tileMatrix
         m <- m[-c(1, nrow(m)),]
         m <- m[,-c(1, ncol(m))]
