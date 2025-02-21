@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-02-17" />
+<meta name="date" content="2025-02-21" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -253,12 +253,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="troubleshooting" class="section level1 hasAnchor" number="7">
 <h1><span class="header-section-number">Chapter 7</span> Troubleshooting<a href="troubleshooting.html#troubleshooting" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>The <code>masmr</code> package is designed to enable users to build their own custom pipelines. Users are encouraged to play around with an FOV or two, to determine optimal paramter choices, before looping through their entire data set.</p>
+<p>The <code>masmr</code> package is designed to enable users to build their own custom pipelines. Users are encouraged to play around with an FOV or two, to determine optimal parameter choices, before looping through their entire data set.</p>
 <p>Below, we provide some suggestions for users seeking to improve their pipelines. This has been organised by potential problems, possible causes (and how to identify them), and potential solutions.</p>
 <div id="too-few-spots" class="section level2 unnumbered hasAnchor">
 <h2>Too few spots<a href="troubleshooting.html#too-few-spots" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
-<li><strong>Poor choice of image processing</strong>. This is best identified during the spotcalling script itself, rather than the synthesis step at the end. Users are encouraged to plot their processed images using <code>plot(imager::as.cimg( imageMatrix ))</code>. [The <code>as.cimg</code> offers considerable speed up.]
+<li><strong>Poor choice of image processing</strong>. This is best identified during the spotcalling script itself, rather than the synthesis step at the end. Users are encouraged to plot their processed images using <code>plot(imager::as.cimg( imageMatrix ))</code>. [The <code>as.cimg</code> offers considerable speed up.] Users may attempt manual decoding on a small region of one or two FOVs (i.e. look at images and determine the sequence of pixel ON/OFF), and ensure that their pipeline returns results that agree with their manual decoding. This pipeline – optimised on a subset of FOVs – can then be looped through <em>all</em> FOVs to apply consistent spotcalling standards.
 <ul>
 <li><strong>Potential solution</strong>: Changing the function used to return <code>MASK</code> in <code>getImageMetrics</code>. Larger masks means more pixels are brought forwards for subsequent decoding.</li>
 <li><strong>Potential solution</strong>: Changing the function used to return <code>DECODE</code> in <code>getImageMetrics</code>. As far as possible, attempt to return a bimodal distribution where there is clear separation of OFF and ON bits by intensity.</li>
@@ -295,7 +295,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="weak-correlation-to-fpkm-high-blank" class="section level2 unnumbered hasAnchor">
 <h2>Weak correlation to FPKM / high blank %<a href="troubleshooting.html#weak-correlation-to-fpkm-high-blank" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
-<li><p>Suggests high false positive rate. Do the opposite of recommendations for “Too few spots”: i.e. increase strictness of filtering criteria.</p></li>
+<li><p>Suggests high false positive rate. Do the opposite of recommendations for “Too few spots”: i.e. increase strictness of filtering criteria. If possible, users may attempt manual decoding on a small region of one or two FOVs, and ensure that their pipeline returns similar results.</p></li>
 <li><p><strong>Bit-specific differences in detection rate.</strong> This can be evaluated from <code>BitwiseErrorRates</code> and <code>BitDetectionRate</code> plots after synthesis. [This may also cause too few spots to be returned – but in general, there tends to be variation across genes: where some genes are too few, and some too abundant.]</p>
 <ul>
 <li><strong>Potential solution</strong>: Ensure that <code>getAnchorParams</code> is returning reasonable intensity ceilings and floors for each bit. Users should <em>not</em> use empty FOVs as anchor FOVs.</li>
