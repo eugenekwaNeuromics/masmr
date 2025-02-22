@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-02-18" />
+<meta name="date" content="2025-02-22" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -257,7 +257,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">2.1</span> Background<a href="introduction.html#background" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>For most MERFISH pipelines, one wants to accomplish the following tasks:</p>
 <ol style="list-style-type: decimal">
-<li><p>Spotcalling: This involves reading each fluorescence image, performing the necessary image processing steps, decoding, and returning of spot coordinates. This is typically performed one image / field-of-view (FOV) at a time.</p></li>
+<li><p>Spotcalling: This involves reading each fluorescence image, performing the necessary image processing steps, decoding, and returning of spot coordinates. This is typically performed one image / field-of-view (FOV) at a time. Ideally, users optimise their spotcalling pipeline on one FOV before looping through all the other FOVs, applying the same spotcalling criteria.</p></li>
 <li><p>Cell segmentation: Cell segmentation involves identifying nuclei or cells in an image and recording locations of each cell mask. Again, this is typically performed one FOV at a time.</p></li>
 <li><p>Stitching: Stitching involves the alignment of partially overlapping FOVs, so that a coherent image and coordinate system is obtained.</p></li>
 <li><p>Synthesis: Having processed every FOV, the final step is to consolidate all outputs into an easy-to-read format. Care must be taken to ensure coordinate information is comparable between spots and cell masks, and spots are assigned to the correct cells.</p></li>
@@ -478,7 +478,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb4-4"><a href="introduction.html#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">establishParams</span>( ... ) <span class="co">#User to input</span></span>
 <span id="cb4-5"><a href="introduction.html#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-6"><a href="introduction.html#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Function to synthesise data</span></span>
-<span id="cb4-7"><a href="introduction.html#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">synthesiseData</span>()</span>
+<span id="cb4-7"><a href="introduction.html#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">synthesizeData</span>()</span>
 <span id="cb4-8"><a href="introduction.html#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-9"><a href="introduction.html#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Function to generate QC plots</span></span>
 <span id="cb4-10"><a href="introduction.html#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plotQC</span>()</span></code></pre></div>

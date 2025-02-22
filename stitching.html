@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-02-17" />
+<meta name="date" content="2025-02-22" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -313,9 +313,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>The actual loading is accomplished with the <code>readImagesForStitch</code> function. The default is to load MERFISH images.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="stitching.html#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="do">## params$current_fov specifies which image to load</span></span>
 <span id="cb12-2"><a href="stitching.html#cb12-2" aria-hidden="true" tabindex="-1"></a>imList <span class="ot">&lt;-</span> <span class="fu">readImagesForStitch</span>()</span></code></pre></div>
-<pre><code>## Processing FOV MMStack_1-Pos_001_003 (1 of 5)...</code></pre>
-<pre><code>## </code></pre>
-<pre><code>## Reading images...</code></pre>
+<pre><code>## 
+## Processing FOV MMStack_1-Pos_001_003 (1 of 5)...</code></pre>
+<pre><code>## 
+## Reading images...</code></pre>
 <pre><code>## 1 of 1...
 ## Processing FOV MMStack_1-Pos_002_002 (2 of 5)...
 ## 
@@ -334,17 +335,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## Reading images...
 ## 1 of 1...
 ## Processing images...</code></pre>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="stitching.html#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>))</span>
-<span id="cb17-2"><a href="stitching.html#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(imList)){</span>
-<span id="cb17-3"><a href="stitching.html#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>(imList[[i]]), <span class="at">main=</span><span class="fu">names</span>(imList)[i])</span>
-<span id="cb17-4"><a href="stitching.html#cb17-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb17-5"><a href="stitching.html#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="stitching.html#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>))</span>
+<span id="cb16-2"><a href="stitching.html#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(imList)){</span>
+<span id="cb16-3"><a href="stitching.html#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>(imList[[i]]), <span class="at">main=</span><span class="fu">names</span>(imList)[i])</span>
+<span id="cb16-4"><a href="stitching.html#cb16-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-5"><a href="stitching.html#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
 <p><img src="_main_files/figure-html/stitch-readimagesforstitch-1.png" width="672" /></p>
 <p>The <code>subDirectory</code> parameter allows for easy swapping between DAPI and MERFISH images.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="stitching.html#cb18-1" aria-hidden="true" tabindex="-1"></a>imList <span class="ot">&lt;-</span> <span class="fu">readImagesForStitch</span>( <span class="at">subDirectory =</span> <span class="st">&#39;DAPI&#39;</span> )</span></code></pre></div>
-<pre><code>## Processing FOV MMStack_1-Pos_001_003 (1 of 5)...</code></pre>
-<pre><code>## </code></pre>
-<pre><code>## Reading images...</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="stitching.html#cb17-1" aria-hidden="true" tabindex="-1"></a>imList <span class="ot">&lt;-</span> <span class="fu">readImagesForStitch</span>( <span class="at">subDirectory =</span> <span class="st">&#39;DAPI&#39;</span> )</span></code></pre></div>
+<pre><code>## 
+## Processing FOV MMStack_1-Pos_001_003 (1 of 5)...</code></pre>
+<pre><code>## 
+## Reading images...</code></pre>
 <pre><code>## 1 of 1...
 ## Processing FOV MMStack_1-Pos_002_002 (2 of 5)...
 ## 
@@ -363,15 +365,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## Reading images...
 ## 1 of 1...
 ## Processing images...</code></pre>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="stitching.html#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>))</span>
-<span id="cb23-2"><a href="stitching.html#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(imList)){</span>
-<span id="cb23-3"><a href="stitching.html#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>(imList[[i]]), <span class="at">main=</span><span class="fu">names</span>(imList)[i])</span>
-<span id="cb23-4"><a href="stitching.html#cb23-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb23-5"><a href="stitching.html#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="stitching.html#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>))</span>
+<span id="cb21-2"><a href="stitching.html#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(imList)){</span>
+<span id="cb21-3"><a href="stitching.html#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>(imList[[i]]), <span class="at">main=</span><span class="fu">names</span>(imList)[i])</span>
+<span id="cb21-4"><a href="stitching.html#cb21-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb21-5"><a href="stitching.html#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
 <p><img src="_main_files/figure-html/stitch-swappingsubdirectory-1.png" width="672" /></p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="stitching.html#cb24-1" aria-hidden="true" tabindex="-1"></a>dapiList <span class="ot">&lt;-</span> imList</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="stitching.html#cb22-1" aria-hidden="true" tabindex="-1"></a>dapiList <span class="ot">&lt;-</span> imList</span></code></pre></div>
 <p>Every time <code>readImagesForStitch</code> is run, a <code>stitchParams</code> environment object is generated. This functions similarly to <code>params</code>: it houses parameters for image handling and file saving. It also copies <code>params$current_fov</code> [It is separate from <code>params</code> owing to users possibly wishing to handle both MERFISH and DAPI images.]</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="stitching.html#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span>( <span class="at">envir =</span> stitchParams )</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="stitching.html#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span>( <span class="at">envir =</span> stitchParams )</span></code></pre></div>
 <pre><code>## [1] &quot;current_fov&quot;             &quot;fov_names&quot;              
 ## [3] &quot;global_coords&quot;           &quot;im_format&quot;              
 ## [5] &quot;out_dir&quot;                 &quot;processed_images_loaded&quot;
@@ -379,23 +381,24 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>From above, it is apparent that raw MERFISH images may require some image processing prior to stitching (e.g. brightening of image). We recommend the same image processing as done during image registration (Chapter <a href="spotcalling.html#image-registration">3.3.3</a>).</p>
 <p>If stitching is done <em>after</em> spotcalling is complete for all FOVs, processed images for the reference bit are accessible by setting <code>loadProcessedImages</code> to <code>TRUE</code>. As default, the <code>loadProcessedImages</code> parameter is <code>FALSE</code>. If <code>TRUE</code>, the function will first attempt to search for <code>REGIM_{ FOV Name }.png</code> images and load those instead. If unable to, <code>loadProcessedImages</code> is switched back to <code>FALSE</code>, and raw images loaded instead (failure to find processed images returned as a warning).</p>
 <p>Otherwise, we can reprocess the raw images by specifying the <code>imageFunction</code> parameter. [The minimum and maximum brightness below come from outputs of <code>getAnchorParams</code>; this done early during the spotcalling pipeline (see Chapter <a href="spotcalling.html#establishing-global-image-parameters">3.2.2</a>).]</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="stitching.html#cb27-1" aria-hidden="true" tabindex="-1"></a>imFunction <span class="ot">&lt;-</span> <span class="cf">function</span>( im ){</span>
-<span id="cb27-2"><a href="stitching.html#cb27-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-3"><a href="stitching.html#cb27-3" aria-hidden="true" tabindex="-1"></a>  minBrightness <span class="ot">=</span> <span class="fl">0.0370383157674109</span> <span class="co">#First bit floor</span></span>
-<span id="cb27-4"><a href="stitching.html#cb27-4" aria-hidden="true" tabindex="-1"></a>  maxBrightness <span class="ot">=</span> <span class="fl">0.288414576071673</span>  <span class="co">#First bit cap</span></span>
-<span id="cb27-5"><a href="stitching.html#cb27-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-6"><a href="stitching.html#cb27-6" aria-hidden="true" tabindex="-1"></a>  norm <span class="ot">&lt;-</span> </span>
-<span id="cb27-7"><a href="stitching.html#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">imLowPass</span>(im, <span class="at">floorVal =</span> minBrightness, <span class="at">ceilVal =</span> maxBrightness) <span class="sc">+</span></span>
-<span id="cb27-8"><a href="stitching.html#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">imForDecode</span>(im, <span class="at">floorVal =</span> minBrightness, <span class="at">ceilVal =</span> maxBrightness)</span>
-<span id="cb27-9"><a href="stitching.html#cb27-9" aria-hidden="true" tabindex="-1"></a>  norm <span class="ot">&lt;-</span> <span class="fu">imNormalise</span>(norm)</span>
-<span id="cb27-10"><a href="stitching.html#cb27-10" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-11"><a href="stitching.html#cb27-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>( norm )</span>
-<span id="cb27-12"><a href="stitching.html#cb27-12" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb27-13"><a href="stitching.html#cb27-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-14"><a href="stitching.html#cb27-14" aria-hidden="true" tabindex="-1"></a>imList <span class="ot">&lt;-</span> <span class="fu">readImagesForStitch</span>( <span class="at">subDirectory =</span> <span class="st">&#39;IM&#39;</span>, <span class="at">imageFunction =</span> imFunction)</span></code></pre></div>
-<pre><code>## Processing FOV MMStack_1-Pos_001_003 (1 of 5)...</code></pre>
-<pre><code>## </code></pre>
-<pre><code>## Reading images...</code></pre>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="stitching.html#cb25-1" aria-hidden="true" tabindex="-1"></a>imFunction <span class="ot">&lt;-</span> <span class="cf">function</span>( im ){</span>
+<span id="cb25-2"><a href="stitching.html#cb25-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb25-3"><a href="stitching.html#cb25-3" aria-hidden="true" tabindex="-1"></a>  minBrightness <span class="ot">=</span> <span class="fl">0.0370383157674109</span> <span class="co">#First bit floor</span></span>
+<span id="cb25-4"><a href="stitching.html#cb25-4" aria-hidden="true" tabindex="-1"></a>  maxBrightness <span class="ot">=</span> <span class="fl">0.288414576071673</span>  <span class="co">#First bit cap</span></span>
+<span id="cb25-5"><a href="stitching.html#cb25-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb25-6"><a href="stitching.html#cb25-6" aria-hidden="true" tabindex="-1"></a>  norm <span class="ot">&lt;-</span> </span>
+<span id="cb25-7"><a href="stitching.html#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">imLowPass</span>(im, <span class="at">floorVal =</span> minBrightness, <span class="at">ceilVal =</span> maxBrightness) <span class="sc">+</span></span>
+<span id="cb25-8"><a href="stitching.html#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">imForDecode</span>(im, <span class="at">floorVal =</span> minBrightness, <span class="at">ceilVal =</span> maxBrightness)</span>
+<span id="cb25-9"><a href="stitching.html#cb25-9" aria-hidden="true" tabindex="-1"></a>  norm <span class="ot">&lt;-</span> <span class="fu">imNormalise</span>(norm)</span>
+<span id="cb25-10"><a href="stitching.html#cb25-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb25-11"><a href="stitching.html#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>( norm )</span>
+<span id="cb25-12"><a href="stitching.html#cb25-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb25-13"><a href="stitching.html#cb25-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-14"><a href="stitching.html#cb25-14" aria-hidden="true" tabindex="-1"></a>imList <span class="ot">&lt;-</span> <span class="fu">readImagesForStitch</span>( <span class="at">subDirectory =</span> <span class="st">&#39;IM&#39;</span>, <span class="at">imageFunction =</span> imFunction)</span></code></pre></div>
+<pre><code>## 
+## Processing FOV MMStack_1-Pos_001_003 (1 of 5)...</code></pre>
+<pre><code>## 
+## Reading images...</code></pre>
 <pre><code>## 1 of 1...
 ## Processing FOV MMStack_1-Pos_002_002 (2 of 5)...
 ## 
@@ -414,21 +417,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## Reading images...
 ## 1 of 1...
 ## Processing images...</code></pre>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="stitching.html#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>))</span>
-<span id="cb32-2"><a href="stitching.html#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(imList)){</span>
-<span id="cb32-3"><a href="stitching.html#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>(imList[[i]]), <span class="at">main=</span><span class="fu">names</span>(imList)[i])</span>
-<span id="cb32-4"><a href="stitching.html#cb32-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb32-5"><a href="stitching.html#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="stitching.html#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>))</span>
+<span id="cb29-2"><a href="stitching.html#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(imList)){</span>
+<span id="cb29-3"><a href="stitching.html#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>(imList[[i]]), <span class="at">main=</span><span class="fu">names</span>(imList)[i])</span>
+<span id="cb29-4"><a href="stitching.html#cb29-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb29-5"><a href="stitching.html#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
 <p><img src="_main_files/figure-html/stitch-customprocessingfunction-1.png" width="672" /></p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="stitching.html#cb33-1" aria-hidden="true" tabindex="-1"></a>merList <span class="ot">&lt;-</span> imList</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="stitching.html#cb30-1" aria-hidden="true" tabindex="-1"></a>merList <span class="ot">&lt;-</span> imList</span></code></pre></div>
 </div>
 <div id="performing-stitching" class="section level2 hasAnchor" number="5.3">
 <h2><span class="header-section-number">5.3</span> Performing stitching<a href="stitching.html#performing-stitching" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The task of stitching is similar to image registration and our stitching algorithm <code>stitchImages</code> similarly relies on cross-correlation to a reference image. As default, the first image in the list – which should also be the current FOV being processed – is used.</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="stitching.html#cb34-1" aria-hidden="true" tabindex="-1"></a>stitchResults <span class="ot">&lt;-</span> <span class="fu">stitchImages</span>(merList)</span></code></pre></div>
-<pre><code>## Aligning adjacent FOVs...</code></pre>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="stitching.html#cb31-1" aria-hidden="true" tabindex="-1"></a>stitchResults <span class="ot">&lt;-</span> <span class="fu">stitchImages</span>(merList)</span></code></pre></div>
+<pre><code>## 
+## Aligning adjacent FOVs...</code></pre>
 <pre><code>## 1 of 4...2 of 4...3 of 4...4 of 4...</code></pre>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="stitching.html#cb37-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(stitchResults, <span class="at">format =</span> <span class="st">&#39;html&#39;</span>, <span class="at">booktabs =</span> T)</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="stitching.html#cb34-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(stitchResults, <span class="at">format =</span> <span class="st">&#39;html&#39;</span>, <span class="at">booktabs =</span> T)</span></code></pre></div>
 <table>
 <thead>
 <tr>
@@ -490,14 +494,15 @@ MMStack_1-Pos_003_003
 </tbody>
 </table>
 <p>Users may wish to stitch both DAPI and MERFISH images to compare.</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="stitching.html#cb38-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> stitchResults</span>
-<span id="cb38-2"><a href="stitching.html#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(df)[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&#39;merfish_&#39;</span>, <span class="fu">colnames</span>(stitchResults)[<span class="dv">2</span>])</span>
-<span id="cb38-3"><a href="stitching.html#cb38-3" aria-hidden="true" tabindex="-1"></a>stitchResults <span class="ot">&lt;-</span> <span class="fu">stitchImages</span>(dapiList)</span></code></pre></div>
-<pre><code>## Aligning adjacent FOVs...</code></pre>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="stitching.html#cb35-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> stitchResults</span>
+<span id="cb35-2"><a href="stitching.html#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(df)[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&#39;merfish_&#39;</span>, <span class="fu">colnames</span>(stitchResults)[<span class="dv">2</span>])</span>
+<span id="cb35-3"><a href="stitching.html#cb35-3" aria-hidden="true" tabindex="-1"></a>stitchResults <span class="ot">&lt;-</span> <span class="fu">stitchImages</span>(dapiList)</span></code></pre></div>
+<pre><code>## 
+## Aligning adjacent FOVs...</code></pre>
 <pre><code>## 1 of 4...2 of 4...3 of 4...4 of 4...</code></pre>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="stitching.html#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(stitchResults)[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&#39;dapi_&#39;</span>, <span class="fu">colnames</span>(stitchResults)[<span class="dv">2</span>])</span>
-<span id="cb41-2"><a href="stitching.html#cb41-2" aria-hidden="true" tabindex="-1"></a>stitchResults[,<span class="fu">colnames</span>(df)[<span class="dv">2</span>]] <span class="ot">&lt;-</span> df[<span class="fu">match</span>(stitchResults[,<span class="dv">1</span>], df[,<span class="dv">1</span>]),<span class="dv">2</span>]</span>
-<span id="cb41-3"><a href="stitching.html#cb41-3" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(stitchResults, <span class="at">format =</span> <span class="st">&#39;html&#39;</span>, <span class="at">booktabs =</span> T)</span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="stitching.html#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(stitchResults)[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&#39;dapi_&#39;</span>, <span class="fu">colnames</span>(stitchResults)[<span class="dv">2</span>])</span>
+<span id="cb38-2"><a href="stitching.html#cb38-2" aria-hidden="true" tabindex="-1"></a>stitchResults[,<span class="fu">colnames</span>(df)[<span class="dv">2</span>]] <span class="ot">&lt;-</span> df[<span class="fu">match</span>(stitchResults[,<span class="dv">1</span>], df[,<span class="dv">1</span>]),<span class="dv">2</span>]</span>
+<span id="cb38-3"><a href="stitching.html#cb38-3" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(stitchResults, <span class="at">format =</span> <span class="st">&#39;html&#39;</span>, <span class="at">booktabs =</span> T)</span></code></pre></div>
 <table>
 <thead>
 <tr>
@@ -574,62 +579,62 @@ MMStack_1-Pos_003_003
 </tbody>
 </table>
 <p>Stitching can be evaluated visually. Below we show how a FOV to the right of our reference FOV aligns prior to and after stitching.</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="stitching.html#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Subset a portion of the reference image and query image</span></span>
-<span id="cb42-2"><a href="stitching.html#cb42-2" aria-hidden="true" tabindex="-1"></a>refImage <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>( dapiList[[<span class="dv">1</span>]] ) ) <span class="co">#2_3</span></span>
-<span id="cb42-3"><a href="stitching.html#cb42-3" aria-hidden="true" tabindex="-1"></a>querImage <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>( dapiList[[<span class="dv">5</span>]] ) ) <span class="co">#3_3, right of 2_3</span></span>
-<span id="cb42-4"><a href="stitching.html#cb42-4" aria-hidden="true" tabindex="-1"></a>refImage <span class="ot">&lt;-</span> refImage[refImage<span class="sc">$</span>x <span class="sc">&gt;</span> <span class="dv">2000</span>,] <span class="co">#Image dimensions: 2960 x 2960, values of x between 2000-2960</span></span>
-<span id="cb42-5"><a href="stitching.html#cb42-5" aria-hidden="true" tabindex="-1"></a>querImage <span class="ot">&lt;-</span> querImage[querImage<span class="sc">$</span>x <span class="sc">&lt;</span> <span class="dv">960</span>,] <span class="co">#Values of x between 0-960</span></span>
-<span id="cb42-6"><a href="stitching.html#cb42-6" aria-hidden="true" tabindex="-1"></a>refImage<span class="sc">$</span>image <span class="ot">&lt;-</span> <span class="fu">names</span>( dapiList )[<span class="dv">1</span>]</span>
-<span id="cb42-7"><a href="stitching.html#cb42-7" aria-hidden="true" tabindex="-1"></a>querImage<span class="sc">$</span>image <span class="ot">&lt;-</span> <span class="fu">names</span>( dapiList )[<span class="dv">5</span>]</span>
-<span id="cb42-8"><a href="stitching.html#cb42-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-9"><a href="stitching.html#cb42-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Get corresponding shift vector</span></span>
-<span id="cb42-10"><a href="stitching.html#cb42-10" aria-hidden="true" tabindex="-1"></a>shiftVector <span class="ot">&lt;-</span> stitchResults[stitchResults<span class="sc">$</span>fov <span class="sc">==</span> <span class="fu">names</span>(dapiList)[<span class="dv">5</span>], <span class="st">&#39;dapi_shift_pixel&#39;</span>]</span>
-<span id="cb42-11"><a href="stitching.html#cb42-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-12"><a href="stitching.html#cb42-12" aria-hidden="true" tabindex="-1"></a><span class="do">## Visualise: Note the difference between stitched and unstitched are the values added to x,y</span></span>
-<span id="cb42-13"><a href="stitching.html#cb42-13" aria-hidden="true" tabindex="-1"></a>cowplot<span class="sc">::</span><span class="fu">plot_grid</span>( <span class="at">plotlist =</span> <span class="fu">list</span>(</span>
-<span id="cb42-14"><a href="stitching.html#cb42-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb42-15"><a href="stitching.html#cb42-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>( </span>
-<span id="cb42-16"><a href="stitching.html#cb42-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">data=</span>refImage, </span>
-<span id="cb42-17"><a href="stitching.html#cb42-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y, <span class="at">alpha=</span>value, <span class="at">fill =</span> image), </span>
-<span id="cb42-18"><a href="stitching.html#cb42-18" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
-<span id="cb42-19"><a href="stitching.html#cb42-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>( </span>
-<span id="cb42-20"><a href="stitching.html#cb42-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">data=</span>querImage, </span>
-<span id="cb42-21"><a href="stitching.html#cb42-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(<span class="at">x=</span>x <span class="sc">+</span> <span class="dv">2960</span>, <span class="at">y=</span>y <span class="sc">+</span> <span class="dv">0</span>, </span>
-<span id="cb42-22"><a href="stitching.html#cb42-22" aria-hidden="true" tabindex="-1"></a>          <span class="at">alpha=</span>value, <span class="at">fill =</span> image)) <span class="sc">+</span></span>
-<span id="cb42-23"><a href="stitching.html#cb42-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_manual</span>(<span class="at">name=</span><span class="st">&#39;&#39;</span>, <span class="at">values=</span><span class="fu">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;blue&#39;</span>)) <span class="sc">+</span></span>
-<span id="cb42-24"><a href="stitching.html#cb42-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_alpha_continuous</span>( <span class="at">range =</span> <span class="fu">c</span>(<span class="fl">0.75</span>, <span class="dv">0</span>) ) <span class="sc">+</span></span>
-<span id="cb42-25"><a href="stitching.html#cb42-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>( <span class="at">alpha =</span> <span class="st">&#39;none&#39;</span>, <span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="at">ncol=</span><span class="dv">1</span>) ) <span class="sc">+</span></span>
-<span id="cb42-26"><a href="stitching.html#cb42-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb42-27"><a href="stitching.html#cb42-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_void</span>( <span class="at">base_size=</span> <span class="dv">14</span> ) <span class="sc">+</span></span>
-<span id="cb42-28"><a href="stitching.html#cb42-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;bottom&#39;</span>) <span class="sc">+</span></span>
-<span id="cb42-29"><a href="stitching.html#cb42-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
-<span id="cb42-30"><a href="stitching.html#cb42-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Unstitched&#39;</span>),</span>
-<span id="cb42-31"><a href="stitching.html#cb42-31" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb42-32"><a href="stitching.html#cb42-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb42-33"><a href="stitching.html#cb42-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>( </span>
-<span id="cb42-34"><a href="stitching.html#cb42-34" aria-hidden="true" tabindex="-1"></a>      <span class="at">data=</span>refImage, </span>
-<span id="cb42-35"><a href="stitching.html#cb42-35" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y, <span class="at">alpha=</span>value, <span class="at">fill =</span> image), </span>
-<span id="cb42-36"><a href="stitching.html#cb42-36" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
-<span id="cb42-37"><a href="stitching.html#cb42-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>( </span>
-<span id="cb42-38"><a href="stitching.html#cb42-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">data=</span>querImage, </span>
-<span id="cb42-39"><a href="stitching.html#cb42-39" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(<span class="at">x=</span>x <span class="sc">+</span> <span class="fu">Re</span>(shiftVector), <span class="at">y=</span>y <span class="sc">+</span> <span class="fu">Im</span>(shiftVector), </span>
-<span id="cb42-40"><a href="stitching.html#cb42-40" aria-hidden="true" tabindex="-1"></a>          <span class="at">alpha=</span>value, <span class="at">fill =</span> image)) <span class="sc">+</span></span>
-<span id="cb42-41"><a href="stitching.html#cb42-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_manual</span>(<span class="at">name=</span><span class="st">&#39;&#39;</span>, <span class="at">values=</span><span class="fu">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;blue&#39;</span>)) <span class="sc">+</span></span>
-<span id="cb42-42"><a href="stitching.html#cb42-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_alpha_continuous</span>( <span class="at">range =</span> <span class="fu">c</span>(<span class="fl">0.75</span>, <span class="dv">0</span>) ) <span class="sc">+</span></span>
-<span id="cb42-43"><a href="stitching.html#cb42-43" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>( <span class="at">alpha =</span> <span class="st">&#39;none&#39;</span>, <span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="at">ncol=</span><span class="dv">1</span>) ) <span class="sc">+</span></span>
-<span id="cb42-44"><a href="stitching.html#cb42-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb42-45"><a href="stitching.html#cb42-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_void</span>( <span class="at">base_size=</span> <span class="dv">14</span> ) <span class="sc">+</span></span>
-<span id="cb42-46"><a href="stitching.html#cb42-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;bottom&#39;</span>) <span class="sc">+</span></span>
-<span id="cb42-47"><a href="stitching.html#cb42-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
-<span id="cb42-48"><a href="stitching.html#cb42-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Stitched&#39;</span>)</span>
-<span id="cb42-49"><a href="stitching.html#cb42-49" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow=</span><span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="stitching.html#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Subset a portion of the reference image and query image</span></span>
+<span id="cb39-2"><a href="stitching.html#cb39-2" aria-hidden="true" tabindex="-1"></a>refImage <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>( dapiList[[<span class="dv">1</span>]] ) ) <span class="co">#2_3</span></span>
+<span id="cb39-3"><a href="stitching.html#cb39-3" aria-hidden="true" tabindex="-1"></a>querImage <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>( dapiList[[<span class="dv">5</span>]] ) ) <span class="co">#3_3, right of 2_3</span></span>
+<span id="cb39-4"><a href="stitching.html#cb39-4" aria-hidden="true" tabindex="-1"></a>refImage <span class="ot">&lt;-</span> refImage[refImage<span class="sc">$</span>x <span class="sc">&gt;</span> <span class="dv">2000</span>,] <span class="co">#Image dimensions: 2960 x 2960, values of x between 2000-2960</span></span>
+<span id="cb39-5"><a href="stitching.html#cb39-5" aria-hidden="true" tabindex="-1"></a>querImage <span class="ot">&lt;-</span> querImage[querImage<span class="sc">$</span>x <span class="sc">&lt;</span> <span class="dv">960</span>,] <span class="co">#Values of x between 0-960</span></span>
+<span id="cb39-6"><a href="stitching.html#cb39-6" aria-hidden="true" tabindex="-1"></a>refImage<span class="sc">$</span>image <span class="ot">&lt;-</span> <span class="fu">names</span>( dapiList )[<span class="dv">1</span>]</span>
+<span id="cb39-7"><a href="stitching.html#cb39-7" aria-hidden="true" tabindex="-1"></a>querImage<span class="sc">$</span>image <span class="ot">&lt;-</span> <span class="fu">names</span>( dapiList )[<span class="dv">5</span>]</span>
+<span id="cb39-8"><a href="stitching.html#cb39-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-9"><a href="stitching.html#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Get corresponding shift vector</span></span>
+<span id="cb39-10"><a href="stitching.html#cb39-10" aria-hidden="true" tabindex="-1"></a>shiftVector <span class="ot">&lt;-</span> stitchResults[stitchResults<span class="sc">$</span>fov <span class="sc">==</span> <span class="fu">names</span>(dapiList)[<span class="dv">5</span>], <span class="st">&#39;dapi_shift_pixel&#39;</span>]</span>
+<span id="cb39-11"><a href="stitching.html#cb39-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-12"><a href="stitching.html#cb39-12" aria-hidden="true" tabindex="-1"></a><span class="do">## Visualise: Note the difference between stitched and unstitched are the values added to x,y</span></span>
+<span id="cb39-13"><a href="stitching.html#cb39-13" aria-hidden="true" tabindex="-1"></a>cowplot<span class="sc">::</span><span class="fu">plot_grid</span>( <span class="at">plotlist =</span> <span class="fu">list</span>(</span>
+<span id="cb39-14"><a href="stitching.html#cb39-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb39-15"><a href="stitching.html#cb39-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>( </span>
+<span id="cb39-16"><a href="stitching.html#cb39-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">data=</span>refImage, </span>
+<span id="cb39-17"><a href="stitching.html#cb39-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y, <span class="at">alpha=</span>value, <span class="at">fill =</span> image), </span>
+<span id="cb39-18"><a href="stitching.html#cb39-18" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
+<span id="cb39-19"><a href="stitching.html#cb39-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>( </span>
+<span id="cb39-20"><a href="stitching.html#cb39-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">data=</span>querImage, </span>
+<span id="cb39-21"><a href="stitching.html#cb39-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(<span class="at">x=</span>x <span class="sc">+</span> <span class="dv">2960</span>, <span class="at">y=</span>y <span class="sc">+</span> <span class="dv">0</span>, </span>
+<span id="cb39-22"><a href="stitching.html#cb39-22" aria-hidden="true" tabindex="-1"></a>          <span class="at">alpha=</span>value, <span class="at">fill =</span> image)) <span class="sc">+</span></span>
+<span id="cb39-23"><a href="stitching.html#cb39-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_manual</span>(<span class="at">name=</span><span class="st">&#39;&#39;</span>, <span class="at">values=</span><span class="fu">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;blue&#39;</span>)) <span class="sc">+</span></span>
+<span id="cb39-24"><a href="stitching.html#cb39-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_alpha_continuous</span>( <span class="at">range =</span> <span class="fu">c</span>(<span class="fl">0.75</span>, <span class="dv">0</span>) ) <span class="sc">+</span></span>
+<span id="cb39-25"><a href="stitching.html#cb39-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>( <span class="at">alpha =</span> <span class="st">&#39;none&#39;</span>, <span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="at">ncol=</span><span class="dv">1</span>) ) <span class="sc">+</span></span>
+<span id="cb39-26"><a href="stitching.html#cb39-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb39-27"><a href="stitching.html#cb39-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_void</span>( <span class="at">base_size=</span> <span class="dv">14</span> ) <span class="sc">+</span></span>
+<span id="cb39-28"><a href="stitching.html#cb39-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;bottom&#39;</span>) <span class="sc">+</span></span>
+<span id="cb39-29"><a href="stitching.html#cb39-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb39-30"><a href="stitching.html#cb39-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Unstitched&#39;</span>),</span>
+<span id="cb39-31"><a href="stitching.html#cb39-31" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb39-32"><a href="stitching.html#cb39-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb39-33"><a href="stitching.html#cb39-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>( </span>
+<span id="cb39-34"><a href="stitching.html#cb39-34" aria-hidden="true" tabindex="-1"></a>      <span class="at">data=</span>refImage, </span>
+<span id="cb39-35"><a href="stitching.html#cb39-35" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(<span class="at">x=</span>x, <span class="at">y=</span>y, <span class="at">alpha=</span>value, <span class="at">fill =</span> image), </span>
+<span id="cb39-36"><a href="stitching.html#cb39-36" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
+<span id="cb39-37"><a href="stitching.html#cb39-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>( </span>
+<span id="cb39-38"><a href="stitching.html#cb39-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">data=</span>querImage, </span>
+<span id="cb39-39"><a href="stitching.html#cb39-39" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(<span class="at">x=</span>x <span class="sc">+</span> <span class="fu">Re</span>(shiftVector), <span class="at">y=</span>y <span class="sc">+</span> <span class="fu">Im</span>(shiftVector), </span>
+<span id="cb39-40"><a href="stitching.html#cb39-40" aria-hidden="true" tabindex="-1"></a>          <span class="at">alpha=</span>value, <span class="at">fill =</span> image)) <span class="sc">+</span></span>
+<span id="cb39-41"><a href="stitching.html#cb39-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_manual</span>(<span class="at">name=</span><span class="st">&#39;&#39;</span>, <span class="at">values=</span><span class="fu">c</span>(<span class="st">&#39;red&#39;</span>, <span class="st">&#39;blue&#39;</span>)) <span class="sc">+</span></span>
+<span id="cb39-42"><a href="stitching.html#cb39-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_alpha_continuous</span>( <span class="at">range =</span> <span class="fu">c</span>(<span class="fl">0.75</span>, <span class="dv">0</span>) ) <span class="sc">+</span></span>
+<span id="cb39-43"><a href="stitching.html#cb39-43" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>( <span class="at">alpha =</span> <span class="st">&#39;none&#39;</span>, <span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="at">ncol=</span><span class="dv">1</span>) ) <span class="sc">+</span></span>
+<span id="cb39-44"><a href="stitching.html#cb39-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb39-45"><a href="stitching.html#cb39-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_void</span>( <span class="at">base_size=</span> <span class="dv">14</span> ) <span class="sc">+</span></span>
+<span id="cb39-46"><a href="stitching.html#cb39-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;bottom&#39;</span>) <span class="sc">+</span></span>
+<span id="cb39-47"><a href="stitching.html#cb39-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb39-48"><a href="stitching.html#cb39-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Stitched&#39;</span>)</span>
+<span id="cb39-49"><a href="stitching.html#cb39-49" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow=</span><span class="dv">1</span>)</span></code></pre></div>
 <p><img src="_main_files/figure-html/stitch-visualchecking-1.png" width="672" /></p>
 </div>
 <div id="saving-stitch-vectors" class="section level2 hasAnchor" number="5.4">
 <h2><span class="header-section-number">5.4</span> Saving stitch vectors<a href="stitching.html#saving-stitch-vectors" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Finally, users may save the dataframe output using the <code>saveStitch</code> function. This is strictly <em>not</em> necessary, but is recommended, as it would ensure standardised file names and compatability with the rest of <code>masmr</code>.</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="stitching.html#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveStitch</span>( stitchResults )</span>
-<span id="cb43-2"><a href="stitching.html#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">file.exists</span>( <span class="fu">paste0</span>(stitchParams<span class="sc">$</span>out_dir, <span class="st">&#39;STITCH_&#39;</span>, stitchParams<span class="sc">$</span>current_fov, <span class="st">&#39;.csv&#39;</span>) )</span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="stitching.html#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveStitch</span>( stitchResults )</span>
+<span id="cb40-2"><a href="stitching.html#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">file.exists</span>( <span class="fu">paste0</span>(stitchParams<span class="sc">$</span>out_dir, <span class="st">&#39;STITCH_&#39;</span>, stitchParams<span class="sc">$</span>current_fov, <span class="st">&#39;.csv&#39;</span>) )</span></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
 
 </div>
