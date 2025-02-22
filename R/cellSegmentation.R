@@ -36,7 +36,7 @@ establishCellSegModel <- function(
   ## Create a new environment
   cell_seg_env <- new.env()
 
-  message('Preparing cell segmentation model(s)...')
+  message('\nPreparing cell segmentation model(s)...')
 
   ## If cellpose
   if('cellpose' %in% model){

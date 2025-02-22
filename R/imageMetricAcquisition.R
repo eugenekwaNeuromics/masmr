@@ -18,6 +18,7 @@ getImageMetrics <- function(
     imMetrics <<- new.env()
   }
 
+  message('\nPreparing imMetrics environment...')
   for(i in 1:length(imageFunctions)){
     message(paste0('\nLooping ', names(imageFunctions)[i], ' function...'))
 
@@ -66,7 +67,7 @@ consolidateImageMetrics <- function(
       warning('maskList not provided and imMetrics$MASK does not exist...Assuming want to save all information...')
       maskFilt = F
     }else{
-      warning('Using imMetrics$MASK to filter pixels...')
+      #warning('Using imMetrics$MASK to filter pixels...')
     }
   }
   if(missing(bitFloor)){ bitFloor = 1 }
@@ -74,7 +75,7 @@ consolidateImageMetrics <- function(
 
   acceptable_idx <- 0:prod(as.numeric(as.numeric(params$resolutions$xydimensions_pixels)))
   if(maskFilt){
-    message('Getting acceptable pixel locations...')
+    message('\nGetting acceptable pixel locations...')
     acceptable_idx <- lapply(1:length(maskList), function(idx){
       message(paste0(idx, ' of ', length(maskList), '...'), appendLF = F)
       imx <- matrix(as.numeric(maskList[[idx]]), nrow=nrow(maskList[[idx]]), ncol=ncol(maskList[[idx]]))
@@ -94,7 +95,7 @@ consolidateImageMetrics <- function(
     ))
   }
 
-  message('Consolidating metrics per pixel...')
+  message('\nConsolidating metrics per pixel...')
   available_metrics <- ls(envir=imMetrics)
   raw_images <- imMetrics[[available_metrics[1]]]
   spotcalldf <- list()
@@ -137,8 +138,7 @@ consolidateImageMetrics <- function(
   spotcalldf <- data.frame(do.call(cbind, spotcalldf), check.names = F)
   spotcalldf <- data.frame(cbind(coorddf, spotcalldf), check.names = F)
 
-  message('')
-  message('Removing pixels where we have incomplete information...')
+  message('\nRemoving pixels where we have incomplete information...')
   filtout <- rowSums(is.na(spotcalldf)) > 0
   spotcalldf <- spotcalldf[!filtout,]
 

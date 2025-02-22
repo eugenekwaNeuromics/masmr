@@ -22,4 +22,5 @@ Imports:
   RcppEigen, 
   scales, 
   reshape2,
-  igraph
+  igraph,
+  rlang

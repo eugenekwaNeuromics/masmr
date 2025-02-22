@@ -79,7 +79,7 @@ synthesiseData <- function(
 
   ## Pick a reference FOV
   if(missing(referenceFOV)){
-    message(paste0('Reference FOV not specified...Choosing FOV with most spots...'))
+    message(paste0('\nReference FOV not specified...Choosing FOV with most spots...'))
     nspots <- lapply(spotcallfs, function(fx){
       nrow(data.table::fread(fx))
     })
@@ -92,7 +92,7 @@ synthesiseData <- function(
   message( paste0('FOV chosen: ', referenceFOV, '...') )
 
   ## Update global_coords
-  message('Updating global coordinates...')
+  message('\nUpdating global coordinates...')
   if( length(stitchChosenColumn) > 1 ){
     warning('More than one stitch dataframe column specified: taking mean of vectors...')
   }
@@ -177,7 +177,7 @@ synthesiseData <- function(
   data.table::fwrite(gcx, paste0(params$out_dir, 'OUT_GLOBALCOORD.csv'), row.names = F)
 
   ## Begin looping through files to synthesise data
-  message('Synthesising data...')
+  message('\nSynthesising data...')
   finalcellseg <- finaldf <- data.frame()
   NCHAR_NAME = nLeadingZeroes #Assume a max of 99999 cells per FOV
   for( fovName in fov_names ){
@@ -208,7 +208,7 @@ synthesiseData <- function(
 
     ## Load neighbours
     if(removeRedundancy){
-      message('Removing redundant spot calls...', appendLF = F)
+      message('\nRemoving redundant spot calls...', appendLF = F)
       fovNeighbours <- stitchResults[grepl(paste0('STITCH_', fovName, '.csv'), names(stitchResults))][[1]]
       for( i in 1:nrow(fovNeighbours) ){
 
@@ -274,7 +274,7 @@ synthesiseData <- function(
 
       ## Load neighbours
       if(removeRedundancy){
-        message('Removing redundant cell calls...', appendLF = F)
+        message('\nRemoving redundant cell calls...', appendLF = F)
         fovNeighbours <- stitchResults[grepl(paste0('STITCH_', fovName, '.csv'), names(stitchResults))][[1]]
         for( i in 1:nrow(fovNeighbours) ){
 
@@ -390,8 +390,7 @@ synthesiseData <- function(
   }
 
   ## Note that above tends to create duplicate entries in CELLEXPRESSION, have to load and edit
-  message('')
-  message('Cleaning up...')
+  message('\nCleaning up...')
   cellMetaClean <- cellMeta <- data.table::fread(paste0(params$out_dir, 'OUT_CELLS.csv.gz'), data.table = F)
   if( any(duplicated(cellMeta$CELLNAME)) ){
     duplicatedCells <- sort(unique( cellMeta[duplicated(cellMeta$CELLNAME), 'CELLNAME'] ))

@@ -16,7 +16,7 @@ spatialHNNDist <- function(
   }
   set.seed(seed)
 
-  message('Calculating homotypic nearest neighbour distances...')
+  message('\nCalculating homotypic nearest neighbour distances...')
 
   hnndist <- rep(NA, nrow(spotcalldf))
   for(i in 1:nrow(codebook)){
@@ -145,7 +145,7 @@ spatialClusterLeiden <- function(
   rownames(spotcalldf) <- 1:nrow(spotcalldf)
 
 
-  message('Clustering homotypic pixels and finding cluster centroids...')
+  message('\nClustering homotypic pixels and finding cluster centroids...')
 
 
   filtout_idx <- c() #Rownames to drop

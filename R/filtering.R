@@ -1,13 +1,144 @@
 # Function for dataframe filtering
 
+require(rlang)
 require(data.table)
+require(ggplot2)
+
+spotcall_troubleshootPlots <- function(
+    spotcalldf,
+    imList,
+    chosenCoordinate,
+    plotWindowRadius = 10,
+    decodeMetric = 'DECODE',
+    params = get('params', envir = globalenv())
+){
+  if(!('g' %in% colnames(spotcalldf)) ){
+    stop('spotcalldf must have a g column: ensure decoding has been done!')
+  }
+  if(!missing(chosenCoordinate)){
+    if(!is.complex(chosenCoordinate)){
+      stop('Please specify chosenCoordinate as a complex number: with real being X and imaginary being Y!')
+    }
+  }
+  if(missing(imList)){
+    ## Get decode
+    if( !exists('imMetrics', envir=globalenv()) ){
+      stop('Unable to plot: imMetrics does not exist and imageList not provided!')
+    }
+    imMetrics <- get('imMetrics', envir = globalenv())
+    if( !exists(decodeMetric, envir=imMetrics) ){
+      if(length(names(imMetrics))<1 | is.null(names(imMetrics))){
+        stop('Unable to plot: cannot find relevant object in imMetrics to reference!')
+      }
+      warning( paste0('Unable to find ', decodeMetric, ': replacing with ', names(imMetrics)[1], '...'))
+      decodeMetric <- names(imMetrics)[1]
+    }
+    imList <- get(decodeMetric, envir=imMetrics)
+  }
+  shifts <- params$shifts
+  if(is.null(shifts)){
+    warning('Unable to find params$shifts: will not adjust coordinates')
+    shifts <- rep(0+0i, length(imList))
+  }
+  if( !all( c('WX', 'WY') %in% colnames(spotcalldf)) ){
+    stop('Unable to plot: cannot find columns WX and WY in your spotcalldf!')
+  }
+
+  if(!missing(chosenCoordinate)){
+    chosen_cx <- chosenCoordinate
+  }else{
+    pixelIndex <- 1
+    chosen_cx <- spotcalldf[pixelIndex,'WX'] + 1i * spotcalldf[pixelIndex,'WY']
+  }
+  coordM <- getRasterCoords(imList[[ which(shifts==(0+0i))[1] ]]) + 1 + 1i
+  MAXX <- max(Re(coordM))
+  MAXY <- max(Im(coordM))
+
+  plotList <- list()
+  for(j in 1:length(chosen_cx)){
+    cxx <- chosen_cx[j]
+    bbox <- c(
+      Re(cxx) - plotWindowRadius,
+      Re(cxx) + plotWindowRadius,
+      Im(cxx) - plotWindowRadius,
+      Im(cxx) + plotWindowRadius
+    )
+    subimList <- do.call(rbind, lapply(1:length(imList), function(i){
+      shifti <- shifts[i]
+      subIm <- imList[[i]]
+      dfsub <- as.data.frame(imager::as.cimg(subIm))
+      dfsub$x <- dfsub$x + Re(shifti)
+      dfsub$y <- dfsub$y + Im(shifti)
+      dfsub <- dfsub[
+        dfsub$x >= bbox[1]
+        & dfsub$x <= bbox[2]
+        & dfsub$y >= bbox[3]
+        & dfsub$y <= bbox[4],
+      ]
+      bname <- names(imList)[i]
+      if(is.null(bname)){
+        bname = i
+        lvls <- 1:length(imList)
+      }else{
+        lvls <- names(imList)
+      }
+      dfsub$bit_name <- factor(bname, levels = lvls)
+      return(dfsub)
+    }) )
+    spdf_bool <-
+      spotcalldf$WX >= bbox[1] &
+      spotcalldf$WX <= bbox[2] &
+      spotcalldf$WY >= bbox[3] &
+      spotcalldf$WY <= bbox[4]
+    glevels = sort(unique(as.character(spotcalldf[spdf_bool, 'g'])))
+
+    p <-
+      ggplot2::ggplot() +
+      ggplot2::geom_tile(
+        data=subimList,
+        ggplot2::aes(x=x, y=y, fill=value)) +
+      ggplot2::geom_point(
+        data=spotcalldf[spdf_bool,],
+        ggplot2::aes(x=WX, y=WY, colour=factor(g, levels = glevels) ),
+        shape=1, alpha = 1, stroke=1) +
+      ggplot2::scale_colour_viridis_d(name = '', option='turbo', na.value='none') +
+      ggplot2::scale_fill_gradient(low='black', high='white', na.value = 'black') +
+      ggplot2::facet_wrap( ~factor(bit_name) ) +
+      ggplot2::theme_void(base_size=14) +
+      ggplot2::coord_fixed() +
+      ggplot2::xlab('') + ggplot2::ylab('') +
+      ggplot2::theme(
+        plot.background = ggplot2::element_rect( fill = 'black' ),
+        text = ggplot2::element_text(colour = 'white'),
+        strip.text = ggplot2::element_text(colour = 'white', size=16),
+        axis.text = ggplot2::element_text(colour = 'grey', size=12)) +
+      ggplot2::guides(
+        fill='none',
+        colour = ggplot2::guide_legend(
+          override.aes = list(
+            size = 10,
+            alpha = 1, shape = 16
+          )))
+    spot_name <- paste0('X', Re(cxx), '_Y', Im(cxx))
+    plotList[[spot_name]] <- p
+  }
+
+  return(plotList)
+}
+
+###
 
 filterDF <- function(
     spotcalldf,
     filterOut,
+    returnTroubleShootPlots = FALSE,
+    troubleShootCoordinates = NULL,
     logBase = exp(1),
-    params = get('params', envir = globalenv())
+    params = get('params', envir = globalenv()),
+    ...
 ){
+  filterExpression <- rlang::as_label(rlang::enquo( filterOut ))
+  message( paste0('\nApplying filter: ', filterExpression, '...') )
 
   if(length(filterOut) != nrow(spotcalldf)){
     stop('filterOut length does not match nrows of the dataframe!')
@@ -17,8 +148,6 @@ filterDF <- function(
     stop('filterOut is not a boolean vector!')
   }
   keep <- !filterOut
-
-  message('Filtering...')
 
   ## Report number of pixels filtered
   before <- length(keep)
@@ -142,6 +271,40 @@ filterDF <- function(
         'LogN Probes Corr: ',
         round(before, digits=5), ' --> ',
         round(after, digits=5) ))
+    }
+  }
+
+  if( returnTroubleShootPlots ){
+    troubleshootPlots <<- new.env()
+    if(is.null(troubleShootCoordinates)){
+      refcx <- spotcalldf[keep,]
+      refcx <- refcx[which.min(refcx$COS),c('WX','WY')]
+      refcx <- refcx$WX + refcx$WY * 1i
+      plist <- spotcall_troubleshootPlots(
+        spotcalldf=spotcalldf,
+        params=params,
+        chosenCoordinate=refcx,
+        ...)
+      troubleshootPlots[['BEFORE']] <<- plist
+      plist <-  spotcall_troubleshootPlots(
+        spotcalldf=spotcalldf[keep,],
+        params=params,
+        chosenCoordinate=refcx,
+        ...)
+      troubleshootPlots[['AFTER']] <<- plist
+    }else{
+      plist <- spotcall_troubleshootPlots(
+        spotcalldf=spotcalldf,
+        params=params,
+        chosenCoordinate = troubleShootCoordinates,
+        ...)
+      troubleshootPlots[['BEFORE']] <<- plist
+      plist <-  spotcall_troubleshootPlots(
+        spotcalldf=spotcalldf[keep,],
+        params=params,
+        chosenCoordinate = troubleShootCoordinates,
+        ...)
+      troubleshootPlots[['AFTER']] <<- plist
     }
   }
 

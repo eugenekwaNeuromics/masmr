@@ -36,7 +36,7 @@ Function removes rows where the decoding metric is always 0 across all images, a
 \item{  L2ELAB: Decoded gene according to nearest \code{L2E}. }
 }
 
-The corresponding values for the \strong{next} closest gene are similarly provided. These columns are similar to above but with an additional \code{B} prefix (e.g. \code{BNCOS} and \code{BNCOSLAB}).
+The corresponding values for the \strong{next} closest gene are similarly provided. These columns are similar to above but with an additional \code{B} prefix (e.g. \code{BCOS} and \code{BCOSLAB}).
 
 Additionally, global coordinate position information is also appended:
 

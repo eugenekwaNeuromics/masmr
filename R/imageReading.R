@@ -209,10 +209,7 @@ readImageMetaData <- function(
           if( length(unique(z_coord))==1 ){
             z_coord <- unique(z_coord)
           }
-          bit_name_full <- paste0(
-            rep(names(fsub), length(channels)), '_',
-            rep(channels, each=length(fsub))
-            )
+
           bit_name_alias <- paste0(
             rep(altnames, length(channels)), '_',
             rep(channels, each=length(fsub))
@@ -223,19 +220,27 @@ readImageMetaData <- function(
             stop( paste0('Corresponding image for meta data file of ', fov, ' does not exist!'))
           }
           nreps <- length(channels) * length(bit_name_full)
-          global_coord <- suppressWarnings(
-            do.call(rbind, lapply(1:length(z_coord), function(zi){
-              res <- data.frame(
+
+          global_coord <- list()
+          for( fsubidx  in 1:length(fsub) ){
+            fsubi <- fsub[fsubidx]
+            bit_name_full <- paste0(names(fsubi), '_', channels)
+            bit_name_alias <- paste0(altnames[fsubidx], '_', channels)
+            for( zidx in 1:length(z_coord)){
+              fsubidf <- data.frame(
                 'x_microns' = x_coord,
                 'y_microns' = y_coord,
-                'z_microns' = z_coord[zi],
-                'image_file' = rep(fsub, each=length(channels)),
+                'z_microns' = z_coord[zidx],
+                'image_file' = fsubi,
                 'fov' = fov,
                 'bit_name_full' = bit_name_full,
                 'bit_name_alias' = bit_name_alias,
-                'bit_name' = bit_name_alias)
-              return(res)
-              })))
+                'bit_name' = bit_name_alias
+              )
+              global_coord[[length(global_coord) + 1]] <- fsubidf
+            }
+          }
+          global_coord <- do.call(rbind, global_coord)
           global_coords[[fov]] <- global_coord
         }
       }
@@ -428,8 +433,7 @@ readImageList <- function(
   ###
   imLists <- imList <- list()
   if(length(fovs)==1){
-    message('')
-    message('Reading images...')
+    message('\nReading images...')
     for(i in 1:length(fileNames)){
 
       message(paste0(i, ' of ', length(fileNames), '...'), appendLF = F)
@@ -477,8 +481,8 @@ readImageList <- function(
     imLists <- imList
   }else{
     for(j in 1:length(fovs)){
-      if(j > 1){ message('') } #Skip new line
-      message(paste0('Processing FOV ', fovs[j], ' (', j, ' of ', length(fovs), ')...'))
+      # if(j > 1){ message('') } #Skip new line
+      message(paste0('\nProcessing FOV ', fovs[j], ' (', j, ' of ', length(fovs), ')...'))
       fileNameSub <- unique(gcx$image_file[gcx$fov==fovs[j]])
       imLists[[fovs[j]]] <-
         readImageList(

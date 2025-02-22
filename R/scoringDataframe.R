@@ -65,7 +65,7 @@ scoreClassifier <- function(
 
   ## Check which covariates have missing, non.numeric, or Inf values
   if(missing(modelFormula)){
-    message('Checking which covariates to exclude...')
+    message('\nChecking which covariates to exclude...')
     drop_covar <- c(LHS, variablesExcluded)
     for(i in 1:ncol(spotcalldf)){
       if(colnames(spotcalldf)[i] %in% drop_covar){ next }
@@ -106,7 +106,7 @@ scoreClassifier <- function(
     }
     modelFormula <- paste0(LHS, ' ~ ', formsplit[,2])
   }
-  message( paste0('Formula: ', modelFormula ))
+  message( paste0('\nFormula: ', modelFormula ))
   t <- try( classifyFunction(as.formula(modelFormula), data = spotcalldf[trainIndex,], ...), silent = T )
   if( inherits(t, 'try-error') ){
     modelFormula <<- modelFormula
@@ -157,7 +157,7 @@ scoreDeltaF <- function(
     stop('Unable to generate geneMatrix from spotcalldf$g!')
   }
 
-  message('Calculating delta F metrics...')
+  message('\nCalculating delta F metrics...')
   for(i in 1:length(prefixes)){
     prefixi <- prefixes[i]
     message(paste0(prefixi, ' ( ', i, ' of ', length(prefixes), ' )...'), appendLF = F)

@@ -73,7 +73,7 @@ decode <- function(
   }
 
   ## Generate metrics for decoding
-  message('Decoding...')
+  message('\nDecoding...')
   l2norm <- (NORM / rowSums(NORM))
   tc <- t(apply(codebook, 2, as.numeric))
   nA <- sqrt(rowSums(NORM^2))

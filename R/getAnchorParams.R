@@ -128,7 +128,7 @@ getAnchorParams <- function(
     stop('Anchors are not present in params$fov_names!')
   }
   params$anchors <<- anchors
-  message(paste0('Using ', length(anchors), ' anchor FOVs...'))
+  message(paste0('\nUsing ', length(anchors), ' anchor FOVs...'))
 
 
   ## Create anchors plot for visualisation
@@ -172,8 +172,9 @@ getAnchorParams <- function(
     }
 
     ## Loop through every bit and get metrics
+    message('\nObtaining anchor metrics per bit...')
     for( i in 1:ncol(codebook) ){
-      message(paste0('Loading bit ', i, ' of ', ncol(codebook), '...'))
+      message(paste0('\nLoading bit ', i, ' of ', ncol(codebook), '...'))
       current_bit <- colnames(codebook)[i]
       gcx <- global_coords[
         global_coords$fov %in% anchors
@@ -230,7 +231,6 @@ getAnchorParams <- function(
       }
       rm(imCheck)
 
-      message('')
       for( fi in 1:length(imageFunctions) ){
         current_func <- names(imageFunctions)[fi]
         message(paste0('Getting ', current_func, '...'))
@@ -256,7 +256,7 @@ getAnchorParams <- function(
   }
 
   message(paste0(
-    'Anchor metrics: ', paste(params$anchors_metrics, collapse=', ')
+    '\nAnchor metrics obtained: ', paste(params$anchors_metrics, collapse=', ')
     ))
 }
 

@@ -45,7 +45,7 @@ registerImages <- function(
   w <- gaussianWeightAmplitude * exp(-( (Re(coord)^2/(2*gaussianWeightSigmaX^2) + (Im(coord)^2/(2*gaussianWeightSigmaY^2) ))))
   acceptable_coords <- coord[Mod(coord) <= maxAcceptableShiftDistance]
 
-  message('Registering...')
+  message('\nRegistering...')
   shifts <- rep(0+0i, length(imList))
   for(i in 1:length(imList)){
     message(paste0(i, ' of ', length(imList), '...'), appendLF = F)
@@ -141,7 +141,7 @@ registerImages <- function(
     }
   }
   if(standardiseShifts){
-    message('Standardising shift across channels and images...')
+    message('\nStandardising shift across channels and images...')
     shift_bychannel <- by(shifts, channels, function(x){
       val <- mean(x, na.rm=T)
       val <- round(Re(val)) + (1i * round(Im(val)))
@@ -178,7 +178,7 @@ registerImages <- function(
   }))
   window <- c(max(window[,1]), min(window[,2]), max(window[,3]), min(window[,4]))
   params$intersecting_window <<- window
-  message(paste0('Intersecting window is ', paste(window, collapse = ' x '), '...'))
+  message(paste0('\nIntersecting window is ', paste(window, collapse = ' x '), '...'))
 
   if(saveShifts){
     out_file <- paste0(params$out_dir, 'REGIM_', currentFovName, '.png')

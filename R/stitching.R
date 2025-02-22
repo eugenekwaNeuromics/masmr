@@ -120,8 +120,7 @@ readImagesForStitch <- function(
   stitchParams <<- tmp_param
 
   ## Process each image
-  message('')
-  message('Processing images...')
+  message('\nProcessing images...')
 
   imList <- setNames( lapply(imList, function(im){
     if( is.list(im) ){ im <- im[[1]] }
@@ -155,7 +154,7 @@ stitchImages <- function(
   }
   per_pixel_microns <- as.numeric(stitchParams$resolutions$per_pixel_microns)
 
-  message('Aligning adjacent FOVs...')
+  message('\nAligning adjacent FOVs...')
   shifts <- c()
   # coord <- getRasterCoords(refx) - sum(dim(refx) * c(1, 1i)) + (1+1i)
   for(imidxi in 1:length(nnlist)){

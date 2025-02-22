@@ -46,7 +46,7 @@ prepareCodebook <- function(
     }
 
     if(exhaustiveBlanks){
-      message('Finding more blanks...')
+      message('\nFinding more blanks...')
       universe <- expand.grid(lapply(1:ncol(codebook), function(x) return(c(0,1)) ))
       intcodes <- Reduce('+', lapply(1:ncol(codebook), function(x){
         val <- universe[,x] * 2^(x-1)
@@ -59,7 +59,7 @@ prepareCodebook <- function(
       newblanks <- universe[!(intcodes %in% donecodes),]
       newblanks <- newblanks[rowSums(newblanks)==params$nbits,]
 
-      message('Calculating hamming distances to existing codes...')
+      message('\nCalculating hamming distances to existing codes...')
       hdists <- rep(Inf, nrow(newblanks))
       closest <- rep(NA, nrow(newblanks))
       for(i in 1:nrow(codebook)){
@@ -73,7 +73,7 @@ prepareCodebook <- function(
       valid <- (hdists > hammingDistanceThreshold)
       newblanks <- newblanks[valid,]
 
-      message(paste0('Adding ', sum(valid), ' new blanks...'))
+      message(paste0('\nAdding ', sum(valid), ' new blanks...'))
       if(sum(valid) > 0){
         rownames(newblanks) <- paste0('BLANK-NEW-', sprintf(paste0('%0', nchar(nrow(newblanks)), 'd'), 1:nrow(newblanks)))
         colnames(newblanks) <- colnames(codebook)
@@ -92,5 +92,5 @@ prepareCodebook <- function(
   params$ordered_codebook <<- codebook
   params$capture_order <<- colnames(codebook)
   params$isblank <<- grepl('^blank-', tolower(rownames(codebook)))
-  message(paste0('Codebook has ', sum(params$isblank), ' blanks and ', sum(!params$isblank), ' genes...' ))
+  message(paste0('\nCodebook has ', sum(params$isblank), ' blanks and ', sum(!params$isblank), ' genes...' ))
 }
