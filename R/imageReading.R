@@ -209,25 +209,18 @@ readImageMetaData <- function(
           if( length(unique(z_coord))==1 ){
             z_coord <- unique(z_coord)
           }
-
-          bit_name_alias <- paste0(
-            rep(altnames, length(channels)), '_',
-            rep(channels, each=length(fsub))
-          )
-          bit_name_alias <- tolower(bit_name_alias)
           fsub <- gsub(params$meta_format, params$im_format, fsub)
           if(!all(file.exists(fsub))){
             stop( paste0('Corresponding image for meta data file of ', fov, ' does not exist!'))
           }
-          nreps <- length(channels) * length(bit_name_full)
 
           global_coord <- list()
           for( fsubidx  in 1:length(fsub) ){
             fsubi <- fsub[fsubidx]
             bit_name_full <- paste0(names(fsubi), '_', channels)
-            bit_name_alias <- paste0(altnames[fsubidx], '_', channels)
+            bit_name_alias <- tolower( paste0(altnames[fsubidx], '_', channels) )
             for( zidx in 1:length(z_coord)){
-              fsubidf <- data.frame(
+              fsubidf <- suppressWarnings( data.frame(
                 'x_microns' = x_coord,
                 'y_microns' = y_coord,
                 'z_microns' = z_coord[zidx],
@@ -236,11 +229,11 @@ readImageMetaData <- function(
                 'bit_name_full' = bit_name_full,
                 'bit_name_alias' = bit_name_alias,
                 'bit_name' = bit_name_alias
-              )
+              ))
               global_coord[[length(global_coord) + 1]] <- fsubidf
             }
           }
-          global_coord <- do.call(rbind, global_coord)
+          global_coord <- suppressWarnings( do.call(rbind, global_coord) )
           global_coords[[fov]] <- global_coord
         }
       }
