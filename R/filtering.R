@@ -3,6 +3,7 @@
 require(rlang)
 require(data.table)
 require(ggplot2)
+require(viridis)
 
 spotcall_troubleshootPlots <- function(
     spotcalldf,
@@ -43,6 +44,12 @@ spotcall_troubleshootPlots <- function(
   if( !all( c('WX', 'WY') %in% colnames(spotcalldf)) ){
     stop('Unable to plot: cannot find columns WX and WY in your spotcalldf!')
   }
+
+  if(is.null( params$genePalette )){
+    genePalette <- setNames( viridis::turbo(nrow(params$ordered_codebook), alpha = 1), rownames(params$ordered_codebook) )
+    params$genePalette <<- genePalette
+  }
+  genePalette <- params$genePalette
 
   if(!missing(chosenCoordinate)){
     chosen_cx <- chosenCoordinate
@@ -91,6 +98,7 @@ spotcall_troubleshootPlots <- function(
       spotcalldf$WY >= bbox[3] &
       spotcalldf$WY <= bbox[4]
     glevels = sort(unique(as.character(spotcalldf[spdf_bool, 'g'])))
+    gene_pal <- genePalette[names(genePalette) %in% glevels]
 
     p <-
       ggplot2::ggplot() +
@@ -101,7 +109,7 @@ spotcall_troubleshootPlots <- function(
         data=spotcalldf[spdf_bool,],
         ggplot2::aes(x=WX, y=WY, colour=factor(g, levels = glevels) ),
         shape=1, alpha = 1, stroke=1) +
-      ggplot2::scale_colour_viridis_d(name = '', option='turbo', na.value='none') +
+      ggplot2::scale_colour_manual(name = '', values=gene_pal, na.value='none') +
       ggplot2::scale_fill_gradient(low='black', high='white', na.value = 'black') +
       ggplot2::facet_wrap( ~factor(bit_name) ) +
       ggplot2::theme_void(base_size=14) +
