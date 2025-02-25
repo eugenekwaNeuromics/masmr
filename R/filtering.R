@@ -113,6 +113,7 @@ spotcall_troubleshootPlots <- function(
       ggplot2::scale_fill_gradient(low='black', high='white', na.value = 'black') +
       ggplot2::facet_wrap( ~factor(bit_name) ) +
       ggplot2::theme_void(base_size=14) +
+      ggplot2::scale_y_reverse() +
       ggplot2::coord_fixed() +
       ggplot2::xlab('') + ggplot2::ylab('') +
       ggplot2::theme(
