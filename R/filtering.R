@@ -105,11 +105,7 @@ spotcall_troubleshootPlots <- function(
       ggplot2::geom_tile(
         data=subimList,
         ggplot2::aes(x=x, y=y, fill=value)) +
-      ggplot2::geom_point(
-        data=spotcalldf[spdf_bool,],
-        ggplot2::aes(x=WX, y=WY, colour=factor(g, levels = glevels) ),
-        shape=1, alpha = 1, stroke=1) +
-      ggplot2::scale_colour_manual(name = '', values=gene_pal, na.value='none') +
+      ggplot2::scale_colour_manual(name = '', values=gene_pal, na.value='black') +
       ggplot2::scale_fill_gradient(low='black', high='white', na.value = 'black') +
       ggplot2::facet_wrap( ~factor(bit_name) ) +
       ggplot2::theme_void(base_size=14) +
@@ -128,6 +124,14 @@ spotcall_troubleshootPlots <- function(
             size = 10,
             alpha = 1, shape = 16
           )))
+    if( sum(spdf_bool) > 0 ){
+      p <- p +
+        ggplot2::geom_point(
+          data=spotcalldf[spdf_bool,],
+          ggplot2::aes(x=WX, y=WY, colour=g ),
+          shape=1, alpha = 1, stroke=1)
+    }
+
     spot_name <- paste0('X', Re(cxx), '_Y', Im(cxx))
     plotList[[spot_name]] <- p
   }
