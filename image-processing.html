@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 4 Image processing | Introduction to the masmr project</title>
+  <meta name="description" content="This is a quick introduction to building piplines for MERFISH decoding using our masmr package." />
+  <meta name="generator" content="bookdown 0.42 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 4 Image processing | Introduction to the masmr project" />
+  <meta property="og:type" content="book" />
+  <meta property="og:image" content="/./images/masmr.png" />
+  <meta property="og:description" content="This is a quick introduction to building piplines for MERFISH decoding using our masmr package." />
+  <meta name="github-repo" content="rstudio/bookdown-demo" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 4 Image processing | Introduction to the masmr project" />
+  
+  <meta name="twitter:description" content="This is a quick introduction to building piplines for MERFISH decoding using our masmr package." />
+  <meta name="twitter:image" content="/./images/masmr.png" />
+
+<meta name="author" content="Eugene Kwa" />
+
+
+<meta name="date" content="2025-02-26" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="spotcalling.html"/>
+<link rel="next" href="cell-segmentation.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Modular Algorithms for Spotcalling in MERFISH in R</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> url: your book url like https://bookdown.org/yihui/bookdown</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#installation"><i class="fa fa-check"></i><b>1.1</b> Installation</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>2</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="introduction.html"><a href="introduction.html#why-do-you-need-masmr"><i class="fa fa-check"></i><b>2.1</b> Why do you need <code>masmr</code>?</a></li>
+<li class="chapter" data-level="2.2" data-path="introduction.html"><a href="introduction.html#background"><i class="fa fa-check"></i><b>2.2</b> Background</a></li>
+<li class="chapter" data-level="2.3" data-path="introduction.html"><a href="introduction.html#quick-start-scripts"><i class="fa fa-check"></i><b>2.3</b> Quick start scripts</a>
+<ul>
+<li class="chapter" data-level="2.3.1" data-path="introduction.html"><a href="introduction.html#quick-start-spotcalling"><i class="fa fa-check"></i><b>2.3.1</b> Quick start: Spotcalling</a></li>
+<li class="chapter" data-level="2.3.2" data-path="introduction.html"><a href="introduction.html#quick-start-cell-segmentation"><i class="fa fa-check"></i><b>2.3.2</b> Quick start: Cell segmentation</a></li>
+<li class="chapter" data-level="2.3.3" data-path="introduction.html"><a href="introduction.html#quick-start-stitching"><i class="fa fa-check"></i><b>2.3.3</b> Quick start: Stitching</a></li>
+<li class="chapter" data-level="2.3.4" data-path="introduction.html"><a href="introduction.html#quick-start-synthesis"><i class="fa fa-check"></i><b>2.3.4</b> Quick start: Synthesis</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="spotcalling.html"><a href="spotcalling.html"><i class="fa fa-check"></i><b>3</b> Spotcalling</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="spotcalling.html"><a href="spotcalling.html#pre-processing"><i class="fa fa-check"></i><b>3.1</b> Pre-processing</a>
+<ul>
+<li class="chapter" data-level="3.1.1" data-path="spotcalling.html"><a href="spotcalling.html#establishing-parameters"><i class="fa fa-check"></i><b>3.1.1</b> Establishing parameters</a></li>
+<li class="chapter" data-level="3.1.2" data-path="spotcalling.html"><a href="spotcalling.html#getting-parameters-from-image-metadata"><i class="fa fa-check"></i><b>3.1.2</b> Getting parameters from image metadata</a></li>
+<li class="chapter" data-level="3.1.3" data-path="spotcalling.html"><a href="spotcalling.html#preparing-the-codebook"><i class="fa fa-check"></i><b>3.1.3</b> Preparing the codebook</a></li>
+<li class="chapter" data-level="3.1.4" data-path="spotcalling.html"><a href="spotcalling.html#house-keeping"><i class="fa fa-check"></i><b>3.1.4</b> House-keeping</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="spotcalling.html"><a href="spotcalling.html#preparing-to-loop-through-images"><i class="fa fa-check"></i><b>3.2</b> Preparing to loop through images</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="spotcalling.html"><a href="spotcalling.html#image-reading"><i class="fa fa-check"></i><b>3.2.1</b> Image reading</a></li>
+<li class="chapter" data-level="3.2.2" data-path="spotcalling.html"><a href="spotcalling.html#establishing-global-image-parameters"><i class="fa fa-check"></i><b>3.2.2</b> Establishing global image parameters</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="spotcalling.html"><a href="spotcalling.html#looping-through-images"><i class="fa fa-check"></i><b>3.3</b> Looping through images</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="spotcalling.html"><a href="spotcalling.html#default-image-processing"><i class="fa fa-check"></i><b>3.3.1</b> Default image processing</a></li>
+<li class="chapter" data-level="3.3.2" data-path="spotcalling.html"><a href="spotcalling.html#image-registration"><i class="fa fa-check"></i><b>3.3.2</b> Image registration</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="spotcalling.html"><a href="spotcalling.html#working-with-pixel-wise-metrics"><i class="fa fa-check"></i><b>3.4</b> Working with pixel-wise metrics</a>
+<ul>
+<li class="chapter" data-level="3.4.1" data-path="spotcalling.html"><a href="spotcalling.html#moving-from-image-lists-to-a-dataframe"><i class="fa fa-check"></i><b>3.4.1</b> Moving from image lists to a dataframe</a></li>
+<li class="chapter" data-level="3.4.2" data-path="spotcalling.html"><a href="spotcalling.html#decoding"><i class="fa fa-check"></i><b>3.4.2</b> Decoding</a></li>
+<li class="chapter" data-level="3.4.3" data-path="spotcalling.html"><a href="spotcalling.html#annotating-blanks"><i class="fa fa-check"></i><b>3.4.3</b> Annotating blanks</a></li>
+<li class="chapter" data-level="3.4.4" data-path="spotcalling.html"><a href="spotcalling.html#filtering-and-evaluating-your-choice-of-filter"><i class="fa fa-check"></i><b>3.4.4</b> Filtering and evaluating your choice of filter</a></li>
+<li class="chapter" data-level="3.4.5" data-path="spotcalling.html"><a href="spotcalling.html#binarising-continuous-values"><i class="fa fa-check"></i><b>3.4.5</b> Binarising continuous values</a></li>
+<li class="chapter" data-level="3.4.6" data-path="spotcalling.html"><a href="spotcalling.html#obtaining-other-qc-metrics"><i class="fa fa-check"></i><b>3.4.6</b> Obtaining other QC metrics</a></li>
+<li class="chapter" data-level="3.4.7" data-path="spotcalling.html"><a href="spotcalling.html#clustering"><i class="fa fa-check"></i><b>3.4.7</b> Clustering</a></li>
+</ul></li>
+<li class="chapter" data-level="3.5" data-path="spotcalling.html"><a href="spotcalling.html#saving-spot-calls"><i class="fa fa-check"></i><b>3.5</b> Saving spot calls</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="image-processing.html"><a href="image-processing.html"><i class="fa fa-check"></i><b>4</b> Image processing</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="image-processing.html"><a href="image-processing.html#pre-processing-1"><i class="fa fa-check"></i><b>4.1</b> Pre-processing</a></li>
+<li class="chapter" data-level="4.2" data-path="image-processing.html"><a href="image-processing.html#building-blocks-of-image-processing"><i class="fa fa-check"></i><b>4.2</b> Building blocks of image processing</a>
+<ul>
+<li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imnormalise"><i class="fa fa-check"></i><code>imNormalise</code></a></li>
+<li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imautobrighten"><i class="fa fa-check"></i><code>imAutobrighten</code></a></li>
+<li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imlaplacianofgaussian"><i class="fa fa-check"></i><code>imLaplacianOfGaussian</code></a></li>
+<li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imhessiandeterminant"><i class="fa fa-check"></i><code>imHessianDeterminant</code></a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="image-processing.html"><a href="image-processing.html#combining-building-blocks"><i class="fa fa-check"></i><b>4.3</b> Combining building blocks</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="cell-segmentation.html"><a href="cell-segmentation.html"><i class="fa fa-check"></i><b>5</b> Cell segmentation</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#pre-processing-2"><i class="fa fa-check"></i><b>5.1</b> Pre-processing</a>
+<ul>
+<li class="chapter" data-level="5.1.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#establishing-parameters-1"><i class="fa fa-check"></i><b>5.1.1</b> Establishing parameters</a></li>
+<li class="chapter" data-level="5.1.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#establishing-the-cell-segmentation-model"><i class="fa fa-check"></i><b>5.1.2</b> Establishing the cell segmentation model</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#running-cell-segmentation"><i class="fa fa-check"></i><b>5.2</b> Running cell segmentation</a></li>
+<li class="chapter" data-level="5.3" data-path="cell-segmentation.html"><a href="cell-segmentation.html#running-segmentation-model"><i class="fa fa-check"></i><b>5.3</b> Running segmentation model</a>
+<ul>
+<li class="chapter" data-level="5.3.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#cellpose"><i class="fa fa-check"></i><b>5.3.1</b> <code>cellpose</code></a></li>
+<li class="chapter" data-level="5.3.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#stardist"><i class="fa fa-check"></i><b>5.3.2</b> <code>stardist</code></a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="cell-segmentation.html"><a href="cell-segmentation.html#saving-cell-masks"><i class="fa fa-check"></i><b>5.4</b> Saving cell masks</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="stitching.html"><a href="stitching.html"><i class="fa fa-check"></i><b>6</b> Stitching</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="stitching.html"><a href="stitching.html#pre-processing-3"><i class="fa fa-check"></i><b>6.1</b> Pre-processing</a></li>
+<li class="chapter" data-level="6.2" data-path="stitching.html"><a href="stitching.html#loading-images-for-stitching"><i class="fa fa-check"></i><b>6.2</b> Loading images for stitching</a></li>
+<li class="chapter" data-level="6.3" data-path="stitching.html"><a href="stitching.html#performing-stitching"><i class="fa fa-check"></i><b>6.3</b> Performing stitching</a></li>
+<li class="chapter" data-level="6.4" data-path="stitching.html"><a href="stitching.html#saving-stitch-vectors"><i class="fa fa-check"></i><b>6.4</b> Saving stitch vectors</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="synthesis.html"><a href="synthesis.html"><i class="fa fa-check"></i><b>7</b> Synthesis</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="synthesis.html"><a href="synthesis.html#unifying-outputs"><i class="fa fa-check"></i><b>7.1</b> Unifying outputs</a></li>
+<li class="chapter" data-level="7.2" data-path="synthesis.html"><a href="synthesis.html#qc-plotting"><i class="fa fa-check"></i><b>7.2</b> QC plotting</a>
+<ul>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#fpkmcorrelation"><i class="fa fa-check"></i><code>FPKMCorrelation</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#cosinedistancedistribution"><i class="fa fa-check"></i><code>CosineDistanceDistribution</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#spotfovdistribution"><i class="fa fa-check"></i><code>SpotFOVDistribution</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#cosinespatialdistribution"><i class="fa fa-check"></i><code>CosineSpatialDistribution</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#bitdetectionrate"><i class="fa fa-check"></i><code>BitDetectionRate</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#bitwiseerrorrates"><i class="fa fa-check"></i><code>BitwiseErrorRates</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#fovmetrics"><i class="fa fa-check"></i><code>FOVMetrics</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#cellmetrics"><i class="fa fa-check"></i><code>CellMetrics</code></a></li>
+</ul></li>
+<li class="chapter" data-level="7.3" data-path="synthesis.html"><a href="synthesis.html#next-steps"><i class="fa fa-check"></i><b>7.3</b> Next steps</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="troubleshooting.html"><a href="troubleshooting.html"><i class="fa fa-check"></i><b>8</b> Troubleshooting</a>
+<ul>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#too-few-spots"><i class="fa fa-check"></i>Too few spots</a></li>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#too-few-cellular-spots"><i class="fa fa-check"></i>Too few cellular spots</a></li>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#weak-correlation-to-fpkm-high-blank"><i class="fa fa-check"></i>Weak correlation to FPKM / high blank %</a></li>
+<li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#issues-with-image-handling"><i class="fa fa-check"></i>Issues with image handling</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="./">Modular Algorithms for Spotcalling in MERFISH in R</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Introduction to the masmr project</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="image-processing" class="section level1 hasAnchor" number="4">
+<h1><span class="header-section-number">Chapter 4</span> Image processing<a href="image-processing.html#image-processing" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>One key decision in your spotcalling script is choosing how to process your images. Here, we will cover the image processing functions that <code>masmr</code> provides, and how users may string together these functions for their own purposes.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="image-processing.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(masmr)</span>
+<span id="cb1-2"><a href="image-processing.html#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.3.2</code></pre>
+<div id="pre-processing-1" class="section level2 hasAnchor" number="4.1">
+<h2><span class="header-section-number">4.1</span> Pre-processing<a href="image-processing.html#pre-processing-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>As before, specify your parameters.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="image-processing.html#cb3-1" aria-hidden="true" tabindex="-1"></a>data_dir <span class="ot">=</span> <span class="st">&#39;C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/&#39;</span></span>
+<span id="cb3-2"><a href="image-processing.html#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">establishParams</span>(</span>
+<span id="cb3-3"><a href="image-processing.html#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageDirs =</span> <span class="fu">paste0</span>(data_dir, <span class="st">&#39;S10/&#39;</span>),</span>
+<span id="cb3-4"><a href="image-processing.html#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageFormat =</span> <span class="st">&#39;.ome.tif&#39;</span>,</span>
+<span id="cb3-5"><a href="image-processing.html#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">codebookFileName =</span> <span class="fu">list.files</span>(<span class="fu">paste0</span>(data_dir, <span class="st">&#39;codebook/&#39;</span>), <span class="at">pattern=</span><span class="st">&#39;codebook&#39;</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-6"><a href="image-processing.html#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">codebookColumnNames =</span> <span class="fu">paste0</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">3</span>), <span class="dv">4</span>), <span class="st">&#39;_&#39;</span>, <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&#39;cy3&#39;</span>, <span class="st">&#39;alexa594&#39;</span>, <span class="st">&#39;cy5&#39;</span>, <span class="st">&#39;cy7&#39;</span>), <span class="at">each=</span><span class="dv">4</span>) ),</span>
+<span id="cb3-7"><a href="image-processing.html#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">outDir =</span> <span class="st">&#39;C:/Users/kwaje/Downloads/JYOUT/&#39;</span>,</span>
+<span id="cb3-8"><a href="image-processing.html#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">dapiDir =</span> <span class="fu">paste0</span>(data_dir, <span class="st">&#39;DAPI_1/&#39;</span>),</span>
+<span id="cb3-9"><a href="image-processing.html#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">pythonLocation =</span> <span class="st">&#39;C:/Users/kwaje/AppData/Local/anaconda3/envs/scipyenv/&#39;</span>,</span>
+<span id="cb3-10"><a href="image-processing.html#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">fpkmFileName =</span> <span class="fu">list.files</span>(<span class="fu">paste0</span>(data_dir, <span class="st">&#39;FPKM_data/&#39;</span>), <span class="at">pattern=</span><span class="st">&#39;FPKM&#39;</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-11"><a href="image-processing.html#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">nProbesFileName =</span> <span class="fu">list.files</span>(<span class="fu">paste0</span>(data_dir), <span class="at">pattern=</span><span class="st">&#39;ProbesPerGene.csv&#39;</span>, <span class="at">recursive =</span> T, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-12"><a href="image-processing.html#cb3-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## Assuming .ome.tif is extension for meta files...</code></pre>
+<pre><code>## resumeMode = TRUE...</code></pre>
+<pre><code>## 100 images across 16 cycles ( 4 ON-bit codes )...</code></pre>
+<p>Image processing is handled <em>within</em> your spotcalling script, and consequently requires some pre-processing to have been done prior to looping through images. These are provided below (kindly refer to Chapter <a href="spotcalling.html#spotcalling">3</a> for details).</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="image-processing.html#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Necessary pre-processing done before your loop</span></span>
+<span id="cb7-2"><a href="image-processing.html#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">readImageMetaData</span>()</span></code></pre></div>
+<pre><code>## Warning in readImageMetaData(): Updating params$fov_names</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="image-processing.html#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prepareCodebook</span>()</span></code></pre></div>
+<pre><code>## 
+## Codebook has 57 blanks and 94 genes...</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="image-processing.html#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getAnchorParams</span>()</span></code></pre></div>
+<pre><code>## 
+## Using 10 anchor FOVs...</code></pre>
+<pre><code>## 
+## Anchor metrics obtained: brightness_min, brightness_max</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="image-processing.html#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">establishCleanSlate</span>()</span></code></pre></div>
+<pre><code>## [1] &quot;.Random.seed&quot; &quot;data_dir&quot;     &quot;params&quot;</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="image-processing.html#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Specify the current FOV (done inside the loop)</span></span>
+<span id="cb16-2"><a href="image-processing.html#cb16-2" aria-hidden="true" tabindex="-1"></a>params<span class="sc">$</span>current_fov <span class="ot">&lt;-</span> params<span class="sc">$</span>fov_names[<span class="dv">38</span>]</span>
+<span id="cb16-3"><a href="image-processing.html#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="image-processing.html#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Read the images for your current FOV (done inside loop)</span></span>
+<span id="cb16-5"><a href="image-processing.html#cb16-5" aria-hidden="true" tabindex="-1"></a>imList <span class="ot">&lt;-</span> <span class="fu">readImageList</span>( params<span class="sc">$</span>current_fov )</span></code></pre></div>
+<pre><code>## 
+## Reading images...</code></pre>
+<pre><code>## 1 of 4...2 of 4...3 of 4...4 of 4...</code></pre>
+</div>
+<div id="building-blocks-of-image-processing" class="section level2 hasAnchor" number="4.2">
+<h2><span class="header-section-number">4.2</span> Building blocks of image processing<a href="image-processing.html#building-blocks-of-image-processing" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The backbone of MERFISH pipelines is image processing. We provide several options, which we will showcase with the test image below. Note the use of <code>imager::as.cimg</code>, which converts image matrices to <code>.cimg</code> objects that are read by C++; so doing allows for rapid manipulation and plotting.</p>
+<p><strong>ALWAYS plot to check how your image processing has altered your image!</strong></p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="image-processing.html#cb19-1" aria-hidden="true" tabindex="-1"></a>im <span class="ot">&lt;-</span> imList[[<span class="dv">1</span>]]</span>
+<span id="cb19-2"><a href="image-processing.html#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb19-3"><a href="image-processing.html#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(im), <span class="at">main =</span> <span class="st">&#39;Unaltered image&#39;</span> )</span>
+<span id="cb19-4"><a href="image-processing.html#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>( im, <span class="at">breaks=</span><span class="dv">1000</span>, <span class="at">main =</span> <span class="st">&#39;Unaltered image&#39;</span>, <span class="at">xlab=</span><span class="st">&#39;Intensities&#39;</span>, <span class="at">ylab=</span><span class="st">&#39;N pixels&#39;</span> )</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-unaltered-1.png" width="672" /></p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="image-processing.html#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<div id="imnormalise" class="section level3 unnumbered hasAnchor">
+<h3><code>imNormalise</code><a href="image-processing.html#imnormalise" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Note the range of raw intensities. We can use <code>imNormalise</code> to perform a quick min-max normalisation so that values span 0 to 1.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="image-processing.html#cb21-1" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> <span class="fu">imNormalise</span>(im)</span>
+<span id="cb21-2"><a href="image-processing.html#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb21-3"><a href="image-processing.html#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(norm), <span class="at">main =</span> <span class="st">&#39;Min-max image&#39;</span> )</span>
+<span id="cb21-4"><a href="image-processing.html#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>( norm, <span class="at">breaks=</span><span class="dv">1000</span>, <span class="at">main =</span> <span class="st">&#39;Min-max image&#39;</span>, <span class="at">xlab=</span><span class="st">&#39;Intensities&#39;</span>, <span class="at">ylab=</span><span class="st">&#39;N pixels&#39;</span> )</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-minmax-1.png" width="672" /></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="image-processing.html#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<p>Since we previously calculated min and max brightnesses, we may wish to winsorise intensity values (i.e. values trimmed to lie between min and max brightness). As before, we can use <code>imNormalise</code> but this time specifying the desired floor and ceiling values. [When these are unspecified, floor and ceiling values are defaulted to minimum and maximum intensities observed in the image, thereby performing a min-max normalisation.]</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="image-processing.html#cb23-1" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> <span class="fu">imNormalise</span>(im, <span class="at">floorVal =</span> params<span class="sc">$</span>brightness_min[<span class="dv">1</span>], <span class="at">ceilVal =</span> params<span class="sc">$</span>brightness_max[<span class="dv">1</span>] )</span>
+<span id="cb23-2"><a href="image-processing.html#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb23-3"><a href="image-processing.html#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(norm), <span class="at">main =</span> <span class="st">&#39;Winsorised image&#39;</span> )</span>
+<span id="cb23-4"><a href="image-processing.html#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>( norm, <span class="at">breaks=</span><span class="dv">1000</span>, <span class="at">main =</span> <span class="st">&#39;Winsorised image&#39;</span>, <span class="at">xlab=</span><span class="st">&#39;Intensities&#39;</span>, <span class="at">ylab=</span><span class="st">&#39;N pixels&#39;</span> )</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-winsored-1.png" width="672" /></p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="image-processing.html#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+</div>
+<div id="imautobrighten" class="section level3 unnumbered hasAnchor">
+<h3><code>imAutobrighten</code><a href="image-processing.html#imautobrighten" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Brightening an image is accomplished by raising the intensities (that lie between 0 and 1) to some power <span class="math inline">\(x\)</span>, that maximises the distance between two user-specified values (<span class="math inline">\(floor\)</span> and <span class="math inline">\(ceiling\)</span>). The optimal <span class="math inline">\(x\)</span> is found by solving:</p>
+<p><span class="math display">\[\begin{align}
+\frac{d}{dx}\left(ceiling^x - floor^x\right) = 0 \\
+ceiling^x \log{ceiling} - floor^x \log{floor} = 0 \\
+x = \frac{\log{ \frac{\log{ceiling}}{\log{floor}}} }{ \log{\frac{floor}{ceiling}} }
+\end{align}\]</span></p>
+<p>This is the basis of the <code>imAutoBrighten</code> function.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="image-processing.html#cb25-1" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> <span class="fu">imAutoBrighten</span>(im, <span class="at">floorVal =</span> params<span class="sc">$</span>brightness_min[<span class="dv">1</span>], <span class="at">ceilVal =</span> params<span class="sc">$</span>brightness_max[<span class="dv">1</span>] )</span>
+<span id="cb25-2"><a href="image-processing.html#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb25-3"><a href="image-processing.html#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(norm), <span class="at">main =</span> <span class="st">&#39;Autobrightened image&#39;</span> )</span>
+<span id="cb25-4"><a href="image-processing.html#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>( norm, <span class="at">breaks=</span><span class="dv">1000</span>, <span class="at">main =</span> <span class="st">&#39;Autobrightened image&#39;</span>, <span class="at">xlab=</span><span class="st">&#39;Intensities&#39;</span>, <span class="at">ylab=</span><span class="st">&#39;N pixels&#39;</span> )</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-autobright-1.png" width="672" /></p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="image-processing.html#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+</div>
+<div id="imlaplacianofgaussian" class="section level3 unnumbered hasAnchor">
+<h3><code>imLaplacianOfGaussian</code><a href="image-processing.html#imlaplacianofgaussian" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The difference of Gaussian blurs (i.e. Laplacian of Gaussians, LoG) is useful for correcting for uneven lighting or blob detection. This is accomplished by subtracting an image that has been slightly blurred (determined by the <code>smallBlur</code> parameter) from an image that is blurrier (<code>bigBlur</code>).</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="image-processing.html#cb27-1" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> <span class="fu">imLaplacianOfGaussian</span>(im, <span class="at">smallBlur =</span> <span class="dv">1</span>, <span class="at">bigBlur =</span> <span class="dv">5</span> )</span>
+<span id="cb27-2"><a href="image-processing.html#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb27-3"><a href="image-processing.html#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(norm), <span class="at">main =</span> <span class="st">&#39;Laplacian of Gaussians&#39;</span> )</span>
+<span id="cb27-4"><a href="image-processing.html#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(norm[<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>]), <span class="at">main =</span> <span class="st">&#39;Laplacian of Gaussians (Zoom in)&#39;</span> )</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-log-1.png" width="672" /></p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="image-processing.html#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<p>Values that are less than 0 are those dimmer that their immediate surroundings. Spots are typically brighter than their surroundings, and so typically have LoG &gt; 0.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="image-processing.html#cb29-1" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> <span class="fu">imLaplacianOfGaussian</span>(im, <span class="at">smallBlur =</span> <span class="dv">1</span>, <span class="at">bigBlur =</span> <span class="dv">5</span> )</span>
+<span id="cb29-2"><a href="image-processing.html#cb29-2" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> <span class="fu">imNormalise</span>(norm, <span class="dv">0</span>, <span class="fu">max</span>(norm))</span>
+<span id="cb29-3"><a href="image-processing.html#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb29-4"><a href="image-processing.html#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(norm), <span class="at">main =</span> <span class="st">&#39;Laplacian of Gaussians &gt;0&#39;</span> )</span>
+<span id="cb29-5"><a href="image-processing.html#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(norm[<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>]), <span class="at">main =</span> <span class="st">&#39;Laplacian of Gaussians &gt;0 (Zoom in)&#39;</span> )</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-logandnorm-1.png" width="672" /></p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="image-processing.html#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+</div>
+<div id="imhessiandeterminant" class="section level3 unnumbered hasAnchor">
+<h3><code>imHessianDeterminant</code><a href="image-processing.html#imhessiandeterminant" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The Hessian is a symmetric matrix containing second-order partial derivatives (i.e. gradient of gradients). In the context of images, it is a matrix of how intensity values are changing as we move along rows and columns of the image matrix. The determinant of the Hessian (detHess) is frequently used for blob detection – we have thus created a function that calculates its value:</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="image-processing.html#cb31-1" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> <span class="fu">imHessianDeterminant</span>(im, <span class="at">smallBlur =</span> <span class="dv">1</span>)</span>
+<span id="cb31-2"><a href="image-processing.html#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb31-3"><a href="image-processing.html#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(norm), <span class="at">main =</span> <span class="st">&#39;detHess&#39;</span> )</span>
+<span id="cb31-4"><a href="image-processing.html#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(norm[<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>]), <span class="at">main =</span> <span class="st">&#39;detHess&#39;</span> )</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-hessdet-1.png" width="672" /></p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="image-processing.html#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<p>Thresholding detHess values are a quick way of detecting puncta:</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="image-processing.html#cb33-1" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> <span class="fu">imHessianDeterminant</span>(im, <span class="at">smallBlur =</span> <span class="dv">1</span>)</span>
+<span id="cb33-2"><a href="image-processing.html#cb33-2" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> norm<span class="sc">&gt;</span><span class="fu">quantile</span>(norm, <span class="fl">0.99</span>) <span class="do">##99 percentile of values</span></span>
+<span id="cb33-3"><a href="image-processing.html#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb33-4"><a href="image-processing.html#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(norm), <span class="at">main =</span> <span class="st">&#39;detHess thresholded&#39;</span> )</span>
+<span id="cb33-5"><a href="image-processing.html#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(norm[<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>]), <span class="at">main =</span> <span class="st">&#39;detHess thresholded (Zoom in)&#39;</span> )</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-hessdetmask-1.png" width="672" /></p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="image-processing.html#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<p>Attentive readers would have noticed that there is a <code>smallBlur</code> parameter (default = 1) in the <code>imHessianDeterminant</code> function. This blur serves to denoise the image, so that detHess values are meaningful.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="image-processing.html#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>))</span>
+<span id="cb35-2"><a href="image-processing.html#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(im[<span class="dv">1200</span><span class="sc">:</span><span class="dv">1300</span>, <span class="dv">1200</span><span class="sc">:</span><span class="dv">1300</span>]), <span class="at">main =</span> <span class="st">&#39;Intensities (Zoom in): No blur&#39;</span> )</span>
+<span id="cb35-3"><a href="image-processing.html#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(<span class="fu">imHessianDeterminant</span>(im[<span class="dv">1200</span><span class="sc">:</span><span class="dv">1300</span>, <span class="dv">1200</span><span class="sc">:</span><span class="dv">1300</span>], <span class="at">smallBlur =</span> <span class="dv">0</span>)), <span class="at">main =</span> <span class="st">&#39;detHess (Zoom in): No blur&#39;</span> )</span>
+<span id="cb35-4"><a href="image-processing.html#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(<span class="fu">imHessianDeterminant</span>(im[<span class="dv">1200</span><span class="sc">:</span><span class="dv">1300</span>, <span class="dv">1200</span><span class="sc">:</span><span class="dv">1300</span>], <span class="at">smallBlur =</span> <span class="dv">1</span>)), <span class="at">main =</span> <span class="st">&#39;detHess (Zoom in): Slight blur&#39;</span> )</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-hessdet-blurvnoblur-1.png" width="672" /></p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="image-processing.html#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+</div>
+</div>
+<div id="combining-building-blocks" class="section level2 hasAnchor" number="4.3">
+<h2><span class="header-section-number">4.3</span> Combining building blocks<a href="image-processing.html#combining-building-blocks" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Using the building blocks above, and any relevant functions from <code>imager</code> or <code>EBImage</code>, users can create complex image processing pipelines. Below is an example of a composite function <code>imLowPass</code> created using a combination of <code>imNormalise</code>, image blurring, and <code>imAutoBrighten</code>.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="image-processing.html#cb37-1" aria-hidden="true" tabindex="-1"></a>masmr<span class="sc">::</span>imLowPass</span></code></pre></div>
+<pre><code>## function (im, smallBlur, currentIteration, ...) 
+## {
+##     if (!missing(currentIteration)) {
+##         message(currentIteration, appendLF = F)
+##     }
+##     if (missing(smallBlur)) {
+##         smallBlur = 1
+##     }
+##     background &lt;- imNormalise(im, ...) == 0
+##     imblur &lt;- array(imager::isoblur(suppressWarnings(imager::as.cimg(im)), 
+##         smallBlur), dim = dim(im))
+##     lowthresh &lt;- median(imblur[background])
+##     hithresh &lt;- median(imblur[!background &amp; (imblur &gt; lowthresh)])
+##     norm &lt;- imAutoBrighten(imblur, floorVal = lowthresh, ceilVal = hithresh)
+##     norm &lt;- imNormalise(norm)
+##     return(norm)
+## }
+## &lt;bytecode: 0x000001ebd6debd80&gt;
+## &lt;environment: namespace:masmr&gt;</code></pre>
+<p><strong>ALWAYS plot to check how your image processing has altered your image!</strong></p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="image-processing.html#cb39-1" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> <span class="fu">imLowPass</span>(im, <span class="at">floorVal =</span> params<span class="sc">$</span>brightness_min[<span class="dv">1</span>], <span class="at">ceilVal =</span> params<span class="sc">$</span>brightness_max[<span class="dv">1</span>] )</span>
+<span id="cb39-2"><a href="image-processing.html#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb39-3"><a href="image-processing.html#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(norm), <span class="at">main =</span> <span class="st">&#39;Low pass&#39;</span> )</span>
+<span id="cb39-4"><a href="image-processing.html#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>( norm, <span class="at">breaks=</span><span class="dv">1000</span>, <span class="at">main =</span> <span class="st">&#39;Low pass&#39;</span>, <span class="at">xlab=</span><span class="st">&#39;Intensities&#39;</span>, <span class="at">ylab=</span><span class="st">&#39;N pixels&#39;</span> )</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-lowpass-1.png" width="672" /></p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="image-processing.html#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<p>Users are strongly encouraged to experiment with the provided image processing functions and create their own image processing pipelines if necessary.
+## Feeding image processing pipelines into <code>getImageMetrics</code></p>
+<p>By listing looping functions in a named list <code>imageFunctions</code> (much like what is done for <code>getAnchorParams</code>), users can perform different types of image processing using our <code>getImageMetrics</code> function. The result is a new environment object (<code>imMetrics</code>) that houses image lists that have been processed in different ways. As default, the following image processing is performed:</p>
+<ul>
+<li><code>ORIG</code>: unprocessed images.</li>
+<li><code>NORM</code>: images that have been min-max normalised.</li>
+<li><code>COARSE</code>: low-pass images, optimised to separate foreground from background.</li>
+<li><code>DECODE</code>: images that have been optimised for decoding.</li>
+<li><code>MASK</code>: images where pixels worth bringing forward for decoding have been masked as <code>TRUE</code>.</li>
+</ul>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="image-processing.html#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getImageMetrics</span>( </span>
+<span id="cb41-2"><a href="image-processing.html#cb41-2" aria-hidden="true" tabindex="-1"></a>  imList,</span>
+<span id="cb41-3"><a href="image-processing.html#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageFunctions =</span> <span class="fu">list</span>(</span>
+<span id="cb41-4"><a href="image-processing.html#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;ORIG&#39;</span> <span class="ot">=</span> imReturn,</span>
+<span id="cb41-5"><a href="image-processing.html#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;NORM&#39;</span> <span class="ot">=</span> imWinsorIntensities,</span>
+<span id="cb41-6"><a href="image-processing.html#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;COARSE&#39;</span> <span class="ot">=</span> imLowPass,</span>
+<span id="cb41-7"><a href="image-processing.html#cb41-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;DECODE&#39;</span> <span class="ot">=</span> imForDecode,</span>
+<span id="cb41-8"><a href="image-processing.html#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;MASK&#39;</span> <span class="ot">=</span> imForMask</span>
+<span id="cb41-9"><a href="image-processing.html#cb41-9" aria-hidden="true" tabindex="-1"></a>  ))</span></code></pre></div>
+<pre><code>## 
+## Preparing imMetrics environment...</code></pre>
+<pre><code>## 
+## Looping ORIG function...</code></pre>
+<pre><code>## 1 of 16...2 of 16...3 of 16...4 of 16...5 of 16...6 of 16...7 of 16...8 of 16...9 of 16...10 of 16...11 of 16...12 of 16...13 of 16...14 of 16...15 of 16...16 of 16...
+## Looping NORM function...
+## 1 of 16...2 of 16...3 of 16...4 of 16...5 of 16...6 of 16...7 of 16...8 of 16...9 of 16...10 of 16...11 of 16...12 of 16...13 of 16...14 of 16...15 of 16...16 of 16...
+## Looping COARSE function...
+## 1 of 16...2 of 16...3 of 16...4 of 16...5 of 16...6 of 16...7 of 16...8 of 16...9 of 16...10 of 16...11 of 16...12 of 16...13 of 16...14 of 16...15 of 16...16 of 16...
+## Looping DECODE function...
+## 1 of 16...2 of 16...3 of 16...4 of 16...5 of 16...6 of 16...7 of 16...8 of 16...9 of 16...10 of 16...11 of 16...12 of 16...13 of 16...14 of 16...15 of 16...16 of 16...
+## Looping MASK function...
+## 1 of 16...2 of 16...3 of 16...4 of 16...5 of 16...6 of 16...7 of 16...8 of 16...9 of 16...10 of 16...11 of 16...12 of 16...13 of 16...14 of 16...15 of 16...16 of 16...</code></pre>
+<p><strong>ALWAYS plot to check how your image processing has altered your image!</strong></p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="image-processing.html#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>))</span>
+<span id="cb45-2"><a href="image-processing.html#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>( imMetricName <span class="cf">in</span> <span class="fu">ls</span>(imMetrics) ){</span>
+<span id="cb45-3"><a href="image-processing.html#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( imMetrics[[imMetricName]][[<span class="dv">1</span>]][<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>] ), <span class="at">main =</span> imMetricName)</span>
+<span id="cb45-4"><a href="image-processing.html#cb45-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb45-5"><a href="image-processing.html#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-imagemetrics-zoomed-1.png" width="672" /></p>
+<p>Users can do the same, and visualise how their function performs on one FOV. When satisfied, that custom function can be looped through all images in the <code>imList</code> with <code>getImageMetrics</code>:</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="image-processing.html#cb46-1" aria-hidden="true" tabindex="-1"></a>userCustomFunction <span class="ot">&lt;-</span> <span class="cf">function</span>( im ){</span>
+<span id="cb46-2"><a href="image-processing.html#cb46-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## User to decide on how they want the image to be processed</span></span>
+<span id="cb46-3"><a href="image-processing.html#cb46-3" aria-hidden="true" tabindex="-1"></a>  ...</span>
+<span id="cb46-4"><a href="image-processing.html#cb46-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb46-5"><a href="image-processing.html#cb46-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-6"><a href="image-processing.html#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Loop the custom function across all images</span></span>
+<span id="cb46-7"><a href="image-processing.html#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="fu">getImageMetrics</span>( </span>
+<span id="cb46-8"><a href="image-processing.html#cb46-8" aria-hidden="true" tabindex="-1"></a>  imList,</span>
+<span id="cb46-9"><a href="image-processing.html#cb46-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageFunctions =</span> <span class="fu">list</span>(</span>
+<span id="cb46-10"><a href="image-processing.html#cb46-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;ORIG&#39;</span> <span class="ot">=</span> imReturn,</span>
+<span id="cb46-11"><a href="image-processing.html#cb46-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;NORM&#39;</span> <span class="ot">=</span> imWinsorIntensities,</span>
+<span id="cb46-12"><a href="image-processing.html#cb46-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;COARSE&#39;</span> <span class="ot">=</span> imLowPass,</span>
+<span id="cb46-13"><a href="image-processing.html#cb46-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;DECODE&#39;</span> <span class="ot">=</span> imForDecode,</span>
+<span id="cb46-14"><a href="image-processing.html#cb46-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;MASK&#39;</span> <span class="ot">=</span> imForMask,</span>
+<span id="cb46-15"><a href="image-processing.html#cb46-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;CUSTOM&#39;</span> <span class="ot">=</span> userCustomFunction <span class="co">#New function  (or replace one of the above with your new function)</span></span>
+<span id="cb46-16"><a href="image-processing.html#cb46-16" aria-hidden="true" tabindex="-1"></a>  ))</span></code></pre></div>
+<p>As an example of a custom function: say users want to mask all pixels brighter than some value. This can be done by creating a function:</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="image-processing.html#cb47-1" aria-hidden="true" tabindex="-1"></a>myCustomMask <span class="ot">&lt;-</span> <span class="cf">function</span>( im ){</span>
+<span id="cb47-2"><a href="image-processing.html#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>( im<span class="sc">&gt;</span><span class="fl">0.1</span> )</span>
+<span id="cb47-3"><a href="image-processing.html#cb47-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb47-4"><a href="image-processing.html#cb47-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-5"><a href="image-processing.html#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>))</span>
+<span id="cb47-6"><a href="image-processing.html#cb47-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( imList[[<span class="dv">1</span>]][<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>] ), <span class="at">main=</span><span class="st">&#39;Original&#39;</span>)</span>
+<span id="cb47-7"><a href="image-processing.html#cb47-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( <span class="fu">imForMask</span>(imList[[<span class="dv">1</span>]])[<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>] ), <span class="at">main=</span><span class="st">&#39;Default mask&#39;</span>)</span>
+<span id="cb47-8"><a href="image-processing.html#cb47-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( <span class="fu">myCustomMask</span>(imList[[<span class="dv">1</span>]][<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>]) ), <span class="at">main=</span><span class="st">&#39;Custom mask&#39;</span>)</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-customMask-1.png" width="672" /></p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="image-processing.html#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<p>It is important to note that <code>imMetrics$MASK</code> will determine which pixels are brought forwards for decoding during the later <code>consolidateImageMetrics</code> function; and that decoding will be performed on <code>imMetrics$DECODE</code>. The <code>DECODE</code> and <code>MASK</code> metrics should thus be the image processing pipelines that users should focus on when optimising.</p>
+<p>If users want to decode on the whole image (which may be memory intensive), removing <code>MASK</code> from <code>imMetrics</code> (an example below), or creating a <code>imMetrics$MASK</code> with <code>TRUE</code> for every pixel will work. In so doing, spotcalling will only depend on the <code>DECODE</code> images.</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="image-processing.html#cb49-1" aria-hidden="true" tabindex="-1"></a>myCustomMask <span class="ot">&lt;-</span> <span class="cf">function</span>(im){</span>
+<span id="cb49-2"><a href="image-processing.html#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>( im <span class="sc">&gt;</span> <span class="sc">-</span><span class="cn">Inf</span> ) <span class="co">#Return TRUE for every pixel</span></span>
+<span id="cb49-3"><a href="image-processing.html#cb49-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb49-4"><a href="image-processing.html#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="fu">getImageMetrics</span>( </span>
+<span id="cb49-5"><a href="image-processing.html#cb49-5" aria-hidden="true" tabindex="-1"></a>  imList,</span>
+<span id="cb49-6"><a href="image-processing.html#cb49-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageFunctions =</span> <span class="fu">list</span>(</span>
+<span id="cb49-7"><a href="image-processing.html#cb49-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;ORIG&#39;</span> <span class="ot">=</span> imReturn,</span>
+<span id="cb49-8"><a href="image-processing.html#cb49-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;NORM&#39;</span> <span class="ot">=</span> imWinsorIntensities,</span>
+<span id="cb49-9"><a href="image-processing.html#cb49-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;COARSE&#39;</span> <span class="ot">=</span> imLowPass,</span>
+<span id="cb49-10"><a href="image-processing.html#cb49-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;DECODE&#39;</span> <span class="ot">=</span> imForDecode,</span>
+<span id="cb49-11"><a href="image-processing.html#cb49-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;MASK&#39;</span> <span class="ot">=</span> myCustomMask <span class="co">#User replacing the mask function</span></span>
+<span id="cb49-12"><a href="image-processing.html#cb49-12" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb49-13"><a href="image-processing.html#cb49-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-14"><a href="image-processing.html#cb49-14" aria-hidden="true" tabindex="-1"></a><span class="do">## Alternatively, users can remove the MASK</span></span>
+<span id="cb49-15"><a href="image-processing.html#cb49-15" aria-hidden="true" tabindex="-1"></a>imMetrics<span class="sc">$</span>MASK <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code></pre></div>
+<p>Experiment and find what works for your dataset. Don’t forget to make use of functions like <code>filterDF</code> and <code>spotcall_troubleshootPlots</code> to help you troubleshoot (see Chapter <a href="spotcalling.html#spotcalling">3</a>).</p>
+<p><strong>Users are encouraged to optimise their image processing pipelines on one FOV, before applying the same pipelines to all other FOVs.</strong></p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="spotcalling.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="cell-segmentation.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/USERNAME/REPO/edit/BRANCH/03-improcessing.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["_main.pdf", "_main.epub"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

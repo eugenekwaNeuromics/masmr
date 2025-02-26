@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 6 Synthesis | Introduction to the masmr project</title>
+  <title>Chapter 7 Synthesis | Introduction to the masmr project</title>
   <meta name="description" content="This is a quick introduction to building piplines for MERFISH decoding using our masmr package." />
   <meta name="generator" content="bookdown 0.42 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 6 Synthesis | Introduction to the masmr project" />
+  <meta property="og:title" content="Chapter 7 Synthesis | Introduction to the masmr project" />
   <meta property="og:type" content="book" />
   <meta property="og:image" content="/./images/masmr.png" />
   <meta property="og:description" content="This is a quick introduction to building piplines for MERFISH decoding using our masmr package." />
   <meta name="github-repo" content="rstudio/bookdown-demo" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 6 Synthesis | Introduction to the masmr project" />
+  <meta name="twitter:title" content="Chapter 7 Synthesis | Introduction to the masmr project" />
   
   <meta name="twitter:description" content="This is a quick introduction to building piplines for MERFISH decoding using our masmr package." />
   <meta name="twitter:image" content="/./images/masmr.png" />
@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-02-22" />
+<meta name="date" content="2025-02-26" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -168,13 +168,14 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="2" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>2</b> Introduction</a>
 <ul>
-<li class="chapter" data-level="2.1" data-path="introduction.html"><a href="introduction.html#background"><i class="fa fa-check"></i><b>2.1</b> Background</a></li>
-<li class="chapter" data-level="2.2" data-path="introduction.html"><a href="introduction.html#quick-start-scripts"><i class="fa fa-check"></i><b>2.2</b> Quick start scripts</a>
+<li class="chapter" data-level="2.1" data-path="introduction.html"><a href="introduction.html#why-do-you-need-masmr"><i class="fa fa-check"></i><b>2.1</b> Why do you need <code>masmr</code>?</a></li>
+<li class="chapter" data-level="2.2" data-path="introduction.html"><a href="introduction.html#background"><i class="fa fa-check"></i><b>2.2</b> Background</a></li>
+<li class="chapter" data-level="2.3" data-path="introduction.html"><a href="introduction.html#quick-start-scripts"><i class="fa fa-check"></i><b>2.3</b> Quick start scripts</a>
 <ul>
-<li class="chapter" data-level="2.2.1" data-path="introduction.html"><a href="introduction.html#quick-start-spotcalling"><i class="fa fa-check"></i><b>2.2.1</b> Quick start: Spotcalling</a></li>
-<li class="chapter" data-level="2.2.2" data-path="introduction.html"><a href="introduction.html#quick-start-cell-segmentation"><i class="fa fa-check"></i><b>2.2.2</b> Quick start: Cell segmentation</a></li>
-<li class="chapter" data-level="2.2.3" data-path="introduction.html"><a href="introduction.html#quick-start-stitching"><i class="fa fa-check"></i><b>2.2.3</b> Quick start: Stitching</a></li>
-<li class="chapter" data-level="2.2.4" data-path="introduction.html"><a href="introduction.html#quick-start-synthesis"><i class="fa fa-check"></i><b>2.2.4</b> Quick start: Synthesis</a></li>
+<li class="chapter" data-level="2.3.1" data-path="introduction.html"><a href="introduction.html#quick-start-spotcalling"><i class="fa fa-check"></i><b>2.3.1</b> Quick start: Spotcalling</a></li>
+<li class="chapter" data-level="2.3.2" data-path="introduction.html"><a href="introduction.html#quick-start-cell-segmentation"><i class="fa fa-check"></i><b>2.3.2</b> Quick start: Cell segmentation</a></li>
+<li class="chapter" data-level="2.3.3" data-path="introduction.html"><a href="introduction.html#quick-start-stitching"><i class="fa fa-check"></i><b>2.3.3</b> Quick start: Stitching</a></li>
+<li class="chapter" data-level="2.3.4" data-path="introduction.html"><a href="introduction.html#quick-start-synthesis"><i class="fa fa-check"></i><b>2.3.4</b> Quick start: Synthesis</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="spotcalling.html"><a href="spotcalling.html"><i class="fa fa-check"></i><b>3</b> Spotcalling</a>
@@ -186,54 +187,67 @@ div.csl-indent {
 <li class="chapter" data-level="3.1.3" data-path="spotcalling.html"><a href="spotcalling.html#preparing-the-codebook"><i class="fa fa-check"></i><b>3.1.3</b> Preparing the codebook</a></li>
 <li class="chapter" data-level="3.1.4" data-path="spotcalling.html"><a href="spotcalling.html#house-keeping"><i class="fa fa-check"></i><b>3.1.4</b> House-keeping</a></li>
 </ul></li>
-<li class="chapter" data-level="3.2" data-path="spotcalling.html"><a href="spotcalling.html#handling-images"><i class="fa fa-check"></i><b>3.2</b> Handling images</a>
+<li class="chapter" data-level="3.2" data-path="spotcalling.html"><a href="spotcalling.html#preparing-to-loop-through-images"><i class="fa fa-check"></i><b>3.2</b> Preparing to loop through images</a>
 <ul>
 <li class="chapter" data-level="3.2.1" data-path="spotcalling.html"><a href="spotcalling.html#image-reading"><i class="fa fa-check"></i><b>3.2.1</b> Image reading</a></li>
 <li class="chapter" data-level="3.2.2" data-path="spotcalling.html"><a href="spotcalling.html#establishing-global-image-parameters"><i class="fa fa-check"></i><b>3.2.2</b> Establishing global image parameters</a></li>
 </ul></li>
 <li class="chapter" data-level="3.3" data-path="spotcalling.html"><a href="spotcalling.html#looping-through-images"><i class="fa fa-check"></i><b>3.3</b> Looping through images</a>
 <ul>
-<li class="chapter" data-level="3.3.1" data-path="spotcalling.html"><a href="spotcalling.html#image-processing-building-blocks"><i class="fa fa-check"></i><b>3.3.1</b> Image processing: building blocks</a></li>
-<li class="chapter" data-level="3.3.2" data-path="spotcalling.html"><a href="spotcalling.html#image-processing-combining-functions"><i class="fa fa-check"></i><b>3.3.2</b> Image processing: combining functions</a></li>
-<li class="chapter" data-level="3.3.3" data-path="spotcalling.html"><a href="spotcalling.html#image-registration"><i class="fa fa-check"></i><b>3.3.3</b> Image registration</a></li>
+<li class="chapter" data-level="3.3.1" data-path="spotcalling.html"><a href="spotcalling.html#default-image-processing"><i class="fa fa-check"></i><b>3.3.1</b> Default image processing</a></li>
+<li class="chapter" data-level="3.3.2" data-path="spotcalling.html"><a href="spotcalling.html#image-registration"><i class="fa fa-check"></i><b>3.3.2</b> Image registration</a></li>
 </ul></li>
 <li class="chapter" data-level="3.4" data-path="spotcalling.html"><a href="spotcalling.html#working-with-pixel-wise-metrics"><i class="fa fa-check"></i><b>3.4</b> Working with pixel-wise metrics</a>
 <ul>
 <li class="chapter" data-level="3.4.1" data-path="spotcalling.html"><a href="spotcalling.html#moving-from-image-lists-to-a-dataframe"><i class="fa fa-check"></i><b>3.4.1</b> Moving from image lists to a dataframe</a></li>
 <li class="chapter" data-level="3.4.2" data-path="spotcalling.html"><a href="spotcalling.html#decoding"><i class="fa fa-check"></i><b>3.4.2</b> Decoding</a></li>
 <li class="chapter" data-level="3.4.3" data-path="spotcalling.html"><a href="spotcalling.html#annotating-blanks"><i class="fa fa-check"></i><b>3.4.3</b> Annotating blanks</a></li>
-<li class="chapter" data-level="3.4.4" data-path="spotcalling.html"><a href="spotcalling.html#binarising-continuous-values"><i class="fa fa-check"></i><b>3.4.4</b> Binarising continuous values</a></li>
-<li class="chapter" data-level="3.4.5" data-path="spotcalling.html"><a href="spotcalling.html#obtaining-other-qc-metrics"><i class="fa fa-check"></i><b>3.4.5</b> Obtaining other QC metrics</a></li>
-<li class="chapter" data-level="3.4.6" data-path="spotcalling.html"><a href="spotcalling.html#clustering"><i class="fa fa-check"></i><b>3.4.6</b> Clustering</a></li>
+<li class="chapter" data-level="3.4.4" data-path="spotcalling.html"><a href="spotcalling.html#filtering-and-evaluating-your-choice-of-filter"><i class="fa fa-check"></i><b>3.4.4</b> Filtering and evaluating your choice of filter</a></li>
+<li class="chapter" data-level="3.4.5" data-path="spotcalling.html"><a href="spotcalling.html#binarising-continuous-values"><i class="fa fa-check"></i><b>3.4.5</b> Binarising continuous values</a></li>
+<li class="chapter" data-level="3.4.6" data-path="spotcalling.html"><a href="spotcalling.html#obtaining-other-qc-metrics"><i class="fa fa-check"></i><b>3.4.6</b> Obtaining other QC metrics</a></li>
+<li class="chapter" data-level="3.4.7" data-path="spotcalling.html"><a href="spotcalling.html#clustering"><i class="fa fa-check"></i><b>3.4.7</b> Clustering</a></li>
 </ul></li>
 <li class="chapter" data-level="3.5" data-path="spotcalling.html"><a href="spotcalling.html#saving-spot-calls"><i class="fa fa-check"></i><b>3.5</b> Saving spot calls</a></li>
 </ul></li>
-<li class="chapter" data-level="4" data-path="cell-segmentation.html"><a href="cell-segmentation.html"><i class="fa fa-check"></i><b>4</b> Cell segmentation</a>
+<li class="chapter" data-level="4" data-path="image-processing.html"><a href="image-processing.html"><i class="fa fa-check"></i><b>4</b> Image processing</a>
 <ul>
-<li class="chapter" data-level="4.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#pre-processing-1"><i class="fa fa-check"></i><b>4.1</b> Pre-processing</a>
+<li class="chapter" data-level="4.1" data-path="image-processing.html"><a href="image-processing.html#pre-processing-1"><i class="fa fa-check"></i><b>4.1</b> Pre-processing</a></li>
+<li class="chapter" data-level="4.2" data-path="image-processing.html"><a href="image-processing.html#building-blocks-of-image-processing"><i class="fa fa-check"></i><b>4.2</b> Building blocks of image processing</a>
 <ul>
-<li class="chapter" data-level="4.1.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#establishing-parameters-1"><i class="fa fa-check"></i><b>4.1.1</b> Establishing parameters</a></li>
-<li class="chapter" data-level="4.1.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#establishing-the-cell-segmentation-model"><i class="fa fa-check"></i><b>4.1.2</b> Establishing the cell segmentation model</a></li>
+<li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imnormalise"><i class="fa fa-check"></i><code>imNormalise</code></a></li>
+<li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imautobrighten"><i class="fa fa-check"></i><code>imAutobrighten</code></a></li>
+<li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imlaplacianofgaussian"><i class="fa fa-check"></i><code>imLaplacianOfGaussian</code></a></li>
+<li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imhessiandeterminant"><i class="fa fa-check"></i><code>imHessianDeterminant</code></a></li>
 </ul></li>
-<li class="chapter" data-level="4.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#running-cell-segmentation"><i class="fa fa-check"></i><b>4.2</b> Running cell segmentation</a></li>
-<li class="chapter" data-level="4.3" data-path="cell-segmentation.html"><a href="cell-segmentation.html#running-segmentation-model"><i class="fa fa-check"></i><b>4.3</b> Running segmentation model</a>
-<ul>
-<li class="chapter" data-level="4.3.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#cellpose"><i class="fa fa-check"></i><b>4.3.1</b> <code>cellpose</code></a></li>
-<li class="chapter" data-level="4.3.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#stardist"><i class="fa fa-check"></i><b>4.3.2</b> <code>stardist</code></a></li>
+<li class="chapter" data-level="4.3" data-path="image-processing.html"><a href="image-processing.html#combining-building-blocks"><i class="fa fa-check"></i><b>4.3</b> Combining building blocks</a></li>
+<li class="chapter" data-level="4.4" data-path="image-processing.html"><a href="image-processing.html#feeding-image-processing-pipelines-into-getimagemetrics"><i class="fa fa-check"></i><b>4.4</b> Feeding image processing pipelines into <code>getImageMetrics</code></a></li>
 </ul></li>
-<li class="chapter" data-level="4.4" data-path="cell-segmentation.html"><a href="cell-segmentation.html#saving-cell-masks"><i class="fa fa-check"></i><b>4.4</b> Saving cell masks</a></li>
-</ul></li>
-<li class="chapter" data-level="5" data-path="stitching.html"><a href="stitching.html"><i class="fa fa-check"></i><b>5</b> Stitching</a>
+<li class="chapter" data-level="5" data-path="cell-segmentation.html"><a href="cell-segmentation.html"><i class="fa fa-check"></i><b>5</b> Cell segmentation</a>
 <ul>
-<li class="chapter" data-level="5.1" data-path="stitching.html"><a href="stitching.html#pre-processing-2"><i class="fa fa-check"></i><b>5.1</b> Pre-processing</a></li>
-<li class="chapter" data-level="5.2" data-path="stitching.html"><a href="stitching.html#loading-images-for-stitching"><i class="fa fa-check"></i><b>5.2</b> Loading images for stitching</a></li>
-<li class="chapter" data-level="5.3" data-path="stitching.html"><a href="stitching.html#performing-stitching"><i class="fa fa-check"></i><b>5.3</b> Performing stitching</a></li>
-<li class="chapter" data-level="5.4" data-path="stitching.html"><a href="stitching.html#saving-stitch-vectors"><i class="fa fa-check"></i><b>5.4</b> Saving stitch vectors</a></li>
-</ul></li>
-<li class="chapter" data-level="6" data-path="synthesis.html"><a href="synthesis.html"><i class="fa fa-check"></i><b>6</b> Synthesis</a>
+<li class="chapter" data-level="5.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#pre-processing-2"><i class="fa fa-check"></i><b>5.1</b> Pre-processing</a>
 <ul>
-<li class="chapter" data-level="6.1" data-path="synthesis.html"><a href="synthesis.html#unifying-outputs"><i class="fa fa-check"></i><b>6.1</b> Unifying outputs</a></li>
-<li class="chapter" data-level="6.2" data-path="synthesis.html"><a href="synthesis.html#qc-plotting"><i class="fa fa-check"></i><b>6.2</b> QC plotting</a>
+<li class="chapter" data-level="5.1.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#establishing-parameters-1"><i class="fa fa-check"></i><b>5.1.1</b> Establishing parameters</a></li>
+<li class="chapter" data-level="5.1.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#establishing-the-cell-segmentation-model"><i class="fa fa-check"></i><b>5.1.2</b> Establishing the cell segmentation model</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#running-cell-segmentation"><i class="fa fa-check"></i><b>5.2</b> Running cell segmentation</a></li>
+<li class="chapter" data-level="5.3" data-path="cell-segmentation.html"><a href="cell-segmentation.html#running-segmentation-model"><i class="fa fa-check"></i><b>5.3</b> Running segmentation model</a>
+<ul>
+<li class="chapter" data-level="5.3.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#cellpose"><i class="fa fa-check"></i><b>5.3.1</b> <code>cellpose</code></a></li>
+<li class="chapter" data-level="5.3.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#stardist"><i class="fa fa-check"></i><b>5.3.2</b> <code>stardist</code></a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="cell-segmentation.html"><a href="cell-segmentation.html#saving-cell-masks"><i class="fa fa-check"></i><b>5.4</b> Saving cell masks</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="stitching.html"><a href="stitching.html"><i class="fa fa-check"></i><b>6</b> Stitching</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="stitching.html"><a href="stitching.html#pre-processing-3"><i class="fa fa-check"></i><b>6.1</b> Pre-processing</a></li>
+<li class="chapter" data-level="6.2" data-path="stitching.html"><a href="stitching.html#loading-images-for-stitching"><i class="fa fa-check"></i><b>6.2</b> Loading images for stitching</a></li>
+<li class="chapter" data-level="6.3" data-path="stitching.html"><a href="stitching.html#performing-stitching"><i class="fa fa-check"></i><b>6.3</b> Performing stitching</a></li>
+<li class="chapter" data-level="6.4" data-path="stitching.html"><a href="stitching.html#saving-stitch-vectors"><i class="fa fa-check"></i><b>6.4</b> Saving stitch vectors</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="synthesis.html"><a href="synthesis.html"><i class="fa fa-check"></i><b>7</b> Synthesis</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="synthesis.html"><a href="synthesis.html#unifying-outputs"><i class="fa fa-check"></i><b>7.1</b> Unifying outputs</a></li>
+<li class="chapter" data-level="7.2" data-path="synthesis.html"><a href="synthesis.html#qc-plotting"><i class="fa fa-check"></i><b>7.2</b> QC plotting</a>
 <ul>
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#fpkmcorrelation"><i class="fa fa-check"></i><code>FPKMCorrelation</code></a></li>
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#cosinedistancedistribution"><i class="fa fa-check"></i><code>CosineDistanceDistribution</code></a></li>
@@ -244,9 +258,9 @@ div.csl-indent {
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#fovmetrics"><i class="fa fa-check"></i><code>FOVMetrics</code></a></li>
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#cellmetrics"><i class="fa fa-check"></i><code>CellMetrics</code></a></li>
 </ul></li>
-<li class="chapter" data-level="6.3" data-path="synthesis.html"><a href="synthesis.html#next-steps"><i class="fa fa-check"></i><b>6.3</b> Next steps</a></li>
+<li class="chapter" data-level="7.3" data-path="synthesis.html"><a href="synthesis.html#next-steps"><i class="fa fa-check"></i><b>7.3</b> Next steps</a></li>
 </ul></li>
-<li class="chapter" data-level="7" data-path="troubleshooting.html"><a href="troubleshooting.html"><i class="fa fa-check"></i><b>7</b> Troubleshooting</a>
+<li class="chapter" data-level="8" data-path="troubleshooting.html"><a href="troubleshooting.html"><i class="fa fa-check"></i><b>8</b> Troubleshooting</a>
 <ul>
 <li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#too-few-spots"><i class="fa fa-check"></i>Too few spots</a></li>
 <li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#too-few-cellular-spots"><i class="fa fa-check"></i>Too few cellular spots</a></li>
@@ -273,14 +287,14 @@ div.csl-indent {
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="synthesis" class="section level1 hasAnchor" number="6">
-<h1><span class="header-section-number">Chapter 6</span> Synthesis<a href="synthesis.html#synthesis" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="synthesis" class="section level1 hasAnchor" number="7">
+<h1><span class="header-section-number">Chapter 7</span> Synthesis<a href="synthesis.html#synthesis" class="anchor-section" aria-label="Anchor link to header"></a></h1>
 <p>Synthesis involves the consolidation of disparate outputs and is the final task. This will be the focus of this Chapter.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="synthesis.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(masmr)</span>
 <span id="cb1-2"><a href="synthesis.html#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
 <pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.3.2</code></pre>
-<div id="unifying-outputs" class="section level2 hasAnchor" number="6.1">
-<h2><span class="header-section-number">6.1</span> Unifying outputs<a href="synthesis.html#unifying-outputs" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="unifying-outputs" class="section level2 hasAnchor" number="7.1">
+<h2><span class="header-section-number">7.1</span> Unifying outputs<a href="synthesis.html#unifying-outputs" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>As a consequence of running scripts from preceding chapters, we expect three subdirectories in the user-specified output directory: one for spotcalling outputs (<code>IM</code>), one for cell segmentation (<code>DAPI</code>), and one for stitching (<code>STITCH</code>). The outputs from these three subdirectories will be combined, and output into a final <code>OUT</code> subdirectory.</p>
 <p>For illustrative purposes, we have processed just nine FOVs below. Also note the <code>removeRedundancy</code> parameter currently set to <code>FALSE</code> – this will be explained later.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="synthesis.html#cb3-1" aria-hidden="true" tabindex="-1"></a>data_dir <span class="ot">=</span> <span class="st">&#39;C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/&#39;</span></span>
@@ -628,8 +642,8 @@ div.csl-indent {
 <span id="cb27-10"><a href="synthesis.html#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span><span class="fu">log10</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">median</span>(<span class="fu">colSums</span>(cellExp))), <span class="at">col=</span><span class="st">&#39;red&#39;</span>)</span></code></pre></div>
 <p><img src="_main_files/figure-html/syn-synproper-cellwise-1.png" width="672" /></p>
 </div>
-<div id="qc-plotting" class="section level2 hasAnchor" number="6.2">
-<h2><span class="header-section-number">6.2</span> QC plotting<a href="synthesis.html#qc-plotting" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="qc-plotting" class="section level2 hasAnchor" number="7.2">
+<h2><span class="header-section-number">7.2</span> QC plotting<a href="synthesis.html#qc-plotting" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>We have provided a <code>plotQC</code> function that returns several default QC plots as <code>.png</code> files. This function depends on parameters input during <code>establishParams</code>: e.g. if <code>fpkmFileName</code> is missing, then FPKM correlations will not be plotted. Additionally, if users ran <code>prepareCodebook</code> with <code>exhaustiveBlanks</code>, the newly added blanks will be flagged. [Users wishing to ignore these new blanks can set <code>includeNewBlanks</code> in <code>plotQC</code> to <code>FALSE</code> (see below).]</p>
 <div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="synthesis.html#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotQC</span>( <span class="at">includeNewBlanks=</span>T )</span></code></pre></div>
 <pre><code>## FPKMCorrelation...</code></pre>
@@ -699,8 +713,8 @@ div.csl-indent {
 <p><img src="images/CellMetrics_nCounts.png" width="100%" style="display: block; margin: auto;" /></p>
 </div>
 </div>
-<div id="next-steps" class="section level2 hasAnchor" number="6.3">
-<h2><span class="header-section-number">6.3</span> Next steps<a href="synthesis.html#next-steps" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="next-steps" class="section level2 hasAnchor" number="7.3">
+<h2><span class="header-section-number">7.3</span> Next steps<a href="synthesis.html#next-steps" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Yay! Your MERFISH pipeline is now done. If satisfied with the results, downstream analysis can be done on <code>OUT_CELLEXPRESSION.csv.gz</code> matrix – which contains cell-wise gene expression – using standard single cell RNA-sequencing pipelines. [More advanced bioinformaticians may wish to perform custom analysis to address e.g. lower counts per cell in spatial technologies (that violates assumptions of some normalisation algorithms used in scRNA-seq).]</p>
 <p>If unsatisfied, users can go back and re-process their data with tweaked parameters. Suggestions for troubleshooting are provided in the next chapter.</p>
 
@@ -749,7 +763,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/USERNAME/REPO/edit/BRANCH/05-synthesising.Rmd",
+"link": "https://github.com/USERNAME/REPO/edit/BRANCH/06-synthesising.Rmd",
 "text": "Edit"
 },
 "history": {

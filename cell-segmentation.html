@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 4 Cell segmentation | Introduction to the masmr project</title>
+  <title>Chapter 5 Cell segmentation | Introduction to the masmr project</title>
   <meta name="description" content="This is a quick introduction to building piplines for MERFISH decoding using our masmr package." />
   <meta name="generator" content="bookdown 0.42 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 4 Cell segmentation | Introduction to the masmr project" />
+  <meta property="og:title" content="Chapter 5 Cell segmentation | Introduction to the masmr project" />
   <meta property="og:type" content="book" />
   <meta property="og:image" content="/./images/masmr.png" />
   <meta property="og:description" content="This is a quick introduction to building piplines for MERFISH decoding using our masmr package." />
   <meta name="github-repo" content="rstudio/bookdown-demo" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 4 Cell segmentation | Introduction to the masmr project" />
+  <meta name="twitter:title" content="Chapter 5 Cell segmentation | Introduction to the masmr project" />
   
   <meta name="twitter:description" content="This is a quick introduction to building piplines for MERFISH decoding using our masmr package." />
   <meta name="twitter:image" content="/./images/masmr.png" />
@@ -23,14 +23,14 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-02-22" />
+<meta name="date" content="2025-02-26" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="spotcalling.html"/>
+<link rel="prev" href="image-processing.html"/>
 <link rel="next" href="stitching.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
@@ -168,13 +168,14 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="2" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>2</b> Introduction</a>
 <ul>
-<li class="chapter" data-level="2.1" data-path="introduction.html"><a href="introduction.html#background"><i class="fa fa-check"></i><b>2.1</b> Background</a></li>
-<li class="chapter" data-level="2.2" data-path="introduction.html"><a href="introduction.html#quick-start-scripts"><i class="fa fa-check"></i><b>2.2</b> Quick start scripts</a>
+<li class="chapter" data-level="2.1" data-path="introduction.html"><a href="introduction.html#why-do-you-need-masmr"><i class="fa fa-check"></i><b>2.1</b> Why do you need <code>masmr</code>?</a></li>
+<li class="chapter" data-level="2.2" data-path="introduction.html"><a href="introduction.html#background"><i class="fa fa-check"></i><b>2.2</b> Background</a></li>
+<li class="chapter" data-level="2.3" data-path="introduction.html"><a href="introduction.html#quick-start-scripts"><i class="fa fa-check"></i><b>2.3</b> Quick start scripts</a>
 <ul>
-<li class="chapter" data-level="2.2.1" data-path="introduction.html"><a href="introduction.html#quick-start-spotcalling"><i class="fa fa-check"></i><b>2.2.1</b> Quick start: Spotcalling</a></li>
-<li class="chapter" data-level="2.2.2" data-path="introduction.html"><a href="introduction.html#quick-start-cell-segmentation"><i class="fa fa-check"></i><b>2.2.2</b> Quick start: Cell segmentation</a></li>
-<li class="chapter" data-level="2.2.3" data-path="introduction.html"><a href="introduction.html#quick-start-stitching"><i class="fa fa-check"></i><b>2.2.3</b> Quick start: Stitching</a></li>
-<li class="chapter" data-level="2.2.4" data-path="introduction.html"><a href="introduction.html#quick-start-synthesis"><i class="fa fa-check"></i><b>2.2.4</b> Quick start: Synthesis</a></li>
+<li class="chapter" data-level="2.3.1" data-path="introduction.html"><a href="introduction.html#quick-start-spotcalling"><i class="fa fa-check"></i><b>2.3.1</b> Quick start: Spotcalling</a></li>
+<li class="chapter" data-level="2.3.2" data-path="introduction.html"><a href="introduction.html#quick-start-cell-segmentation"><i class="fa fa-check"></i><b>2.3.2</b> Quick start: Cell segmentation</a></li>
+<li class="chapter" data-level="2.3.3" data-path="introduction.html"><a href="introduction.html#quick-start-stitching"><i class="fa fa-check"></i><b>2.3.3</b> Quick start: Stitching</a></li>
+<li class="chapter" data-level="2.3.4" data-path="introduction.html"><a href="introduction.html#quick-start-synthesis"><i class="fa fa-check"></i><b>2.3.4</b> Quick start: Synthesis</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="spotcalling.html"><a href="spotcalling.html"><i class="fa fa-check"></i><b>3</b> Spotcalling</a>
@@ -186,54 +187,67 @@ div.csl-indent {
 <li class="chapter" data-level="3.1.3" data-path="spotcalling.html"><a href="spotcalling.html#preparing-the-codebook"><i class="fa fa-check"></i><b>3.1.3</b> Preparing the codebook</a></li>
 <li class="chapter" data-level="3.1.4" data-path="spotcalling.html"><a href="spotcalling.html#house-keeping"><i class="fa fa-check"></i><b>3.1.4</b> House-keeping</a></li>
 </ul></li>
-<li class="chapter" data-level="3.2" data-path="spotcalling.html"><a href="spotcalling.html#handling-images"><i class="fa fa-check"></i><b>3.2</b> Handling images</a>
+<li class="chapter" data-level="3.2" data-path="spotcalling.html"><a href="spotcalling.html#preparing-to-loop-through-images"><i class="fa fa-check"></i><b>3.2</b> Preparing to loop through images</a>
 <ul>
 <li class="chapter" data-level="3.2.1" data-path="spotcalling.html"><a href="spotcalling.html#image-reading"><i class="fa fa-check"></i><b>3.2.1</b> Image reading</a></li>
 <li class="chapter" data-level="3.2.2" data-path="spotcalling.html"><a href="spotcalling.html#establishing-global-image-parameters"><i class="fa fa-check"></i><b>3.2.2</b> Establishing global image parameters</a></li>
 </ul></li>
 <li class="chapter" data-level="3.3" data-path="spotcalling.html"><a href="spotcalling.html#looping-through-images"><i class="fa fa-check"></i><b>3.3</b> Looping through images</a>
 <ul>
-<li class="chapter" data-level="3.3.1" data-path="spotcalling.html"><a href="spotcalling.html#image-processing-building-blocks"><i class="fa fa-check"></i><b>3.3.1</b> Image processing: building blocks</a></li>
-<li class="chapter" data-level="3.3.2" data-path="spotcalling.html"><a href="spotcalling.html#image-processing-combining-functions"><i class="fa fa-check"></i><b>3.3.2</b> Image processing: combining functions</a></li>
-<li class="chapter" data-level="3.3.3" data-path="spotcalling.html"><a href="spotcalling.html#image-registration"><i class="fa fa-check"></i><b>3.3.3</b> Image registration</a></li>
+<li class="chapter" data-level="3.3.1" data-path="spotcalling.html"><a href="spotcalling.html#default-image-processing"><i class="fa fa-check"></i><b>3.3.1</b> Default image processing</a></li>
+<li class="chapter" data-level="3.3.2" data-path="spotcalling.html"><a href="spotcalling.html#image-registration"><i class="fa fa-check"></i><b>3.3.2</b> Image registration</a></li>
 </ul></li>
 <li class="chapter" data-level="3.4" data-path="spotcalling.html"><a href="spotcalling.html#working-with-pixel-wise-metrics"><i class="fa fa-check"></i><b>3.4</b> Working with pixel-wise metrics</a>
 <ul>
 <li class="chapter" data-level="3.4.1" data-path="spotcalling.html"><a href="spotcalling.html#moving-from-image-lists-to-a-dataframe"><i class="fa fa-check"></i><b>3.4.1</b> Moving from image lists to a dataframe</a></li>
 <li class="chapter" data-level="3.4.2" data-path="spotcalling.html"><a href="spotcalling.html#decoding"><i class="fa fa-check"></i><b>3.4.2</b> Decoding</a></li>
 <li class="chapter" data-level="3.4.3" data-path="spotcalling.html"><a href="spotcalling.html#annotating-blanks"><i class="fa fa-check"></i><b>3.4.3</b> Annotating blanks</a></li>
-<li class="chapter" data-level="3.4.4" data-path="spotcalling.html"><a href="spotcalling.html#binarising-continuous-values"><i class="fa fa-check"></i><b>3.4.4</b> Binarising continuous values</a></li>
-<li class="chapter" data-level="3.4.5" data-path="spotcalling.html"><a href="spotcalling.html#obtaining-other-qc-metrics"><i class="fa fa-check"></i><b>3.4.5</b> Obtaining other QC metrics</a></li>
-<li class="chapter" data-level="3.4.6" data-path="spotcalling.html"><a href="spotcalling.html#clustering"><i class="fa fa-check"></i><b>3.4.6</b> Clustering</a></li>
+<li class="chapter" data-level="3.4.4" data-path="spotcalling.html"><a href="spotcalling.html#filtering-and-evaluating-your-choice-of-filter"><i class="fa fa-check"></i><b>3.4.4</b> Filtering and evaluating your choice of filter</a></li>
+<li class="chapter" data-level="3.4.5" data-path="spotcalling.html"><a href="spotcalling.html#binarising-continuous-values"><i class="fa fa-check"></i><b>3.4.5</b> Binarising continuous values</a></li>
+<li class="chapter" data-level="3.4.6" data-path="spotcalling.html"><a href="spotcalling.html#obtaining-other-qc-metrics"><i class="fa fa-check"></i><b>3.4.6</b> Obtaining other QC metrics</a></li>
+<li class="chapter" data-level="3.4.7" data-path="spotcalling.html"><a href="spotcalling.html#clustering"><i class="fa fa-check"></i><b>3.4.7</b> Clustering</a></li>
 </ul></li>
 <li class="chapter" data-level="3.5" data-path="spotcalling.html"><a href="spotcalling.html#saving-spot-calls"><i class="fa fa-check"></i><b>3.5</b> Saving spot calls</a></li>
 </ul></li>
-<li class="chapter" data-level="4" data-path="cell-segmentation.html"><a href="cell-segmentation.html"><i class="fa fa-check"></i><b>4</b> Cell segmentation</a>
+<li class="chapter" data-level="4" data-path="image-processing.html"><a href="image-processing.html"><i class="fa fa-check"></i><b>4</b> Image processing</a>
 <ul>
-<li class="chapter" data-level="4.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#pre-processing-1"><i class="fa fa-check"></i><b>4.1</b> Pre-processing</a>
+<li class="chapter" data-level="4.1" data-path="image-processing.html"><a href="image-processing.html#pre-processing-1"><i class="fa fa-check"></i><b>4.1</b> Pre-processing</a></li>
+<li class="chapter" data-level="4.2" data-path="image-processing.html"><a href="image-processing.html#building-blocks-of-image-processing"><i class="fa fa-check"></i><b>4.2</b> Building blocks of image processing</a>
 <ul>
-<li class="chapter" data-level="4.1.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#establishing-parameters-1"><i class="fa fa-check"></i><b>4.1.1</b> Establishing parameters</a></li>
-<li class="chapter" data-level="4.1.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#establishing-the-cell-segmentation-model"><i class="fa fa-check"></i><b>4.1.2</b> Establishing the cell segmentation model</a></li>
+<li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imnormalise"><i class="fa fa-check"></i><code>imNormalise</code></a></li>
+<li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imautobrighten"><i class="fa fa-check"></i><code>imAutobrighten</code></a></li>
+<li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imlaplacianofgaussian"><i class="fa fa-check"></i><code>imLaplacianOfGaussian</code></a></li>
+<li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imhessiandeterminant"><i class="fa fa-check"></i><code>imHessianDeterminant</code></a></li>
 </ul></li>
-<li class="chapter" data-level="4.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#running-cell-segmentation"><i class="fa fa-check"></i><b>4.2</b> Running cell segmentation</a></li>
-<li class="chapter" data-level="4.3" data-path="cell-segmentation.html"><a href="cell-segmentation.html#running-segmentation-model"><i class="fa fa-check"></i><b>4.3</b> Running segmentation model</a>
-<ul>
-<li class="chapter" data-level="4.3.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#cellpose"><i class="fa fa-check"></i><b>4.3.1</b> <code>cellpose</code></a></li>
-<li class="chapter" data-level="4.3.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#stardist"><i class="fa fa-check"></i><b>4.3.2</b> <code>stardist</code></a></li>
+<li class="chapter" data-level="4.3" data-path="image-processing.html"><a href="image-processing.html#combining-building-blocks"><i class="fa fa-check"></i><b>4.3</b> Combining building blocks</a></li>
+<li class="chapter" data-level="4.4" data-path="image-processing.html"><a href="image-processing.html#feeding-image-processing-pipelines-into-getimagemetrics"><i class="fa fa-check"></i><b>4.4</b> Feeding image processing pipelines into <code>getImageMetrics</code></a></li>
 </ul></li>
-<li class="chapter" data-level="4.4" data-path="cell-segmentation.html"><a href="cell-segmentation.html#saving-cell-masks"><i class="fa fa-check"></i><b>4.4</b> Saving cell masks</a></li>
-</ul></li>
-<li class="chapter" data-level="5" data-path="stitching.html"><a href="stitching.html"><i class="fa fa-check"></i><b>5</b> Stitching</a>
+<li class="chapter" data-level="5" data-path="cell-segmentation.html"><a href="cell-segmentation.html"><i class="fa fa-check"></i><b>5</b> Cell segmentation</a>
 <ul>
-<li class="chapter" data-level="5.1" data-path="stitching.html"><a href="stitching.html#pre-processing-2"><i class="fa fa-check"></i><b>5.1</b> Pre-processing</a></li>
-<li class="chapter" data-level="5.2" data-path="stitching.html"><a href="stitching.html#loading-images-for-stitching"><i class="fa fa-check"></i><b>5.2</b> Loading images for stitching</a></li>
-<li class="chapter" data-level="5.3" data-path="stitching.html"><a href="stitching.html#performing-stitching"><i class="fa fa-check"></i><b>5.3</b> Performing stitching</a></li>
-<li class="chapter" data-level="5.4" data-path="stitching.html"><a href="stitching.html#saving-stitch-vectors"><i class="fa fa-check"></i><b>5.4</b> Saving stitch vectors</a></li>
-</ul></li>
-<li class="chapter" data-level="6" data-path="synthesis.html"><a href="synthesis.html"><i class="fa fa-check"></i><b>6</b> Synthesis</a>
+<li class="chapter" data-level="5.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#pre-processing-2"><i class="fa fa-check"></i><b>5.1</b> Pre-processing</a>
 <ul>
-<li class="chapter" data-level="6.1" data-path="synthesis.html"><a href="synthesis.html#unifying-outputs"><i class="fa fa-check"></i><b>6.1</b> Unifying outputs</a></li>
-<li class="chapter" data-level="6.2" data-path="synthesis.html"><a href="synthesis.html#qc-plotting"><i class="fa fa-check"></i><b>6.2</b> QC plotting</a>
+<li class="chapter" data-level="5.1.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#establishing-parameters-1"><i class="fa fa-check"></i><b>5.1.1</b> Establishing parameters</a></li>
+<li class="chapter" data-level="5.1.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#establishing-the-cell-segmentation-model"><i class="fa fa-check"></i><b>5.1.2</b> Establishing the cell segmentation model</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#running-cell-segmentation"><i class="fa fa-check"></i><b>5.2</b> Running cell segmentation</a></li>
+<li class="chapter" data-level="5.3" data-path="cell-segmentation.html"><a href="cell-segmentation.html#running-segmentation-model"><i class="fa fa-check"></i><b>5.3</b> Running segmentation model</a>
+<ul>
+<li class="chapter" data-level="5.3.1" data-path="cell-segmentation.html"><a href="cell-segmentation.html#cellpose"><i class="fa fa-check"></i><b>5.3.1</b> <code>cellpose</code></a></li>
+<li class="chapter" data-level="5.3.2" data-path="cell-segmentation.html"><a href="cell-segmentation.html#stardist"><i class="fa fa-check"></i><b>5.3.2</b> <code>stardist</code></a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="cell-segmentation.html"><a href="cell-segmentation.html#saving-cell-masks"><i class="fa fa-check"></i><b>5.4</b> Saving cell masks</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="stitching.html"><a href="stitching.html"><i class="fa fa-check"></i><b>6</b> Stitching</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="stitching.html"><a href="stitching.html#pre-processing-3"><i class="fa fa-check"></i><b>6.1</b> Pre-processing</a></li>
+<li class="chapter" data-level="6.2" data-path="stitching.html"><a href="stitching.html#loading-images-for-stitching"><i class="fa fa-check"></i><b>6.2</b> Loading images for stitching</a></li>
+<li class="chapter" data-level="6.3" data-path="stitching.html"><a href="stitching.html#performing-stitching"><i class="fa fa-check"></i><b>6.3</b> Performing stitching</a></li>
+<li class="chapter" data-level="6.4" data-path="stitching.html"><a href="stitching.html#saving-stitch-vectors"><i class="fa fa-check"></i><b>6.4</b> Saving stitch vectors</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="synthesis.html"><a href="synthesis.html"><i class="fa fa-check"></i><b>7</b> Synthesis</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="synthesis.html"><a href="synthesis.html#unifying-outputs"><i class="fa fa-check"></i><b>7.1</b> Unifying outputs</a></li>
+<li class="chapter" data-level="7.2" data-path="synthesis.html"><a href="synthesis.html#qc-plotting"><i class="fa fa-check"></i><b>7.2</b> QC plotting</a>
 <ul>
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#fpkmcorrelation"><i class="fa fa-check"></i><code>FPKMCorrelation</code></a></li>
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#cosinedistancedistribution"><i class="fa fa-check"></i><code>CosineDistanceDistribution</code></a></li>
@@ -244,9 +258,9 @@ div.csl-indent {
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#fovmetrics"><i class="fa fa-check"></i><code>FOVMetrics</code></a></li>
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#cellmetrics"><i class="fa fa-check"></i><code>CellMetrics</code></a></li>
 </ul></li>
-<li class="chapter" data-level="6.3" data-path="synthesis.html"><a href="synthesis.html#next-steps"><i class="fa fa-check"></i><b>6.3</b> Next steps</a></li>
+<li class="chapter" data-level="7.3" data-path="synthesis.html"><a href="synthesis.html#next-steps"><i class="fa fa-check"></i><b>7.3</b> Next steps</a></li>
 </ul></li>
-<li class="chapter" data-level="7" data-path="troubleshooting.html"><a href="troubleshooting.html"><i class="fa fa-check"></i><b>7</b> Troubleshooting</a>
+<li class="chapter" data-level="8" data-path="troubleshooting.html"><a href="troubleshooting.html"><i class="fa fa-check"></i><b>8</b> Troubleshooting</a>
 <ul>
 <li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#too-few-spots"><i class="fa fa-check"></i>Too few spots</a></li>
 <li class="chapter" data-level="" data-path="troubleshooting.html"><a href="troubleshooting.html#too-few-cellular-spots"><i class="fa fa-check"></i>Too few cellular spots</a></li>
@@ -273,17 +287,17 @@ div.csl-indent {
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="cell-segmentation" class="section level1 hasAnchor" number="4">
-<h1><span class="header-section-number">Chapter 4</span> Cell segmentation<a href="cell-segmentation.html#cell-segmentation" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>Cell / nuclei segmentation is the task of identifying cells / nuclei in an appropriate image (we will be referring to cell and nuclei segmentation interchangeably in the subsequent chapter). There are numerous tools available for this purpose, but we will be covering two Python-based models specifically: <code>cellpose</code> <span class="citation">(<a href="#ref-stringer2021cellpose" role="doc-biblioref">Stringer et al. 2021</a>)</span> and <code>stardist</code> <span class="citation">(<a href="#ref-schmidt2018cell" role="doc-biblioref">Schmidt et al. 2018</a>; <a href="#ref-weigert2022nuclei" role="doc-biblioref">Weigert and Schmidt 2022</a>)</span>.</p>
+<div id="cell-segmentation" class="section level1 hasAnchor" number="5">
+<h1><span class="header-section-number">Chapter 5</span> Cell segmentation<a href="cell-segmentation.html#cell-segmentation" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Cell / nuclei segmentation is the task of identifying cells / nuclei in an appropriate image (we will be referring to cell and nuclei segmentation interchangeably here). There are numerous tools available for this purpose, but we will be covering two Python-based models specifically: <code>cellpose</code> <span class="citation">(<a href="#ref-stringer2021cellpose" role="doc-biblioref">Stringer et al. 2021</a>)</span> and <code>stardist</code> <span class="citation">(<a href="#ref-schmidt2018cell" role="doc-biblioref">Schmidt et al. 2018</a>; <a href="#ref-weigert2022nuclei" role="doc-biblioref">Weigert and Schmidt 2022</a>)</span>.</p>
 <p>As cell segmentation is performed on DAPI images, it can be performed in parallel with spotcalling.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="cell-segmentation.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(masmr)</span>
 <span id="cb1-2"><a href="cell-segmentation.html#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
 <pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.3.2</code></pre>
-<div id="pre-processing-1" class="section level2 hasAnchor" number="4.1">
-<h2><span class="header-section-number">4.1</span> Pre-processing<a href="cell-segmentation.html#pre-processing-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div id="establishing-parameters-1" class="section level3 hasAnchor" number="4.1.1">
-<h3><span class="header-section-number">4.1.1</span> Establishing parameters<a href="cell-segmentation.html#establishing-parameters-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="pre-processing-2" class="section level2 hasAnchor" number="5.1">
+<h2><span class="header-section-number">5.1</span> Pre-processing<a href="cell-segmentation.html#pre-processing-2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="establishing-parameters-1" class="section level3 hasAnchor" number="5.1.1">
+<h3><span class="header-section-number">5.1.1</span> Establishing parameters<a href="cell-segmentation.html#establishing-parameters-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Similar to spotcalling, we first need to establish some parameters. The same code used for spotcalling can be repeated here.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="cell-segmentation.html#cb3-1" aria-hidden="true" tabindex="-1"></a>data_dir <span class="ot">=</span> <span class="st">&#39;C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/&#39;</span></span>
 <span id="cb3-2"><a href="cell-segmentation.html#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">establishParams</span>(</span>
@@ -565,8 +579,8 @@ DAPI_1_dapi
 </tbody>
 </table>
 </div>
-<div id="establishing-the-cell-segmentation-model" class="section level3 hasAnchor" number="4.1.2">
-<h3><span class="header-section-number">4.1.2</span> Establishing the cell segmentation model<a href="cell-segmentation.html#establishing-the-cell-segmentation-model" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="establishing-the-cell-segmentation-model" class="section level3 hasAnchor" number="5.1.2">
+<h3><span class="header-section-number">5.1.2</span> Establishing the cell segmentation model<a href="cell-segmentation.html#establishing-the-cell-segmentation-model" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Unique to the cell segmentation script, users must load their desired cell segmentation model into the environment. This is accomplished with the <code>establishCellSegModel</code> function, which returns a new environment object called <code>cellSeg</code>.</p>
 <p>If no other parameters are specified, the <code>nuclei</code> model in <code>cellpose</code> is loaded. [We will showcase loading different models later in this chapter.] Additionally, GPU acceleration is turned off as default – users able to access their computer’s GPU may turn this on for time saving.</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="cell-segmentation.html#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">establishCellSegModel</span>()</span></code></pre></div>
@@ -579,14 +593,14 @@ DAPI_1_dapi
 <pre><code>## [1] &quot;CELLPOSE&quot;</code></pre>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="cell-segmentation.html#cb23-1" aria-hidden="true" tabindex="-1"></a>cellSeg<span class="sc">$</span>CELLPOSE</span></code></pre></div>
 <pre><code>## $model
-## &lt;cellpose.models.CellposeModel object at 0x0000018D8FE5DE80&gt;
+## &lt;cellpose.models.CellposeModel object at 0x0000019FEF95CE80&gt;
 ## 
 ## $outputs
 ## [1] &quot;masks&quot;  &quot;flows&quot;  &quot;styles&quot; &quot;diams&quot;</code></pre>
 </div>
 </div>
-<div id="running-cell-segmentation" class="section level2 hasAnchor" number="4.2">
-<h2><span class="header-section-number">4.2</span> Running cell segmentation<a href="cell-segmentation.html#running-cell-segmentation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="running-cell-segmentation" class="section level2 hasAnchor" number="5.2">
+<h2><span class="header-section-number">5.2</span> Running cell segmentation<a href="cell-segmentation.html#running-cell-segmentation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>For memory management, it is recommended that FOVs are processed as individual tiles. Below, we read in a specific FOV (and as recommended, save the current FOV in <code>params$current_fov</code>). We can use <code>readImage</code> for a specific file, or – if we know which FOV we want – with <code>readImageList</code>.</p>
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="cell-segmentation.html#cb25-1" aria-hidden="true" tabindex="-1"></a>params<span class="sc">$</span>current_fov <span class="ot">&lt;-</span> params<span class="sc">$</span>fov_names[<span class="dv">38</span>]</span>
 <span id="cb25-2"><a href="cell-segmentation.html#cb25-2" aria-hidden="true" tabindex="-1"></a>im <span class="ot">&lt;-</span> <span class="fu">readImageList</span>( params<span class="sc">$</span>current_fov )[[<span class="dv">1</span>]] <span class="co">#List of 1</span></span></code></pre></div>
@@ -596,11 +610,11 @@ DAPI_1_dapi
 <div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="cell-segmentation.html#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>(im))</span></code></pre></div>
 <p><img src="_main_files/figure-html/cellseg-readimagelist-1.png" width="672" /></p>
 </div>
-<div id="running-segmentation-model" class="section level2 hasAnchor" number="4.3">
-<h2><span class="header-section-number">4.3</span> Running segmentation model<a href="cell-segmentation.html#running-segmentation-model" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="running-segmentation-model" class="section level2 hasAnchor" number="5.3">
+<h2><span class="header-section-number">5.3</span> Running segmentation model<a href="cell-segmentation.html#running-segmentation-model" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Once the necessary parameters have been established, we are ready to run our cell segmentation model with the <code>runCellSegModel</code> function. Further image processing of DAPI images generally is not necessary as these models tend to have in-built image processing functions. However, we have found that modifying image parameters can influence cell segmentation; a more detailed discussion is provided below.</p>
-<div id="cellpose" class="section level3 hasAnchor" number="4.3.1">
-<h3><span class="header-section-number">4.3.1</span> <code>cellpose</code><a href="cell-segmentation.html#cellpose" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="cellpose" class="section level3 hasAnchor" number="5.3.1">
+<h3><span class="header-section-number">5.3.1</span> <code>cellpose</code><a href="cell-segmentation.html#cellpose" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p><code>cellpose</code> is our default choice owing to it being applicable to both nuclei and cellular segmentation. It is a deep-learning based segmentation model trained on a variety of image types including DAPI images alone (<code>nuclei</code>), and multi-channel images with both nuclei and cell boundary stains (<code>cyto</code>, <code>cyto2</code>, and <code>cyto3</code>).</p>
 <p>An example of how to run the model within <code>masmr</code> is shown below. [As default, only the <code>mask</code> output is returned; this can be turned off by setting <code>masksOnly</code> to <code>FALSE</code>.]</p>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="cell-segmentation.html#cb29-1" aria-hidden="true" tabindex="-1"></a>cellMask <span class="ot">&lt;-</span> <span class="fu">runCellSegModel</span>(im, <span class="at">masksOnly =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
@@ -640,8 +654,8 @@ DAPI_1_dapi
 <span id="cb34-13"><a href="cell-segmentation.html#cb34-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;none&#39;</span>)</span></code></pre></div>
 <p><img src="_main_files/figure-html/cellseg-cellpose-alteredparams-1.png" width="672" /></p>
 </div>
-<div id="image-processing" class="section level4 unnumbered hasAnchor">
-<h4>Image processing<a href="cell-segmentation.html#image-processing" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div id="image-processing-1" class="section level4 unnumbered hasAnchor">
+<h4>Image processing<a href="cell-segmentation.html#image-processing-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <p>For some models, altering the intensity values (e.g. by brightening) can influence model performance. For <code>cellpose</code>, the model is generally robust to additional image processing. [Compare to <code>stardist</code> below.]</p>
 <div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="cell-segmentation.html#cb35-1" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> im<span class="sc">^</span><span class="fl">0.5</span></span>
 <span id="cb35-2"><a href="cell-segmentation.html#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
@@ -697,8 +711,8 @@ DAPI_1_dapi
 <p><img src="_main_files/figure-html/cellseg-cellpose-retrained-1.png" width="672" /></p>
 </div>
 </div>
-<div id="stardist" class="section level3 hasAnchor" number="4.3.2">
-<h3><span class="header-section-number">4.3.2</span> <code>stardist</code><a href="cell-segmentation.html#stardist" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="stardist" class="section level3 hasAnchor" number="5.3.2">
+<h3><span class="header-section-number">5.3.2</span> <code>stardist</code><a href="cell-segmentation.html#stardist" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>An alternative for nuclei segmentation is to use <code>stardist</code>: a deep-learning segmentation model that relies on star-convex polygons. The model has been trained on DAPI images (<code>2D_versatile_fluo</code>), and H&amp;E stains (<code>2D_versatile_he</code>). It is typically faster than <code>cellpose</code>, allowing for looping through multiple hyperparameters – should users be interested.</p>
 <div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="cell-segmentation.html#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">establishCellSegModel</span>( <span class="st">&#39;stardist&#39;</span> )</span></code></pre></div>
 <pre><code>## 
@@ -850,8 +864,8 @@ DAPI_1_dapi
 <p><img src="_main_files/figure-html/cellseg-stardist-consolidaten2-1.png" width="672" /></p>
 </div>
 </div>
-<div id="saving-cell-masks" class="section level2 hasAnchor" number="4.4">
-<h2><span class="header-section-number">4.4</span> Saving cell masks<a href="cell-segmentation.html#saving-cell-masks" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="saving-cell-masks" class="section level2 hasAnchor" number="5.4">
+<h2><span class="header-section-number">5.4</span> Saving cell masks<a href="cell-segmentation.html#saving-cell-masks" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>If users are satisfied with model performance, they can use <code>saveCellSegMasks</code> to save masks as a <code>.csv.gz</code> file. Additionally, it is recommended that users save the DAPI image used for cell segmentation. As default, the last image to be processed is stored under <code>params$cell_seg_image</code>, and will be saved if no other images are specified for <code>saveCellSegMasks</code>.</p>
 <div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="cell-segmentation.html#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
 <span id="cb82-2"><a href="cell-segmentation.html#cb82-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(im), <span class="at">main =</span> <span class="st">&#39;Original image&#39;</span> )</span>
@@ -885,7 +899,7 @@ Weigert, Martin, and Uwe Schmidt. 2022. <span>“Nuclei Instance Segmentation an
           </div>
         </div>
       </div>
-<a href="spotcalling.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="image-processing.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 <a href="stitching.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
@@ -917,7 +931,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/USERNAME/REPO/edit/BRANCH/03-segmenting.Rmd",
+"link": "https://github.com/USERNAME/REPO/edit/BRANCH/04-segmenting.Rmd",
 "text": "Edit"
 },
 "history": {
