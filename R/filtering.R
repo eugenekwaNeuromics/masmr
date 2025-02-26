@@ -35,6 +35,22 @@ spotcall_troubleshootPlots <- function(
       decodeMetric <- names(imMetrics)[1]
     }
     imList <- get(decodeMetric, envir=imMetrics)
+    if(is.null(imList)){
+      existingObjects <- names(imMetrics)
+      existingObjects <- existingObjects[!(existingObjects %in% decodeMetric)]
+      replaceName = NA
+      for( i in 1:length(existingObjects) ){
+        if( is.null(imList) ){
+          imList <- get(existingObjects[i], envir=imMetrics)
+          replaceName = existingObjects[i]
+        }
+      }
+      if( is.null(imList) | is.na(replaceName) ){
+        stop('No valid object found in imMetrics to reference!')
+      }
+      warning( paste0('Unable to find valid ', decodeMetric, ': replacing with ', replaceName, '...'))
+      decodeMetric <- replaceName
+    }
   }
   shifts <- params$shifts
   if(is.null(shifts)){
