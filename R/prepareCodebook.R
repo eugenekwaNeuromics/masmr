@@ -1,5 +1,6 @@
 ## This script contains functions for preparing the codebook.
 
+require(viridis)
 require(data.table)
 
 prepareCodebook <- function(
@@ -92,5 +93,7 @@ prepareCodebook <- function(
   params$ordered_codebook <<- codebook
   params$capture_order <<- colnames(codebook)
   params$isblank <<- grepl('^blank-', tolower(rownames(codebook)))
+  genePalette <- setNames( viridis::turbo(nrow(codebook), alpha = 1), rownames(codebook) )
+  params$genePalette <<- genePalette
   message(paste0('\nCodebook has ', sum(params$isblank), ' blanks and ', sum(!params$isblank), ' genes...' ))
 }
