@@ -129,17 +129,20 @@ imLowPass <- function(
 
   background <- imNormalise(im, ...)==0
   imblur <- array( imager::isoblur(suppressWarnings(imager::as.cimg(im)), smallBlur), dim=dim(im) )
-  lowthresh <- conservativeMean( imblur[background & (imblur>0)], ... )
-  hithresh <- conservativeMean( imblur[!background & (imblur > lowthresh)], ... )
-  if( !is.na(lowthresh) & !is.na(hithresh) ){
+  lowthresh <- median( imblur[background] )
+  hithresh <- median( imblur[!background & (imblur > lowthresh)] )
+  
+  if( !( (lowthresh>0) & (hithresh<1) & (lowthresh<hithresh) ) ){
     norm <- imAutoBrighten( imblur, floorVal = lowthresh, ceilVal = hithresh )
   }else{
     warning( paste0(
-      'Unable to autobrighten because of invalid lowthresh (', lowthresh, 
-      ') or hithresh (', hithresh, ')...Skipping...' )
-    )
+      'Skipping imAutoBrighten because of invalid floorVal (', lowthresh, 
+      ') and/or ceilVal (', hithresh, ')...'
+    ))
+    norm <- imblur
   }
   norm <- imNormalise(norm)
+  
   return(norm)
 }
 
