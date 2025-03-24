@@ -129,8 +129,8 @@ imLowPass <- function(
 
   background <- imNormalise(im, ...)==0
   imblur <- array( imager::isoblur(suppressWarnings(imager::as.cimg(im)), smallBlur), dim=dim(im) )
-  lowthresh <- median( imblur[background] )
-  hithresh <- median( imblur[!background & (imblur > lowthresh)] )
+  lowthresh <- mean( imblur[background] )
+  hithresh <- mean( imblur[!background & (imblur > lowthresh)] )
   norm <- imAutoBrighten( imblur, floorVal = lowthresh, ceilVal = hithresh )
   norm <- imNormalise(norm)
   return(norm)
@@ -225,7 +225,7 @@ imForMask <- function(
 
   # Cap between low and high values
   norm <- imNormalise(im, ...)
-  lowpass <- imLowPass(im, ...)
+  lowpass <- imLowPass(norm, ...)
 
   # Calculate determinant of hessian
   dethess <- imHessianDeterminant(norm, ...)
