@@ -132,7 +132,7 @@ imLowPass <- function(
   lowthresh <- median( imblur[background] )
   hithresh <- median( imblur[!background & (imblur > lowthresh)] )
   
-  if( !( (lowthresh>0) & (hithresh<1) & (lowthresh<hithresh) ) ){
+  if( ( (lowthresh>0) & (hithresh<1) & (lowthresh<hithresh) ) ){
     norm <- imAutoBrighten( imblur, floorVal = lowthresh, ceilVal = hithresh )
   }else{
     warning( paste0(
