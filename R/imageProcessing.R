@@ -136,7 +136,7 @@ imLowPass <- function(
   }else{
     warning( paste0(
       'Unable to autobrighten because of invalid lowthresh (', lowthresh, 
-      ') or hithresh (', hithresh ')...Skipping...' )
+      ') or hithresh (', hithresh, ')...Skipping...' )
   }
   norm <- imNormalise(norm)
   return(norm)
