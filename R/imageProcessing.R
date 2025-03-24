@@ -225,7 +225,7 @@ imForMask <- function(
 
   # Cap between low and high values
   norm <- imNormalise(im, ...)
-  lowpass <- imLowPass(norm, ...)
+  lowpass <- imLowPass(im, ...)
 
   # Calculate determinant of hessian
   dethess <- imHessianDeterminant(norm, ...)
