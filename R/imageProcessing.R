@@ -129,8 +129,8 @@ imLowPass <- function(
 
   background <- imNormalise(im, ...)==0
   imblur <- array( imager::isoblur(suppressWarnings(imager::as.cimg(im)), smallBlur), dim=dim(im) )
-  lowthresh <- median( imblur[background] )
-  hithresh <- median( imblur[!background & (imblur > lowthresh)] )
+  lowthresh <- masmr::conservativeMean( imblur[background], ... )
+  hithresh <- masmr::conservativeMean( imblur[!background & (imblur > lowthresh)], ... )
   
   if( ( (lowthresh>0) & (hithresh<1) & (lowthresh<hithresh) ) ){
     norm <- imAutoBrighten( imblur, floorVal = lowthresh, ceilVal = hithresh )
