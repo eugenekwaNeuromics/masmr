@@ -132,6 +132,9 @@ imLowPass <- function(
   lowthresh <- conservativeMean( imblur[background], ... )
   hithresh <- conservativeMean( imblur[!background & (imblur > lowthresh)], ... )
   
+  if(is.na(lowthresh)){ lowthresh = 0 }
+  if(is.na(hithresh)){ hithresh = 1 }
+  
   if( ( (lowthresh>0) & (hithresh<1) & (lowthresh<hithresh) ) ){
     norm <- imAutoBrighten( imblur, floorVal = lowthresh, ceilVal = hithresh )
   }else{
