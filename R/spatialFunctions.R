@@ -163,6 +163,13 @@ spatialClusterLeiden <- function(
     }
     subdf <- spotcalldf[spotcalldf$g==rownames(codebook)[i],]
 
+    if( length(unique(subdf$WX))==1 | length(unique(subdf$WY))==1 ){
+      ## Colinearity: Unable to build mesh, select the best performer. No cluster ID, no clusterSize
+      subdf <- subdf[order(subdf[,distanceMetric], decreasing = F),]
+      filtout_idx <- c(filtout_idx, rownames(subdf)[-1])
+      next
+    }
+    
     dt <- suppressWarnings(tripack::tri.mesh(subdf$WX, subdf$WY))
 
     if(inherits(dt, 'try-error')){
