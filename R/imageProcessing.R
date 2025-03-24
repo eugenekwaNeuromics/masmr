@@ -251,7 +251,7 @@ imForMask <- function(
     LoG[LoG>0], method = thresh_Elbow, ...
   )
 
-  vals <- imNormalise( (norm * lowpass * LoG) )
+  vals <- imNormalise( (norm * lowpass * imNormalise(LoG)) )
   lab <- ( (LoG>LoGthresh) + (dethessb>dethessbFloor) + (im==1) ) > 0
   thresh <- findThreshold(
     vals, method = thresh_Quantile, labels = lab,
