@@ -129,13 +129,10 @@ imLowPass <- function(
 
   background <- imNormalise(im, ...)==0
   imblur <- array( imager::isoblur(suppressWarnings(imager::as.cimg(im)), smallBlur), dim=dim(im) )
-  lowthresh <- conservativeMean( imblur[background], ... )
-  hithresh <- conservativeMean( imblur[!background & (imblur > lowthresh)], ... )
+  lowthresh <- median( imblur[background] )
+  hithresh <- median( imblur[!background & (imblur > lowthresh)] )
   
-  if(is.na(lowthresh)){ lowthresh = 0 }
-  if(is.na(hithresh)){ hithresh = 1 }
-  
-  if( ( (lowthresh>0) & (hithresh<1) & (lowthresh<hithresh) ) ){
+  if( ( (lowthresh>0) & (hithresh<1) & (lowthresh<hithresh) & !is.na(lowthresh) & !is.na(hithresh) ) ){
     norm <- imAutoBrighten( imblur, floorVal = lowthresh, ceilVal = hithresh )
   }else{
     warning( paste0(
@@ -255,7 +252,7 @@ imForMask <- function(
   )
   LoG <- LoG > LoGthresh
 
-  vals <- imNormalise( (norm * lowpass) * (LoG * norm)  )
+  vals <- imNormalise( (norm * lowpass) )
   lab <- ( LoG + (dethessb>dethessbFloor) + (im==1) ) > 0
   thresh <- findThreshold(
     vals, method = thresh_Quantile, labels = lab,
