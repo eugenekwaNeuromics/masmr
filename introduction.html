@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-02-26" />
+<meta name="date" content="2025-03-24" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -198,7 +198,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imhessiandeterminant"><i class="fa fa-check"></i><code>imHessianDeterminant</code></a></li>
 </ul></li>
 <li class="chapter" data-level="4.3" data-path="image-processing.html"><a href="image-processing.html#combining-building-blocks"><i class="fa fa-check"></i><b>4.3</b> Combining building blocks</a></li>
-<li class="chapter" data-level="4.4" data-path="image-processing.html"><a href="image-processing.html#feeding-image-processing-pipelines-into-getimagemetrics"><i class="fa fa-check"></i><b>4.4</b> Feeding image processing pipelines into <code>getImageMetrics</code></a></li>
+<li class="chapter" data-level="4.4" data-path="image-processing.html"><a href="image-processing.html#building-your-own-function-an-example"><i class="fa fa-check"></i><b>4.4</b> Building your own function: an example</a></li>
+<li class="chapter" data-level="4.5" data-path="image-processing.html"><a href="image-processing.html#feeding-image-processing-pipelines-into-getimagemetrics"><i class="fa fa-check"></i><b>4.5</b> Feeding image processing pipelines into <code>getImageMetrics</code></a></li>
 </ul></li>
 <li class="chapter" data-level="5" data-path="cell-segmentation.html"><a href="cell-segmentation.html"><i class="fa fa-check"></i><b>5</b> Cell segmentation</a>
 <ul>
@@ -299,102 +300,110 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-7"><a href="introduction.html#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">getAnchorParams</span>()</span>
 <span id="cb1-8"><a href="introduction.html#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">establishCleanSlate</span>()</span>
 <span id="cb1-9"><a href="introduction.html#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="introduction.html#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## Start loop</span></span>
-<span id="cb1-11"><a href="introduction.html#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>( fovName <span class="cf">in</span> params<span class="sc">$</span>fov_names ){</span>
-<span id="cb1-12"><a href="introduction.html#cb1-12" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-13"><a href="introduction.html#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Report current FOV / iteration </span></span>
-<span id="cb1-14"><a href="introduction.html#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>( <span class="fu">paste0</span>(</span>
-<span id="cb1-15"><a href="introduction.html#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;</span><span class="sc">\n</span><span class="st">&#39;</span>, fovName, <span class="st">&#39;: &#39;</span>, </span>
-<span id="cb1-16"><a href="introduction.html#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">which</span>(params<span class="sc">$</span>fov_names<span class="sc">==</span>fovName), <span class="st">&#39; of &#39;</span>, </span>
-<span id="cb1-17"><a href="introduction.html#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">length</span>(params<span class="sc">$</span>fov_names), <span class="st">&#39;...&#39;</span> ) )</span>
-<span id="cb1-18"><a href="introduction.html#cb1-18" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-19"><a href="introduction.html#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Check if file has been created, skip if yes</span></span>
-<span id="cb1-20"><a href="introduction.html#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>( params<span class="sc">$</span>resumeMode ){</span>
-<span id="cb1-21"><a href="introduction.html#cb1-21" aria-hidden="true" tabindex="-1"></a>    checkFile <span class="ot">&lt;-</span> <span class="fu">file.exists</span>( <span class="fu">paste0</span>(params<span class="sc">$</span>out_dir, <span class="st">&#39;SPOTCALL_&#39;</span>, fovName, <span class="st">&#39;.csv.gz&#39;</span>) )</span>
-<span id="cb1-22"><a href="introduction.html#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(checkFile){</span>
-<span id="cb1-23"><a href="introduction.html#cb1-23" aria-hidden="true" tabindex="-1"></a>      <span class="fu">message</span>(<span class="st">&#39;FOV has been processed...Skipping...&#39;</span>)</span>
-<span id="cb1-24"><a href="introduction.html#cb1-24" aria-hidden="true" tabindex="-1"></a>      <span class="cf">next</span></span>
-<span id="cb1-25"><a href="introduction.html#cb1-25" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb1-26"><a href="introduction.html#cb1-26" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb1-27"><a href="introduction.html#cb1-27" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-28"><a href="introduction.html#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Keep track of the current_fov</span></span>
-<span id="cb1-29"><a href="introduction.html#cb1-29" aria-hidden="true" tabindex="-1"></a>  params<span class="sc">$</span>current_fov <span class="ot">&lt;-</span> fovName</span>
-<span id="cb1-30"><a href="introduction.html#cb1-30" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-31"><a href="introduction.html#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Load current FOV images</span></span>
-<span id="cb1-32"><a href="introduction.html#cb1-32" aria-hidden="true" tabindex="-1"></a>  imList <span class="ot">&lt;-</span> <span class="fu">readImageList</span>( params<span class="sc">$</span>current_fov )</span>
-<span id="cb1-33"><a href="introduction.html#cb1-33" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-34"><a href="introduction.html#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Check if image is largely empty, if so, skip</span></span>
-<span id="cb1-35"><a href="introduction.html#cb1-35" aria-hidden="true" tabindex="-1"></a>  percBlank <span class="ot">&lt;-</span> <span class="fu">mean</span>( <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(imList), <span class="cf">function</span>(i){</span>
-<span id="cb1-36"><a href="introduction.html#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>( imList[[i]] <span class="sc">&lt;</span> params<span class="sc">$</span>brightness_min[i] ) <span class="sc">/</span> <span class="fu">length</span>(imList[[i]])</span>
-<span id="cb1-37"><a href="introduction.html#cb1-37" aria-hidden="true" tabindex="-1"></a>  }) )</span>
-<span id="cb1-38"><a href="introduction.html#cb1-38" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>( percBlank <span class="sc">&gt;=</span> <span class="fl">0.95</span> ){ <span class="cf">next</span> }</span>
-<span id="cb1-39"><a href="introduction.html#cb1-39" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-40"><a href="introduction.html#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Get image metrics</span></span>
-<span id="cb1-41"><a href="introduction.html#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">getImageMetrics</span>( imList )</span>
-<span id="cb1-42"><a href="introduction.html#cb1-42" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-43"><a href="introduction.html#cb1-43" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Register</span></span>
-<span id="cb1-44"><a href="introduction.html#cb1-44" aria-hidden="true" tabindex="-1"></a>  forReg <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb1-45"><a href="introduction.html#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(imList)){</span>
-<span id="cb1-46"><a href="introduction.html#cb1-46" aria-hidden="true" tabindex="-1"></a>    forReg[[i]] <span class="ot">&lt;-</span> <span class="fu">imNormalise</span>( imMetrics<span class="sc">$</span>COARSE[[i]] <span class="sc">+</span> imMetrics<span class="sc">$</span>DECODE[[i]] )</span>
-<span id="cb1-47"><a href="introduction.html#cb1-47" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb1-48"><a href="introduction.html#cb1-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(forReg) <span class="ot">&lt;-</span> <span class="fu">names</span>(imList)</span>
-<span id="cb1-49"><a href="introduction.html#cb1-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">registerImages</span>(forReg)</span>
+<span id="cb1-10"><a href="introduction.html#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## Decide on verboseness: below is code to push messages into a file called messages.Rout</span></span>
+<span id="cb1-11"><a href="introduction.html#cb1-11" aria-hidden="true" tabindex="-1"></a>notVerbose <span class="ot">=</span> F</span>
+<span id="cb1-12"><a href="introduction.html#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>( notVerbose ){</span>
+<span id="cb1-13"><a href="introduction.html#cb1-13" aria-hidden="true" tabindex="-1"></a>  outMessageFile <span class="ot">&lt;-</span> <span class="fu">file</span>( <span class="fu">paste0</span>(params<span class="sc">$</span>out_dir, <span class="st">&#39;messages.Rout&#39;</span>), <span class="at">open =</span> <span class="st">&#39;wt&#39;</span> )</span>
+<span id="cb1-14"><a href="introduction.html#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sink</span>(outMessageFile, <span class="at">type =</span> <span class="st">&#39;message&#39;</span>)</span>
+<span id="cb1-15"><a href="introduction.html#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Redirecting messages to messages.Rout...</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb1-16"><a href="introduction.html#cb1-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-17"><a href="introduction.html#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="introduction.html#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="do">## Start loop</span></span>
+<span id="cb1-19"><a href="introduction.html#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>( fovName <span class="cf">in</span> params<span class="sc">$</span>fov_names ){</span>
+<span id="cb1-20"><a href="introduction.html#cb1-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-21"><a href="introduction.html#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Report current FOV / iteration </span></span>
+<span id="cb1-22"><a href="introduction.html#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>( <span class="fu">paste0</span>(</span>
+<span id="cb1-23"><a href="introduction.html#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;</span><span class="sc">\n</span><span class="st">&#39;</span>, fovName, <span class="st">&#39;: &#39;</span>, </span>
+<span id="cb1-24"><a href="introduction.html#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">which</span>(params<span class="sc">$</span>fov_names<span class="sc">==</span>fovName), <span class="st">&#39; of &#39;</span>, </span>
+<span id="cb1-25"><a href="introduction.html#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">length</span>(params<span class="sc">$</span>fov_names), <span class="st">&#39;...&#39;</span> ) )</span>
+<span id="cb1-26"><a href="introduction.html#cb1-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-27"><a href="introduction.html#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Check if file has been created, skip if yes</span></span>
+<span id="cb1-28"><a href="introduction.html#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>( params<span class="sc">$</span>resumeMode ){</span>
+<span id="cb1-29"><a href="introduction.html#cb1-29" aria-hidden="true" tabindex="-1"></a>    checkFile <span class="ot">&lt;-</span> <span class="fu">file.exists</span>( <span class="fu">paste0</span>(params<span class="sc">$</span>out_dir, <span class="st">&#39;SPOTCALL_&#39;</span>, fovName, <span class="st">&#39;.csv.gz&#39;</span>) )</span>
+<span id="cb1-30"><a href="introduction.html#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(checkFile){</span>
+<span id="cb1-31"><a href="introduction.html#cb1-31" aria-hidden="true" tabindex="-1"></a>      <span class="fu">message</span>(<span class="st">&#39;FOV has been processed...Skipping...&#39;</span>)</span>
+<span id="cb1-32"><a href="introduction.html#cb1-32" aria-hidden="true" tabindex="-1"></a>      <span class="cf">next</span></span>
+<span id="cb1-33"><a href="introduction.html#cb1-33" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-34"><a href="introduction.html#cb1-34" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-35"><a href="introduction.html#cb1-35" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-36"><a href="introduction.html#cb1-36" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Keep track of the current_fov</span></span>
+<span id="cb1-37"><a href="introduction.html#cb1-37" aria-hidden="true" tabindex="-1"></a>  params<span class="sc">$</span>current_fov <span class="ot">&lt;-</span> fovName</span>
+<span id="cb1-38"><a href="introduction.html#cb1-38" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-39"><a href="introduction.html#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Load current FOV images</span></span>
+<span id="cb1-40"><a href="introduction.html#cb1-40" aria-hidden="true" tabindex="-1"></a>  imList <span class="ot">&lt;-</span> <span class="fu">readImageList</span>( params<span class="sc">$</span>current_fov )</span>
+<span id="cb1-41"><a href="introduction.html#cb1-41" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-42"><a href="introduction.html#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Check if image is largely empty, if so, skip</span></span>
+<span id="cb1-43"><a href="introduction.html#cb1-43" aria-hidden="true" tabindex="-1"></a>  percBlank <span class="ot">&lt;-</span> <span class="fu">mean</span>( <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(imList), <span class="cf">function</span>(i){</span>
+<span id="cb1-44"><a href="introduction.html#cb1-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>( imList[[i]] <span class="sc">&lt;</span> params<span class="sc">$</span>brightness_min[i] ) <span class="sc">/</span> <span class="fu">length</span>(imList[[i]])</span>
+<span id="cb1-45"><a href="introduction.html#cb1-45" aria-hidden="true" tabindex="-1"></a>  }) )</span>
+<span id="cb1-46"><a href="introduction.html#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>( percBlank <span class="sc">&gt;=</span> <span class="fl">0.95</span> ){ <span class="cf">next</span> }</span>
+<span id="cb1-47"><a href="introduction.html#cb1-47" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-48"><a href="introduction.html#cb1-48" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Get image metrics</span></span>
+<span id="cb1-49"><a href="introduction.html#cb1-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">getImageMetrics</span>( imList )</span>
 <span id="cb1-50"><a href="introduction.html#cb1-50" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-51"><a href="introduction.html#cb1-51" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Consolidate into pixel wise metric dataframe</span></span>
-<span id="cb1-52"><a href="introduction.html#cb1-52" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">consolidateImageMetrics</span>()</span>
-<span id="cb1-53"><a href="introduction.html#cb1-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cleanUp</span>( <span class="fu">c</span>(<span class="st">&#39;spotcalldf&#39;</span>, cleanSlate) )</span>
-<span id="cb1-54"><a href="introduction.html#cb1-54" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-55"><a href="introduction.html#cb1-55" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Decode and annotate blanks</span></span>
-<span id="cb1-56"><a href="introduction.html#cb1-56" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">decode</span>(spotcalldf)</span>
-<span id="cb1-57"><a href="introduction.html#cb1-57" aria-hidden="true" tabindex="-1"></a>  spotcalldf<span class="sc">$</span>BLANK <span class="ot">&lt;-</span> <span class="fu">scoreBlanks</span>( spotcalldf ) <span class="sc">&gt;</span><span class="dv">0</span></span>
+<span id="cb1-51"><a href="introduction.html#cb1-51" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Register</span></span>
+<span id="cb1-52"><a href="introduction.html#cb1-52" aria-hidden="true" tabindex="-1"></a>  forReg <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb1-53"><a href="introduction.html#cb1-53" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(imList)){</span>
+<span id="cb1-54"><a href="introduction.html#cb1-54" aria-hidden="true" tabindex="-1"></a>    forReg[[i]] <span class="ot">&lt;-</span> <span class="fu">imNormalise</span>( imMetrics<span class="sc">$</span>COARSE[[i]] <span class="sc">+</span> imMetrics<span class="sc">$</span>DECODE[[i]] )</span>
+<span id="cb1-55"><a href="introduction.html#cb1-55" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-56"><a href="introduction.html#cb1-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(forReg) <span class="ot">&lt;-</span> <span class="fu">names</span>(imList)</span>
+<span id="cb1-57"><a href="introduction.html#cb1-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">registerImages</span>(forReg)</span>
 <span id="cb1-58"><a href="introduction.html#cb1-58" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-59"><a href="introduction.html#cb1-59" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Binarise and threshold on Hamming distance</span></span>
-<span id="cb1-60"><a href="introduction.html#cb1-60" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">bitsFromDecode</span>(spotcalldf, <span class="at">trainIndex =</span> <span class="sc">!</span>spotcalldf<span class="sc">$</span>BLANK)</span>
-<span id="cb1-61"><a href="introduction.html#cb1-61" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>(spotcalldf, spotcalldf<span class="sc">$</span>HD<span class="sc">&gt;</span><span class="dv">1</span>)</span>
+<span id="cb1-59"><a href="introduction.html#cb1-59" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Consolidate into pixel wise metric dataframe</span></span>
+<span id="cb1-60"><a href="introduction.html#cb1-60" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">consolidateImageMetrics</span>()</span>
+<span id="cb1-61"><a href="introduction.html#cb1-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cleanUp</span>( <span class="fu">c</span>(<span class="st">&#39;spotcalldf&#39;</span>, cleanSlate) )</span>
 <span id="cb1-62"><a href="introduction.html#cb1-62" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-63"><a href="introduction.html#cb1-63" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Distance-based filtering</span></span>
-<span id="cb1-64"><a href="introduction.html#cb1-64" aria-hidden="true" tabindex="-1"></a>  filtout <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">nrow</span>(spotcalldf))</span>
-<span id="cb1-65"><a href="introduction.html#cb1-65" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>( distanceMetric <span class="cf">in</span> <span class="fu">c</span>(<span class="st">&#39;COS&#39;</span>, <span class="st">&#39;EUC&#39;</span>, <span class="st">&#39;L2E&#39;</span>) ){</span>
-<span id="cb1-66"><a href="introduction.html#cb1-66" aria-hidden="true" tabindex="-1"></a>    thresh <span class="ot">&lt;-</span> <span class="fu">thresh_Quantile</span>( </span>
-<span id="cb1-67"><a href="introduction.html#cb1-67" aria-hidden="true" tabindex="-1"></a>      spotcalldf[,distanceMetric], </span>
-<span id="cb1-68"><a href="introduction.html#cb1-68" aria-hidden="true" tabindex="-1"></a>      <span class="at">label =</span> spotcalldf<span class="sc">$</span>BLANK, </span>
-<span id="cb1-69"><a href="introduction.html#cb1-69" aria-hidden="true" tabindex="-1"></a>      <span class="at">quantileFalse =</span> <span class="fl">0.5</span>, <span class="at">quantileTrue =</span> <span class="fl">0.5</span> )</span>
-<span id="cb1-70"><a href="introduction.html#cb1-70" aria-hidden="true" tabindex="-1"></a>    filtout <span class="ot">&lt;-</span> filtout <span class="sc">+</span> spotcalldf[,distanceMetric] <span class="sc">&gt;</span> thresh</span>
-<span id="cb1-71"><a href="introduction.html#cb1-71" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb1-72"><a href="introduction.html#cb1-72" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>(spotcalldf, filtout<span class="sc">&gt;</span><span class="dv">0</span>)</span>
-<span id="cb1-73"><a href="introduction.html#cb1-73" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-74"><a href="introduction.html#cb1-74" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Filter nonblanks that are next to blanks</span></span>
-<span id="cb1-75"><a href="introduction.html#cb1-75" aria-hidden="true" tabindex="-1"></a>  spotcalldf<span class="sc">$</span>NEXTTOBLANK <span class="ot">&lt;-</span> <span class="fu">spatialIsAdjacent</span>( spotcalldf, <span class="st">&#39;BLANK&#39;</span> )</span>
-<span id="cb1-76"><a href="introduction.html#cb1-76" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>(spotcalldf, spotcalldf<span class="sc">$</span>NEXTTOBLANK <span class="sc">&amp;</span> <span class="sc">!</span>spotcalldf<span class="sc">$</span>BLANK)</span>
-<span id="cb1-77"><a href="introduction.html#cb1-77" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb1-78"><a href="introduction.html#cb1-78" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Filter using DFF0 metrics</span></span>
-<span id="cb1-79"><a href="introduction.html#cb1-79" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">scoreDeltaF</span>( spotcalldf )</span>
-<span id="cb1-80"><a href="introduction.html#cb1-80" aria-hidden="true" tabindex="-1"></a>  thresh <span class="ot">&lt;-</span> <span class="fu">thresh_Quantile</span>( </span>
-<span id="cb1-81"><a href="introduction.html#cb1-81" aria-hidden="true" tabindex="-1"></a>    spotcalldf[,<span class="st">&#39;DFF0_DECODE&#39;</span>], </span>
-<span id="cb1-82"><a href="introduction.html#cb1-82" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> spotcalldf<span class="sc">$</span>BLANK, </span>
-<span id="cb1-83"><a href="introduction.html#cb1-83" aria-hidden="true" tabindex="-1"></a>    <span class="at">quantileFalse =</span> <span class="fl">0.25</span>, <span class="at">quantileTrue =</span> <span class="fl">0.25</span> )</span>
-<span id="cb1-84"><a href="introduction.html#cb1-84" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>(spotcalldf, spotcalldf[,<span class="st">&#39;DFF0_DECODE&#39;</span>] <span class="sc">&lt;</span> thresh <span class="sc">&amp;</span> spotcalldf<span class="sc">$</span>F0_DECODE<span class="sc">!=</span><span class="dv">0</span>)</span>
-<span id="cb1-85"><a href="introduction.html#cb1-85" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-86"><a href="introduction.html#cb1-86" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Filter based on HNN distance</span></span>
-<span id="cb1-87"><a href="introduction.html#cb1-87" aria-hidden="true" tabindex="-1"></a>  spotcalldf<span class="sc">$</span>HNNDIST <span class="ot">&lt;-</span> <span class="fu">spatialHNNDist</span>( spotcalldf )</span>
-<span id="cb1-88"><a href="introduction.html#cb1-88" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>( spotcalldf, spotcalldf<span class="sc">$</span>HNNDIST <span class="sc">&gt;</span> <span class="dv">5</span> <span class="sc">|</span> <span class="fu">is.na</span>(spotcalldf<span class="sc">$</span>HNNDIST) )</span>
-<span id="cb1-89"><a href="introduction.html#cb1-89" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-90"><a href="introduction.html#cb1-90" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Filter based on PBLANK  </span></span>
-<span id="cb1-91"><a href="introduction.html#cb1-91" aria-hidden="true" tabindex="-1"></a>  forExclusion <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&#39;Xm&#39;</span>, <span class="st">&#39;Ym&#39;</span>, <span class="st">&#39;fov&#39;</span>, <span class="st">&#39;g&#39;</span>, <span class="st">&#39;WX&#39;</span>, <span class="st">&#39;WY&#39;</span>, <span class="st">&#39;IDX&#39;</span>, </span>
-<span id="cb1-92"><a href="introduction.html#cb1-92" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">colnames</span>(spotcalldf)[<span class="fu">grepl</span>(<span class="st">&#39;_</span><span class="sc">\\</span><span class="st">d+$|^DFF0_|^F1_|CV_|LAB$&#39;</span>, <span class="fu">colnames</span>(spotcalldf))])</span>
-<span id="cb1-93"><a href="introduction.html#cb1-93" aria-hidden="true" tabindex="-1"></a>  spotcalldf<span class="sc">$</span>PBLANK <span class="ot">&lt;-</span> <span class="fu">scoreClassifier</span>(spotcalldf, <span class="st">&#39;BLANK&#39;</span>, <span class="at">variablesExcluded =</span> forExclusion)</span>
-<span id="cb1-94"><a href="introduction.html#cb1-94" aria-hidden="true" tabindex="-1"></a>  thresh <span class="ot">&lt;-</span> <span class="fu">thresh_Quantile</span>(spotcalldf<span class="sc">$</span>PBLANK, spotcalldf<span class="sc">$</span>BLANK, <span class="at">quantileFalse =</span> <span class="fl">0.5</span>, <span class="at">quantileTrue =</span> <span class="fl">0.25</span>)</span>
-<span id="cb1-95"><a href="introduction.html#cb1-95" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>(spotcalldf, spotcalldf<span class="sc">$</span>PBLANK <span class="sc">&gt;</span> thresh)</span>
-<span id="cb1-96"><a href="introduction.html#cb1-96" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-97"><a href="introduction.html#cb1-97" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Cluster</span></span>
-<span id="cb1-98"><a href="introduction.html#cb1-98" aria-hidden="true" tabindex="-1"></a>  clusterInfo <span class="ot">&lt;-</span> <span class="fu">spatialClusterLeiden</span>( spotcalldf, <span class="at">minNeighbours =</span> <span class="dv">3</span>, <span class="at">maxInterSpotDistancePixels =</span> <span class="dv">3</span>)</span>
-<span id="cb1-99"><a href="introduction.html#cb1-99" aria-hidden="true" tabindex="-1"></a>  spotcalldf[,<span class="fu">colnames</span>(clusterInfo)] <span class="ot">&lt;-</span> clusterInfo</span>
-<span id="cb1-100"><a href="introduction.html#cb1-100" aria-hidden="true" tabindex="-1"></a>  maxClusterSize <span class="ot">=</span> <span class="dv">250</span></span>
-<span id="cb1-101"><a href="introduction.html#cb1-101" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>(spotcalldf, <span class="sc">!</span>(spotcalldf<span class="sc">$</span>CENTROID <span class="sc">&amp;</span> spotcalldf<span class="sc">$</span>CLUSTER_SIZE <span class="sc">&lt;</span> maxClusterSize) )</span>
-<span id="cb1-102"><a href="introduction.html#cb1-102" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveDF</span>( spotcalldf )</span>
-<span id="cb1-103"><a href="introduction.html#cb1-103" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-104"><a href="introduction.html#cb1-104" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cleanUp</span>()</span>
-<span id="cb1-105"><a href="introduction.html#cb1-105" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb1-63"><a href="introduction.html#cb1-63" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Decode and annotate blanks</span></span>
+<span id="cb1-64"><a href="introduction.html#cb1-64" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">decode</span>(spotcalldf)</span>
+<span id="cb1-65"><a href="introduction.html#cb1-65" aria-hidden="true" tabindex="-1"></a>  spotcalldf<span class="sc">$</span>BLANK <span class="ot">&lt;-</span> <span class="fu">scoreBlanks</span>( spotcalldf ) <span class="sc">&gt;</span><span class="dv">0</span></span>
+<span id="cb1-66"><a href="introduction.html#cb1-66" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-67"><a href="introduction.html#cb1-67" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Binarise and threshold on Hamming distance</span></span>
+<span id="cb1-68"><a href="introduction.html#cb1-68" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">bitsFromDecode</span>(spotcalldf, <span class="at">trainIndex =</span> <span class="sc">!</span>spotcalldf<span class="sc">$</span>BLANK)</span>
+<span id="cb1-69"><a href="introduction.html#cb1-69" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>(spotcalldf, spotcalldf<span class="sc">$</span>HD<span class="sc">&gt;</span><span class="dv">1</span>)</span>
+<span id="cb1-70"><a href="introduction.html#cb1-70" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-71"><a href="introduction.html#cb1-71" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Distance-based filtering</span></span>
+<span id="cb1-72"><a href="introduction.html#cb1-72" aria-hidden="true" tabindex="-1"></a>  filtout <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">nrow</span>(spotcalldf))</span>
+<span id="cb1-73"><a href="introduction.html#cb1-73" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>( distanceMetric <span class="cf">in</span> <span class="fu">c</span>(<span class="st">&#39;COS&#39;</span>, <span class="st">&#39;EUC&#39;</span>, <span class="st">&#39;L2E&#39;</span>) ){</span>
+<span id="cb1-74"><a href="introduction.html#cb1-74" aria-hidden="true" tabindex="-1"></a>    thresh <span class="ot">&lt;-</span> <span class="fu">thresh_Quantile</span>( </span>
+<span id="cb1-75"><a href="introduction.html#cb1-75" aria-hidden="true" tabindex="-1"></a>      spotcalldf[,distanceMetric], </span>
+<span id="cb1-76"><a href="introduction.html#cb1-76" aria-hidden="true" tabindex="-1"></a>      <span class="at">label =</span> spotcalldf<span class="sc">$</span>BLANK, </span>
+<span id="cb1-77"><a href="introduction.html#cb1-77" aria-hidden="true" tabindex="-1"></a>      <span class="at">quantileFalse =</span> <span class="fl">0.5</span>, <span class="at">quantileTrue =</span> <span class="fl">0.5</span> )</span>
+<span id="cb1-78"><a href="introduction.html#cb1-78" aria-hidden="true" tabindex="-1"></a>    filtout <span class="ot">&lt;-</span> filtout <span class="sc">+</span> spotcalldf[,distanceMetric] <span class="sc">&gt;</span> thresh</span>
+<span id="cb1-79"><a href="introduction.html#cb1-79" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-80"><a href="introduction.html#cb1-80" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>(spotcalldf, filtout<span class="sc">&gt;</span><span class="dv">0</span>)</span>
+<span id="cb1-81"><a href="introduction.html#cb1-81" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-82"><a href="introduction.html#cb1-82" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Filter nonblanks that are next to blanks</span></span>
+<span id="cb1-83"><a href="introduction.html#cb1-83" aria-hidden="true" tabindex="-1"></a>  spotcalldf<span class="sc">$</span>NEXTTOBLANK <span class="ot">&lt;-</span> <span class="fu">spatialIsAdjacent</span>( spotcalldf, <span class="st">&#39;BLANK&#39;</span> )</span>
+<span id="cb1-84"><a href="introduction.html#cb1-84" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>(spotcalldf, spotcalldf<span class="sc">$</span>NEXTTOBLANK <span class="sc">&amp;</span> <span class="sc">!</span>spotcalldf<span class="sc">$</span>BLANK)</span>
+<span id="cb1-85"><a href="introduction.html#cb1-85" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb1-86"><a href="introduction.html#cb1-86" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Filter using DFF0 metrics</span></span>
+<span id="cb1-87"><a href="introduction.html#cb1-87" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">scoreDeltaF</span>( spotcalldf )</span>
+<span id="cb1-88"><a href="introduction.html#cb1-88" aria-hidden="true" tabindex="-1"></a>  thresh <span class="ot">&lt;-</span> <span class="fu">thresh_Quantile</span>( </span>
+<span id="cb1-89"><a href="introduction.html#cb1-89" aria-hidden="true" tabindex="-1"></a>    spotcalldf[,<span class="st">&#39;DFF0_DECODE&#39;</span>], </span>
+<span id="cb1-90"><a href="introduction.html#cb1-90" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> spotcalldf<span class="sc">$</span>BLANK, </span>
+<span id="cb1-91"><a href="introduction.html#cb1-91" aria-hidden="true" tabindex="-1"></a>    <span class="at">quantileFalse =</span> <span class="fl">0.25</span>, <span class="at">quantileTrue =</span> <span class="fl">0.25</span> )</span>
+<span id="cb1-92"><a href="introduction.html#cb1-92" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>(spotcalldf, spotcalldf[,<span class="st">&#39;DFF0_DECODE&#39;</span>] <span class="sc">&lt;</span> thresh <span class="sc">&amp;</span> spotcalldf<span class="sc">$</span>F0_DECODE<span class="sc">!=</span><span class="dv">0</span>)</span>
+<span id="cb1-93"><a href="introduction.html#cb1-93" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-94"><a href="introduction.html#cb1-94" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Filter based on HNN distance</span></span>
+<span id="cb1-95"><a href="introduction.html#cb1-95" aria-hidden="true" tabindex="-1"></a>  spotcalldf<span class="sc">$</span>HNNDIST <span class="ot">&lt;-</span> <span class="fu">spatialHNNDist</span>( spotcalldf )</span>
+<span id="cb1-96"><a href="introduction.html#cb1-96" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>( spotcalldf, spotcalldf<span class="sc">$</span>HNNDIST <span class="sc">&gt;</span> <span class="dv">5</span> <span class="sc">|</span> <span class="fu">is.na</span>(spotcalldf<span class="sc">$</span>HNNDIST) )</span>
+<span id="cb1-97"><a href="introduction.html#cb1-97" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-98"><a href="introduction.html#cb1-98" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Filter based on PBLANK  </span></span>
+<span id="cb1-99"><a href="introduction.html#cb1-99" aria-hidden="true" tabindex="-1"></a>  forExclusion <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&#39;Xm&#39;</span>, <span class="st">&#39;Ym&#39;</span>, <span class="st">&#39;fov&#39;</span>, <span class="st">&#39;g&#39;</span>, <span class="st">&#39;WX&#39;</span>, <span class="st">&#39;WY&#39;</span>, <span class="st">&#39;IDX&#39;</span>, </span>
+<span id="cb1-100"><a href="introduction.html#cb1-100" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">colnames</span>(spotcalldf)[<span class="fu">grepl</span>(<span class="st">&#39;_</span><span class="sc">\\</span><span class="st">d+$|^DFF0_|^F1_|CV_|LAB$&#39;</span>, <span class="fu">colnames</span>(spotcalldf))])</span>
+<span id="cb1-101"><a href="introduction.html#cb1-101" aria-hidden="true" tabindex="-1"></a>  spotcalldf<span class="sc">$</span>PBLANK <span class="ot">&lt;-</span> <span class="fu">scoreClassifier</span>(spotcalldf, <span class="st">&#39;BLANK&#39;</span>, <span class="at">variablesExcluded =</span> forExclusion)</span>
+<span id="cb1-102"><a href="introduction.html#cb1-102" aria-hidden="true" tabindex="-1"></a>  thresh <span class="ot">&lt;-</span> <span class="fu">thresh_Quantile</span>(spotcalldf<span class="sc">$</span>PBLANK, spotcalldf<span class="sc">$</span>BLANK, <span class="at">quantileFalse =</span> <span class="fl">0.5</span>, <span class="at">quantileTrue =</span> <span class="fl">0.25</span>)</span>
+<span id="cb1-103"><a href="introduction.html#cb1-103" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>(spotcalldf, spotcalldf<span class="sc">$</span>PBLANK <span class="sc">&gt;</span> thresh)</span>
+<span id="cb1-104"><a href="introduction.html#cb1-104" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-105"><a href="introduction.html#cb1-105" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Cluster</span></span>
+<span id="cb1-106"><a href="introduction.html#cb1-106" aria-hidden="true" tabindex="-1"></a>  clusterInfo <span class="ot">&lt;-</span> <span class="fu">spatialClusterLeiden</span>( spotcalldf, <span class="at">minNeighbours =</span> <span class="dv">3</span>, <span class="at">maxInterSpotDistancePixels =</span> <span class="dv">3</span>)</span>
+<span id="cb1-107"><a href="introduction.html#cb1-107" aria-hidden="true" tabindex="-1"></a>  spotcalldf[,<span class="fu">colnames</span>(clusterInfo)] <span class="ot">&lt;-</span> clusterInfo</span>
+<span id="cb1-108"><a href="introduction.html#cb1-108" aria-hidden="true" tabindex="-1"></a>  maxClusterSize <span class="ot">=</span> <span class="dv">250</span></span>
+<span id="cb1-109"><a href="introduction.html#cb1-109" aria-hidden="true" tabindex="-1"></a>  spotcalldf <span class="ot">&lt;-</span> <span class="fu">filterDF</span>(spotcalldf, <span class="sc">!</span>(spotcalldf<span class="sc">$</span>CENTROID <span class="sc">&amp;</span> spotcalldf<span class="sc">$</span>CLUSTER_SIZE <span class="sc">&lt;</span> maxClusterSize) )</span>
+<span id="cb1-110"><a href="introduction.html#cb1-110" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveDF</span>( spotcalldf )</span>
+<span id="cb1-111"><a href="introduction.html#cb1-111" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-112"><a href="introduction.html#cb1-112" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cleanUp</span>()</span>
+<span id="cb1-113"><a href="introduction.html#cb1-113" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="quick-start-cell-segmentation" class="section level3 hasAnchor" number="2.3.2">
 <h3><span class="header-section-number">2.3.2</span> Quick start: Cell segmentation<a href="introduction.html#quick-start-cell-segmentation" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -406,39 +415,47 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb2-6"><a href="introduction.html#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">establishCellSegModel</span>()</span>
 <span id="cb2-7"><a href="introduction.html#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">establishCleanSlate</span>()</span>
 <span id="cb2-8"><a href="introduction.html#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="introduction.html#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Start loop</span></span>
-<span id="cb2-10"><a href="introduction.html#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>( fovName <span class="cf">in</span> params<span class="sc">$</span>fov_names ){</span>
-<span id="cb2-11"><a href="introduction.html#cb2-11" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-12"><a href="introduction.html#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Report current FOV / iteration </span></span>
-<span id="cb2-13"><a href="introduction.html#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>( <span class="fu">paste0</span>(</span>
-<span id="cb2-14"><a href="introduction.html#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;</span><span class="sc">\n</span><span class="st">&#39;</span>, fovName, <span class="st">&#39;: &#39;</span>, </span>
-<span id="cb2-15"><a href="introduction.html#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">which</span>(params<span class="sc">$</span>fov_names<span class="sc">==</span>fovName), <span class="st">&#39; of &#39;</span>, </span>
-<span id="cb2-16"><a href="introduction.html#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">length</span>(params<span class="sc">$</span>fov_names), <span class="st">&#39;...&#39;</span> ) )</span>
-<span id="cb2-17"><a href="introduction.html#cb2-17" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-18"><a href="introduction.html#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Check if file has been created, skip if yes</span></span>
-<span id="cb2-19"><a href="introduction.html#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>( params<span class="sc">$</span>resumeMode ){</span>
-<span id="cb2-20"><a href="introduction.html#cb2-20" aria-hidden="true" tabindex="-1"></a>    checkFile <span class="ot">&lt;-</span> <span class="fu">file.exists</span>( </span>
-<span id="cb2-21"><a href="introduction.html#cb2-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste0</span>(params<span class="sc">$</span>out_dir, <span class="st">&#39;CELLSEG_&#39;</span>,</span>
-<span id="cb2-22"><a href="introduction.html#cb2-22" aria-hidden="true" tabindex="-1"></a>             <span class="fu">paste</span>(<span class="fu">sort</span>(<span class="fu">ls</span>(cellSeg)), <span class="at">collapse=</span><span class="st">&#39;&#39;</span>), <span class="st">&#39;_&#39;</span>, </span>
-<span id="cb2-23"><a href="introduction.html#cb2-23" aria-hidden="true" tabindex="-1"></a>             fovName, <span class="st">&#39;.csv.gz&#39;</span>) )</span>
-<span id="cb2-24"><a href="introduction.html#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(checkFile){</span>
-<span id="cb2-25"><a href="introduction.html#cb2-25" aria-hidden="true" tabindex="-1"></a>      <span class="fu">message</span>(<span class="st">&#39;FOV has been processed...Skipping...&#39;</span>)</span>
-<span id="cb2-26"><a href="introduction.html#cb2-26" aria-hidden="true" tabindex="-1"></a>      <span class="cf">next</span></span>
-<span id="cb2-27"><a href="introduction.html#cb2-27" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb2-28"><a href="introduction.html#cb2-28" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb2-29"><a href="introduction.html#cb2-29" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-30"><a href="introduction.html#cb2-30" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Keep track of the current_fov</span></span>
-<span id="cb2-31"><a href="introduction.html#cb2-31" aria-hidden="true" tabindex="-1"></a>  params<span class="sc">$</span>current_fov <span class="ot">&lt;-</span> fovName</span>
-<span id="cb2-32"><a href="introduction.html#cb2-32" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-33"><a href="introduction.html#cb2-33" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Load current FOV image</span></span>
-<span id="cb2-34"><a href="introduction.html#cb2-34" aria-hidden="true" tabindex="-1"></a>  im <span class="ot">&lt;-</span> <span class="fu">readImageList</span>( params<span class="sc">$</span>current_fov )[[<span class="dv">1</span>]] <span class="co">#List of 1</span></span>
-<span id="cb2-35"><a href="introduction.html#cb2-35" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-36"><a href="introduction.html#cb2-36" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Cell segmentation and saving</span></span>
-<span id="cb2-37"><a href="introduction.html#cb2-37" aria-hidden="true" tabindex="-1"></a>  cellMask <span class="ot">&lt;-</span> <span class="fu">runCellSegModel</span>(im)</span>
-<span id="cb2-38"><a href="introduction.html#cb2-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveCellSegMasks</span>(cellMask, <span class="at">im =</span> im)</span>
-<span id="cb2-39"><a href="introduction.html#cb2-39" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-40"><a href="introduction.html#cb2-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cleanUp</span>()</span>
-<span id="cb2-41"><a href="introduction.html#cb2-41" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb2-9"><a href="introduction.html#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Decide on verboseness: below is code to push messages into a file called messages.Rout</span></span>
+<span id="cb2-10"><a href="introduction.html#cb2-10" aria-hidden="true" tabindex="-1"></a>notVerbose <span class="ot">=</span> F</span>
+<span id="cb2-11"><a href="introduction.html#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>( notVerbose ){</span>
+<span id="cb2-12"><a href="introduction.html#cb2-12" aria-hidden="true" tabindex="-1"></a>  outMessageFile <span class="ot">&lt;-</span> <span class="fu">file</span>( <span class="fu">paste0</span>(params<span class="sc">$</span>out_dir, <span class="st">&#39;messages.Rout&#39;</span>), <span class="at">open =</span> <span class="st">&#39;wt&#39;</span> )</span>
+<span id="cb2-13"><a href="introduction.html#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sink</span>(outMessageFile, <span class="at">type =</span> <span class="st">&#39;message&#39;</span>)</span>
+<span id="cb2-14"><a href="introduction.html#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Redirecting messages to messages.Rout...</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-15"><a href="introduction.html#cb2-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-16"><a href="introduction.html#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="introduction.html#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="do">## Start loop</span></span>
+<span id="cb2-18"><a href="introduction.html#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>( fovName <span class="cf">in</span> params<span class="sc">$</span>fov_names ){</span>
+<span id="cb2-19"><a href="introduction.html#cb2-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-20"><a href="introduction.html#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Report current FOV / iteration </span></span>
+<span id="cb2-21"><a href="introduction.html#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>( <span class="fu">paste0</span>(</span>
+<span id="cb2-22"><a href="introduction.html#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;</span><span class="sc">\n</span><span class="st">&#39;</span>, fovName, <span class="st">&#39;: &#39;</span>, </span>
+<span id="cb2-23"><a href="introduction.html#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">which</span>(params<span class="sc">$</span>fov_names<span class="sc">==</span>fovName), <span class="st">&#39; of &#39;</span>, </span>
+<span id="cb2-24"><a href="introduction.html#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">length</span>(params<span class="sc">$</span>fov_names), <span class="st">&#39;...&#39;</span> ) )</span>
+<span id="cb2-25"><a href="introduction.html#cb2-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-26"><a href="introduction.html#cb2-26" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Check if file has been created, skip if yes</span></span>
+<span id="cb2-27"><a href="introduction.html#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>( params<span class="sc">$</span>resumeMode ){</span>
+<span id="cb2-28"><a href="introduction.html#cb2-28" aria-hidden="true" tabindex="-1"></a>    checkFile <span class="ot">&lt;-</span> <span class="fu">file.exists</span>( </span>
+<span id="cb2-29"><a href="introduction.html#cb2-29" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste0</span>(params<span class="sc">$</span>out_dir, <span class="st">&#39;CELLSEG_&#39;</span>,</span>
+<span id="cb2-30"><a href="introduction.html#cb2-30" aria-hidden="true" tabindex="-1"></a>             <span class="fu">paste</span>(<span class="fu">sort</span>(<span class="fu">ls</span>(cellSeg)), <span class="at">collapse=</span><span class="st">&#39;&#39;</span>), <span class="st">&#39;_&#39;</span>, </span>
+<span id="cb2-31"><a href="introduction.html#cb2-31" aria-hidden="true" tabindex="-1"></a>             fovName, <span class="st">&#39;.csv.gz&#39;</span>) )</span>
+<span id="cb2-32"><a href="introduction.html#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(checkFile){</span>
+<span id="cb2-33"><a href="introduction.html#cb2-33" aria-hidden="true" tabindex="-1"></a>      <span class="fu">message</span>(<span class="st">&#39;FOV has been processed...Skipping...&#39;</span>)</span>
+<span id="cb2-34"><a href="introduction.html#cb2-34" aria-hidden="true" tabindex="-1"></a>      <span class="cf">next</span></span>
+<span id="cb2-35"><a href="introduction.html#cb2-35" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-36"><a href="introduction.html#cb2-36" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-37"><a href="introduction.html#cb2-37" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-38"><a href="introduction.html#cb2-38" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Keep track of the current_fov</span></span>
+<span id="cb2-39"><a href="introduction.html#cb2-39" aria-hidden="true" tabindex="-1"></a>  params<span class="sc">$</span>current_fov <span class="ot">&lt;-</span> fovName</span>
+<span id="cb2-40"><a href="introduction.html#cb2-40" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-41"><a href="introduction.html#cb2-41" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Load current FOV image</span></span>
+<span id="cb2-42"><a href="introduction.html#cb2-42" aria-hidden="true" tabindex="-1"></a>  im <span class="ot">&lt;-</span> <span class="fu">readImageList</span>( params<span class="sc">$</span>current_fov )[[<span class="dv">1</span>]] <span class="co">#List of 1</span></span>
+<span id="cb2-43"><a href="introduction.html#cb2-43" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-44"><a href="introduction.html#cb2-44" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Cell segmentation and saving</span></span>
+<span id="cb2-45"><a href="introduction.html#cb2-45" aria-hidden="true" tabindex="-1"></a>  cellMask <span class="ot">&lt;-</span> <span class="fu">runCellSegModel</span>(im)</span>
+<span id="cb2-46"><a href="introduction.html#cb2-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveCellSegMasks</span>(cellMask, <span class="at">im =</span> im)</span>
+<span id="cb2-47"><a href="introduction.html#cb2-47" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-48"><a href="introduction.html#cb2-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cleanUp</span>()</span>
+<span id="cb2-49"><a href="introduction.html#cb2-49" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="quick-start-stitching" class="section level3 hasAnchor" number="2.3.3">
 <h3><span class="header-section-number">2.3.3</span> Quick start: Stitching<a href="introduction.html#quick-start-stitching" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -496,11 +513,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb4-3"><a href="introduction.html#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Establish params</span></span>
 <span id="cb4-4"><a href="introduction.html#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">establishParams</span>( ... ) <span class="co">#User to input</span></span>
 <span id="cb4-5"><a href="introduction.html#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-6"><a href="introduction.html#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Function to synthesise data</span></span>
-<span id="cb4-7"><a href="introduction.html#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">synthesizeData</span>()</span>
-<span id="cb4-8"><a href="introduction.html#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-9"><a href="introduction.html#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Function to generate QC plots</span></span>
-<span id="cb4-10"><a href="introduction.html#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plotQC</span>()</span></code></pre></div>
+<span id="cb4-6"><a href="introduction.html#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Decide on verboseness: below is code to push messages into a file called messages.Rout</span></span>
+<span id="cb4-7"><a href="introduction.html#cb4-7" aria-hidden="true" tabindex="-1"></a>notVerbose <span class="ot">=</span> F</span>
+<span id="cb4-8"><a href="introduction.html#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>( notVerbose ){</span>
+<span id="cb4-9"><a href="introduction.html#cb4-9" aria-hidden="true" tabindex="-1"></a>  outMessageFile <span class="ot">&lt;-</span> <span class="fu">file</span>( <span class="fu">paste0</span>(params<span class="sc">$</span>out_dir, <span class="st">&#39;messages.Rout&#39;</span>), <span class="at">open =</span> <span class="st">&#39;wt&#39;</span> )</span>
+<span id="cb4-10"><a href="introduction.html#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sink</span>(outMessageFile, <span class="at">type =</span> <span class="st">&#39;message&#39;</span>)</span>
+<span id="cb4-11"><a href="introduction.html#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Redirecting messages to messages.Rout...</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-12"><a href="introduction.html#cb4-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-13"><a href="introduction.html#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="introduction.html#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="do">## Function to synthesise data</span></span>
+<span id="cb4-15"><a href="introduction.html#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="fu">synthesizeData</span>()</span>
+<span id="cb4-16"><a href="introduction.html#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="introduction.html#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="do">## Function to generate QC plots</span></span>
+<span id="cb4-18"><a href="introduction.html#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="fu">plotQC</span>()</span></code></pre></div>
 
 </div>
 </div>

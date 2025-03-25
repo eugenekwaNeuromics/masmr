@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-02-26" />
+<meta name="date" content="2025-03-24" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -198,6 +198,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="image-processing.html"><a href="image-processing.html#imhessiandeterminant"><i class="fa fa-check"></i><code>imHessianDeterminant</code></a></li>
 </ul></li>
 <li class="chapter" data-level="4.3" data-path="image-processing.html"><a href="image-processing.html#combining-building-blocks"><i class="fa fa-check"></i><b>4.3</b> Combining building blocks</a></li>
+<li class="chapter" data-level="4.4" data-path="image-processing.html"><a href="image-processing.html#building-your-own-function-an-example"><i class="fa fa-check"></i><b>4.4</b> Building your own function: an example</a></li>
+<li class="chapter" data-level="4.5" data-path="image-processing.html"><a href="image-processing.html#feeding-image-processing-pipelines-into-getimagemetrics"><i class="fa fa-check"></i><b>4.5</b> Feeding image processing pipelines into <code>getImageMetrics</code></a></li>
 </ul></li>
 <li class="chapter" data-level="5" data-path="cell-segmentation.html"><a href="cell-segmentation.html"><i class="fa fa-check"></i><b>5</b> Cell segmentation</a>
 <ul>
@@ -346,6 +348,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ceiling^x \log{ceiling} - floor^x \log{floor} = 0 \\
 x = \frac{\log{ \frac{\log{ceiling}}{\log{floor}}} }{ \log{\frac{floor}{ceiling}} }
 \end{align}\]</span></p>
+<p>Note that <code>imAutoBrighten</code> will only be valid if <code>floor</code> is more than 0 and <code>ceiling</code> is less than 1.</p>
 <p>This is the basis of the <code>imAutoBrighten</code> function.</p>
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="image-processing.html#cb25-1" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> <span class="fu">imAutoBrighten</span>(im, <span class="at">floorVal =</span> params<span class="sc">$</span>brightness_min[<span class="dv">1</span>], <span class="at">ceilVal =</span> params<span class="sc">$</span>brightness_max[<span class="dv">1</span>] )</span>
 <span id="cb25-2"><a href="image-processing.html#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
@@ -415,11 +418,20 @@ x = \frac{\log{ \frac{\log{ceiling}}{\log{floor}}} }{ \log{\frac{floor}{ceiling}
 ##         smallBlur), dim = dim(im))
 ##     lowthresh &lt;- median(imblur[background])
 ##     hithresh &lt;- median(imblur[!background &amp; (imblur &gt; lowthresh)])
-##     norm &lt;- imAutoBrighten(imblur, floorVal = lowthresh, ceilVal = hithresh)
+##     if (((lowthresh &gt; 0) &amp; (hithresh &lt; 1) &amp; (lowthresh &lt; hithresh) &amp; 
+##         !is.na(lowthresh) &amp; !is.na(hithresh))) {
+##         norm &lt;- imAutoBrighten(imblur, floorVal = lowthresh, 
+##             ceilVal = hithresh)
+##     }
+##     else {
+##         warning(paste0(&quot;Skipping imAutoBrighten because of invalid floorVal (&quot;, 
+##             lowthresh, &quot;) and/or ceilVal (&quot;, hithresh, &quot;)...&quot;))
+##         norm &lt;- imblur
+##     }
 ##     norm &lt;- imNormalise(norm)
 ##     return(norm)
 ## }
-## &lt;bytecode: 0x000001ebd6debd80&gt;
+## &lt;bytecode: 0x00000263e4818b98&gt;
 ## &lt;environment: namespace:masmr&gt;</code></pre>
 <p><strong>ALWAYS plot to check how your image processing has altered your image!</strong></p>
 <div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="image-processing.html#cb39-1" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> <span class="fu">imLowPass</span>(im, <span class="at">floorVal =</span> params<span class="sc">$</span>brightness_min[<span class="dv">1</span>], <span class="at">ceilVal =</span> params<span class="sc">$</span>brightness_max[<span class="dv">1</span>] )</span>
@@ -428,8 +440,216 @@ x = \frac{\log{ \frac{\log{ceiling}}{\log{floor}}} }{ \log{\frac{floor}{ceiling}
 <span id="cb39-4"><a href="image-processing.html#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>( norm, <span class="at">breaks=</span><span class="dv">1000</span>, <span class="at">main =</span> <span class="st">&#39;Low pass&#39;</span>, <span class="at">xlab=</span><span class="st">&#39;Intensities&#39;</span>, <span class="at">ylab=</span><span class="st">&#39;N pixels&#39;</span> )</span></code></pre></div>
 <p><img src="_main_files/figure-html/improc-lowpass-1.png" width="672" /></p>
 <div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="image-processing.html#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
-<p>Users are strongly encouraged to experiment with the provided image processing functions and create their own image processing pipelines if necessary.
-## Feeding image processing pipelines into <code>getImageMetrics</code></p>
+</div>
+<div id="building-your-own-function-an-example" class="section level2 hasAnchor" number="4.4">
+<h2><span class="header-section-number">4.4</span> Building your own function: an example<a href="image-processing.html#building-your-own-function-an-example" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Users are strongly encouraged to experiment with the provided image processing functions and create their own image processing pipelines if necessary. Below, we provide an example of how a custom function may be built.</p>
+<p>Say we are dissatisfied with the current default masking function (<code>imForMask</code>), whose purpose is to flag pixels where we suspect a spot to be, as being too restrictive (i.e. only flagging the strongest signals).</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="image-processing.html#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="do">## The original image is a bit too dim for visualisation: but will provide here for completeness</span></span>
+<span id="cb41-2"><a href="image-processing.html#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( imList[[<span class="dv">1</span>]][<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>] ), <span class="at">main=</span><span class="st">&#39;Original&#39;</span>)</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-defaultmasking-1.png" width="672" /></p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="image-processing.html#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb42-2"><a href="image-processing.html#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( imList[[<span class="dv">1</span>]][<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>]<span class="sc">^</span><span class="fl">0.1</span> ), <span class="at">main=</span><span class="st">&#39;Original (brightened)&#39;</span>)</span>
+<span id="cb42-3"><a href="image-processing.html#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( <span class="fu">imForMask</span>(imList[[<span class="dv">1</span>]])[<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>] ), <span class="at">main=</span><span class="st">&#39;Default mask&#39;</span>)</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-defaultmasking-2.png" width="672" /></p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="image-processing.html#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<p>First, let’s have a look at what <code>imForMask</code> is doing. From below, we see that it takes in a single image <code>im</code> and…</p>
+<ol style="list-style-type: decimal">
+<li>Low pass filtering of an image with the <code>imLowPass</code> function: returning <code>lowpass</code></li>
+<li>Calculates the determinant of the Hessian (<code>imNormalise %&gt;% imHessianDeterminant %&gt;% isoblur</code>): returning <code>dethessb</code></li>
+<li>Calculates the Laplacian of the Gaussian (<code>imNormalise %&gt;% imLaplacianOfGaussian</code>): returning <code>LoG</code></li>
+<li>Masking of <code>LoG</code> and <code>dethessb</code> by identifying appropriate thresholds (<code>findThreshold</code>)</li>
+<li>Scoring of pixels between 0 and 1 using the product of <code>lowpass</code> and <code>LoG</code>, with saturated pixels (<code>norm==1</code> or <code>im==1</code>) being set to max score</li>
+<li>Flagging saturated pixels (<code>im==1</code>), pixels with superthreshold <code>LoG</code>, or pixels with superthreshold <code>dethessb</code>: returning <code>lab</code> (<code>1</code> if yes to any of the three criteria, otherwise <code>0</code>)</li>
+<li>Finding the threshold for scores calculated in step (5) that separate <code>1</code> and <code>0</code> from <code>lab</code> in step 6: returning <code>mask</code></li>
+<li>Size filter of <code>mask</code> to remove masks smaller than <code>minBlobSize</code> pixels</li>
+</ol>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="image-processing.html#cb44-1" aria-hidden="true" tabindex="-1"></a>masmr<span class="sc">::</span>imForMask</span></code></pre></div>
+<pre><code>## function (im, smallBlur, minBlobSize, currentIteration, ...) 
+## {
+##     if (!missing(currentIteration)) {
+##         message(currentIteration, appendLF = F)
+##     }
+##     if (missing(smallBlur)) {
+##         smallBlur = 1
+##     }
+##     if (missing(minBlobSize)) {
+##         minBlobSize = 9
+##     }
+##     norm &lt;- imNormalise(im, ...)
+##     lowpass &lt;- imLowPass(norm, ...)
+##     dethess &lt;- imHessianDeterminant(norm, ...)
+##     dethess &lt;- imNormalise(dethess)
+##     dethessb &lt;- array(imager::isoblur(suppressWarnings(imager::as.cimg(dethess)), 
+##         smallBlur), dim = dim(im))
+##     vals &lt;- dethessb[dethessb &gt; quantile(dethessb, 0.95)]
+##     dethessbFloor &lt;- findThreshold(vals, method = thresh_Elbow, 
+##         ...)
+##     LoG &lt;- imLaplacianOfGaussian(norm, ...)
+##     LoGthresh &lt;- findThreshold(LoG[LoG &gt; 0], method = thresh_Elbow, 
+##         ...)
+##     vals &lt;- imNormalise(lowpass * imNormalise(LoG, floorVal = LoGthresh, 
+##         ceilVal = max(LoG)))
+##     vals[((im &gt;= 1) + (norm &gt;= 1)) &gt; 0] &lt;- 1
+##     lab &lt;- ((LoG &gt; LoGthresh) + (dethessb &gt; dethessbFloor) + 
+##         (im == 1)) &gt; 0
+##     thresh &lt;- findThreshold(vals, method = thresh_Quantile, labels = lab, 
+##         ...)
+##     mask &lt;- vals &gt; thresh
+##     labmask &lt;- EBImage::bwlabel(mask)
+##     toosmall &lt;- which(tabulate(labmask) &lt; minBlobSize)
+##     mask[labmask %in% toosmall] &lt;- F
+##     final &lt;- matrix(as.integer(mask), nrow = nrow(mask), ncol = ncol(mask))
+##     return(final)
+## }
+## &lt;bytecode: 0x00000263e5194ae0&gt;
+## &lt;environment: namespace:masmr&gt;</code></pre>
+<p>Next, let’s create a new mask function that will be more permissive and flag more pixels. This <code>myCustomMask</code> function is created from copying and editing the default <code>imForMask</code> function above. Briefly, this new function replaces steps 5-7 in the default <code>imForMask</code> function with the union of multiple masks.</p>
+<p>[Note: the use of ellipsis (<code>...</code>) is to allow the passing arguments in <code>myCustomMask</code> to functions <strong>within</strong> <code>myCustomMask</code>: e.g. <code>imLaplacianOfGaussian</code>, <code>imHessianDeterminant</code> etc.]</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="image-processing.html#cb46-1" aria-hidden="true" tabindex="-1"></a>myCustomMask <span class="ot">&lt;-</span> <span class="cf">function</span> (im, smallBlur, minBlobSize, currentIteration, ...){</span>
+<span id="cb46-2"><a href="image-processing.html#cb46-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">missing</span>(currentIteration)) {</span>
+<span id="cb46-3"><a href="image-processing.html#cb46-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">message</span>(currentIteration, <span class="at">appendLF =</span> F)</span>
+<span id="cb46-4"><a href="image-processing.html#cb46-4" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb46-5"><a href="image-processing.html#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">missing</span>(smallBlur)) {</span>
+<span id="cb46-6"><a href="image-processing.html#cb46-6" aria-hidden="true" tabindex="-1"></a>        smallBlur <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb46-7"><a href="image-processing.html#cb46-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb46-8"><a href="image-processing.html#cb46-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">missing</span>(minBlobSize)) {</span>
+<span id="cb46-9"><a href="image-processing.html#cb46-9" aria-hidden="true" tabindex="-1"></a>        minBlobSize <span class="ot">=</span> <span class="dv">9</span></span>
+<span id="cb46-10"><a href="image-processing.html#cb46-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb46-11"><a href="image-processing.html#cb46-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb46-12"><a href="image-processing.html#cb46-12" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Old code: Calculate scores per pixel as per the default imForMask function</span></span>
+<span id="cb46-13"><a href="image-processing.html#cb46-13" aria-hidden="true" tabindex="-1"></a>    norm <span class="ot">&lt;-</span> <span class="fu">imNormalise</span>(im, ...)</span>
+<span id="cb46-14"><a href="image-processing.html#cb46-14" aria-hidden="true" tabindex="-1"></a>    lowpass <span class="ot">&lt;-</span> <span class="fu">imLowPass</span>(im, ...)</span>
+<span id="cb46-15"><a href="image-processing.html#cb46-15" aria-hidden="true" tabindex="-1"></a>    dethess <span class="ot">&lt;-</span> <span class="fu">imHessianDeterminant</span>(norm, ...)</span>
+<span id="cb46-16"><a href="image-processing.html#cb46-16" aria-hidden="true" tabindex="-1"></a>    dethess <span class="ot">&lt;-</span> <span class="fu">imNormalise</span>(dethess)</span>
+<span id="cb46-17"><a href="image-processing.html#cb46-17" aria-hidden="true" tabindex="-1"></a>    dethessb <span class="ot">&lt;-</span> <span class="fu">array</span>(imager<span class="sc">::</span><span class="fu">isoblur</span>(<span class="fu">suppressWarnings</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>(dethess)), </span>
+<span id="cb46-18"><a href="image-processing.html#cb46-18" aria-hidden="true" tabindex="-1"></a>        smallBlur), <span class="at">dim =</span> <span class="fu">dim</span>(im))</span>
+<span id="cb46-19"><a href="image-processing.html#cb46-19" aria-hidden="true" tabindex="-1"></a>    vals <span class="ot">&lt;-</span> dethessb[dethessb <span class="sc">&gt;</span> <span class="fu">quantile</span>(dethessb, <span class="fl">0.95</span>)]</span>
+<span id="cb46-20"><a href="image-processing.html#cb46-20" aria-hidden="true" tabindex="-1"></a>    dethessbFloor <span class="ot">&lt;-</span> <span class="fu">findThreshold</span>(vals, <span class="at">method =</span> thresh_Elbow, </span>
+<span id="cb46-21"><a href="image-processing.html#cb46-21" aria-hidden="true" tabindex="-1"></a>        ...)</span>
+<span id="cb46-22"><a href="image-processing.html#cb46-22" aria-hidden="true" tabindex="-1"></a>    LoG <span class="ot">&lt;-</span> <span class="fu">imLaplacianOfGaussian</span>(norm, ...)</span>
+<span id="cb46-23"><a href="image-processing.html#cb46-23" aria-hidden="true" tabindex="-1"></a>    LoGthresh <span class="ot">&lt;-</span> <span class="fu">findThreshold</span>(LoG[LoG <span class="sc">&gt;</span> <span class="dv">0</span>], <span class="at">method =</span> thresh_Elbow, </span>
+<span id="cb46-24"><a href="image-processing.html#cb46-24" aria-hidden="true" tabindex="-1"></a>        ...)</span>
+<span id="cb46-25"><a href="image-processing.html#cb46-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb46-26"><a href="image-processing.html#cb46-26" aria-hidden="true" tabindex="-1"></a>    <span class="do">## New code: also get LoG values for the lowpass image</span></span>
+<span id="cb46-27"><a href="image-processing.html#cb46-27" aria-hidden="true" tabindex="-1"></a>    LoGLowPass <span class="ot">&lt;-</span> <span class="fu">imLaplacianOfGaussian</span>(norm <span class="sc">*</span> lowpass)</span>
+<span id="cb46-28"><a href="image-processing.html#cb46-28" aria-hidden="true" tabindex="-1"></a>    LoGthreshLowPass <span class="ot">&lt;-</span> <span class="fu">findThreshold</span>(LoG[LoG <span class="sc">&gt;</span> <span class="dv">0</span>], <span class="at">method =</span> thresh_Elbow, ...)</span>
+<span id="cb46-29"><a href="image-processing.html#cb46-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb46-30"><a href="image-processing.html#cb46-30" aria-hidden="true" tabindex="-1"></a>    <span class="do">## New code: Union of masks</span></span>
+<span id="cb46-31"><a href="image-processing.html#cb46-31" aria-hidden="true" tabindex="-1"></a>    mask <span class="ot">&lt;-</span> </span>
+<span id="cb46-32"><a href="image-processing.html#cb46-32" aria-hidden="true" tabindex="-1"></a>      (LoG<span class="sc">&gt;</span>LoGthresh) <span class="sc">+</span>               <span class="co">#LoG of original image above threshold</span></span>
+<span id="cb46-33"><a href="image-processing.html#cb46-33" aria-hidden="true" tabindex="-1"></a>      (LoGLowPass<span class="sc">&gt;</span>LoGthreshLowPass) <span class="sc">+</span> <span class="co">#LoG of lowpass image above threshold</span></span>
+<span id="cb46-34"><a href="image-processing.html#cb46-34" aria-hidden="true" tabindex="-1"></a>      (dethessb<span class="sc">&gt;</span>dethessbFloor) <span class="sc">+</span>      <span class="co">#detHess above threshold</span></span>
+<span id="cb46-35"><a href="image-processing.html#cb46-35" aria-hidden="true" tabindex="-1"></a>      (im<span class="sc">==</span><span class="dv">1</span>)                         <span class="co">#Saturated pixels</span></span>
+<span id="cb46-36"><a href="image-processing.html#cb46-36" aria-hidden="true" tabindex="-1"></a>    mask <span class="ot">&lt;-</span> mask <span class="sc">&gt;</span> <span class="dv">0</span>                  <span class="co">#Inclusive Or</span></span>
+<span id="cb46-37"><a href="image-processing.html#cb46-37" aria-hidden="true" tabindex="-1"></a>    allmask <span class="ot">&lt;-</span> mask</span>
+<span id="cb46-38"><a href="image-processing.html#cb46-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb46-39"><a href="image-processing.html#cb46-39" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Old code: Filter out masks that are too small</span></span>
+<span id="cb46-40"><a href="image-processing.html#cb46-40" aria-hidden="true" tabindex="-1"></a>    labmask <span class="ot">&lt;-</span> EBImage<span class="sc">::</span><span class="fu">bwlabel</span>(mask)</span>
+<span id="cb46-41"><a href="image-processing.html#cb46-41" aria-hidden="true" tabindex="-1"></a>    toosmall <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">tabulate</span>(labmask) <span class="sc">&lt;</span> minBlobSize)</span>
+<span id="cb46-42"><a href="image-processing.html#cb46-42" aria-hidden="true" tabindex="-1"></a>    mask[labmask <span class="sc">%in%</span> toosmall] <span class="ot">&lt;-</span> F</span>
+<span id="cb46-43"><a href="image-processing.html#cb46-43" aria-hidden="true" tabindex="-1"></a>    final <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">as.integer</span>(mask), <span class="at">nrow =</span> <span class="fu">nrow</span>(mask), <span class="at">ncol =</span> <span class="fu">ncol</span>(mask))</span>
+<span id="cb46-44"><a href="image-processing.html#cb46-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb46-45"><a href="image-processing.html#cb46-45" aria-hidden="true" tabindex="-1"></a>    <span class="do">## If function ready, just return final</span></span>
+<span id="cb46-46"><a href="image-processing.html#cb46-46" aria-hidden="true" tabindex="-1"></a>    <span class="co"># return(final)</span></span>
+<span id="cb46-47"><a href="image-processing.html#cb46-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb46-48"><a href="image-processing.html#cb46-48" aria-hidden="true" tabindex="-1"></a>    <span class="do">## If troubleshooting, return all intermediate images</span></span>
+<span id="cb46-49"><a href="image-processing.html#cb46-49" aria-hidden="true" tabindex="-1"></a>    processedImages <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb46-50"><a href="image-processing.html#cb46-50" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;Norm&#39;</span> <span class="ot">=</span> norm,</span>
+<span id="cb46-51"><a href="image-processing.html#cb46-51" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;LowPass&#39;</span> <span class="ot">=</span> lowpass,</span>
+<span id="cb46-52"><a href="image-processing.html#cb46-52" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;detHess&#39;</span> <span class="ot">=</span> dethessb,</span>
+<span id="cb46-53"><a href="image-processing.html#cb46-53" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;detHess masked&#39;</span> <span class="ot">=</span> dethessb<span class="sc">&gt;</span>dethessbFloor,</span>
+<span id="cb46-54"><a href="image-processing.html#cb46-54" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;LoG&#39;</span> <span class="ot">=</span> LoG,</span>
+<span id="cb46-55"><a href="image-processing.html#cb46-55" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;LoG masked&#39;</span> <span class="ot">=</span> LoG<span class="sc">&gt;</span>LoGthresh,</span>
+<span id="cb46-56"><a href="image-processing.html#cb46-56" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;LowPass LoG&#39;</span> <span class="ot">=</span> LoGLowPass,</span>
+<span id="cb46-57"><a href="image-processing.html#cb46-57" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;LowPass LoG masked&#39;</span> <span class="ot">=</span> LoGLowPass<span class="sc">&gt;</span>LoGthreshLowPass,</span>
+<span id="cb46-58"><a href="image-processing.html#cb46-58" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;All masks&#39;</span> <span class="ot">=</span> allmask,</span>
+<span id="cb46-59"><a href="image-processing.html#cb46-59" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;Masks after size filter&#39;</span> <span class="ot">=</span> mask</span>
+<span id="cb46-60"><a href="image-processing.html#cb46-60" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb46-61"><a href="image-processing.html#cb46-61" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>( processedImages )</span>
+<span id="cb46-62"><a href="image-processing.html#cb46-62" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb46-63"><a href="image-processing.html#cb46-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-64"><a href="image-processing.html#cb46-64" aria-hidden="true" tabindex="-1"></a>processedImages <span class="ot">&lt;-</span> <span class="fu">myCustomMask</span>( imList[[<span class="dv">1</span>]] )</span>
+<span id="cb46-65"><a href="image-processing.html#cb46-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-66"><a href="image-processing.html#cb46-66" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">5</span>,<span class="dv">2</span>))</span>
+<span id="cb46-67"><a href="image-processing.html#cb46-67" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>( imMetricName <span class="cf">in</span> <span class="fu">names</span>(processedImages) ){</span>
+<span id="cb46-68"><a href="image-processing.html#cb46-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( processedImages[[imMetricName]][<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>] ), <span class="at">main =</span> <span class="fu">toupper</span>(imMetricName) )</span>
+<span id="cb46-69"><a href="image-processing.html#cb46-69" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-defaultmaskingreplaced-1.png" width="576" /></p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="image-processing.html#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<p>When satisfied with the custom function, returning intermediate images can be skipped:</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="image-processing.html#cb48-1" aria-hidden="true" tabindex="-1"></a>myCustomMask <span class="ot">&lt;-</span> <span class="cf">function</span> (im, smallBlur, minBlobSize, currentIteration, ...){</span>
+<span id="cb48-2"><a href="image-processing.html#cb48-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">missing</span>(currentIteration)) {</span>
+<span id="cb48-3"><a href="image-processing.html#cb48-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">message</span>(currentIteration, <span class="at">appendLF =</span> F)</span>
+<span id="cb48-4"><a href="image-processing.html#cb48-4" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb48-5"><a href="image-processing.html#cb48-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">missing</span>(smallBlur)) {</span>
+<span id="cb48-6"><a href="image-processing.html#cb48-6" aria-hidden="true" tabindex="-1"></a>        smallBlur <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb48-7"><a href="image-processing.html#cb48-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb48-8"><a href="image-processing.html#cb48-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">missing</span>(minBlobSize)) {</span>
+<span id="cb48-9"><a href="image-processing.html#cb48-9" aria-hidden="true" tabindex="-1"></a>        minBlobSize <span class="ot">=</span> <span class="dv">9</span></span>
+<span id="cb48-10"><a href="image-processing.html#cb48-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb48-11"><a href="image-processing.html#cb48-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb48-12"><a href="image-processing.html#cb48-12" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Calculate scores per pixel as per the default imForMask function</span></span>
+<span id="cb48-13"><a href="image-processing.html#cb48-13" aria-hidden="true" tabindex="-1"></a>    norm <span class="ot">&lt;-</span> <span class="fu">imNormalise</span>(im, ...)</span>
+<span id="cb48-14"><a href="image-processing.html#cb48-14" aria-hidden="true" tabindex="-1"></a>    lowpass <span class="ot">&lt;-</span> <span class="fu">imLowPass</span>(im, ...)</span>
+<span id="cb48-15"><a href="image-processing.html#cb48-15" aria-hidden="true" tabindex="-1"></a>    dethess <span class="ot">&lt;-</span> <span class="fu">imHessianDeterminant</span>(norm, ...)</span>
+<span id="cb48-16"><a href="image-processing.html#cb48-16" aria-hidden="true" tabindex="-1"></a>    dethess <span class="ot">&lt;-</span> <span class="fu">imNormalise</span>(dethess)</span>
+<span id="cb48-17"><a href="image-processing.html#cb48-17" aria-hidden="true" tabindex="-1"></a>    dethessb <span class="ot">&lt;-</span> <span class="fu">array</span>(imager<span class="sc">::</span><span class="fu">isoblur</span>(<span class="fu">suppressWarnings</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>(dethess)), </span>
+<span id="cb48-18"><a href="image-processing.html#cb48-18" aria-hidden="true" tabindex="-1"></a>        smallBlur), <span class="at">dim =</span> <span class="fu">dim</span>(im))</span>
+<span id="cb48-19"><a href="image-processing.html#cb48-19" aria-hidden="true" tabindex="-1"></a>    vals <span class="ot">&lt;-</span> dethessb[dethessb <span class="sc">&gt;</span> <span class="fu">quantile</span>(dethessb, <span class="fl">0.95</span>)]</span>
+<span id="cb48-20"><a href="image-processing.html#cb48-20" aria-hidden="true" tabindex="-1"></a>    dethessbFloor <span class="ot">&lt;-</span> <span class="fu">findThreshold</span>(vals, <span class="at">method =</span> thresh_Elbow, </span>
+<span id="cb48-21"><a href="image-processing.html#cb48-21" aria-hidden="true" tabindex="-1"></a>        ...)</span>
+<span id="cb48-22"><a href="image-processing.html#cb48-22" aria-hidden="true" tabindex="-1"></a>    LoG <span class="ot">&lt;-</span> <span class="fu">imLaplacianOfGaussian</span>(norm, ...)</span>
+<span id="cb48-23"><a href="image-processing.html#cb48-23" aria-hidden="true" tabindex="-1"></a>    LoGthresh <span class="ot">&lt;-</span> <span class="fu">findThreshold</span>(LoG[LoG <span class="sc">&gt;</span> <span class="dv">0</span>], <span class="at">method =</span> thresh_Elbow, </span>
+<span id="cb48-24"><a href="image-processing.html#cb48-24" aria-hidden="true" tabindex="-1"></a>        ...)</span>
+<span id="cb48-25"><a href="image-processing.html#cb48-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb48-26"><a href="image-processing.html#cb48-26" aria-hidden="true" tabindex="-1"></a>    <span class="do">## New: also get LoG values for the lowpass image</span></span>
+<span id="cb48-27"><a href="image-processing.html#cb48-27" aria-hidden="true" tabindex="-1"></a>    LoGLowPass <span class="ot">&lt;-</span> <span class="fu">imLaplacianOfGaussian</span>(norm <span class="sc">*</span> lowpass)</span>
+<span id="cb48-28"><a href="image-processing.html#cb48-28" aria-hidden="true" tabindex="-1"></a>    LoGthreshLowPass <span class="ot">&lt;-</span> <span class="fu">findThreshold</span>(LoG[LoG <span class="sc">&gt;</span> <span class="dv">0</span>], <span class="at">method =</span> thresh_Elbow, ...)</span>
+<span id="cb48-29"><a href="image-processing.html#cb48-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb48-30"><a href="image-processing.html#cb48-30" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Union of masks</span></span>
+<span id="cb48-31"><a href="image-processing.html#cb48-31" aria-hidden="true" tabindex="-1"></a>    mask <span class="ot">&lt;-</span> </span>
+<span id="cb48-32"><a href="image-processing.html#cb48-32" aria-hidden="true" tabindex="-1"></a>      (LoG<span class="sc">&gt;</span>LoGthresh) <span class="sc">+</span>               <span class="co">#LoG of original image above threshold</span></span>
+<span id="cb48-33"><a href="image-processing.html#cb48-33" aria-hidden="true" tabindex="-1"></a>      (LoGLowPass<span class="sc">&gt;</span>LoGthreshLowPass) <span class="sc">+</span> <span class="co">#LoG of lowpass image above threshold</span></span>
+<span id="cb48-34"><a href="image-processing.html#cb48-34" aria-hidden="true" tabindex="-1"></a>      (dethessb<span class="sc">&gt;</span>dethessbFloor) <span class="sc">+</span>      <span class="co">#detHess above threshold</span></span>
+<span id="cb48-35"><a href="image-processing.html#cb48-35" aria-hidden="true" tabindex="-1"></a>      (im<span class="sc">==</span><span class="dv">1</span>)                         <span class="co">#Saturated pixels</span></span>
+<span id="cb48-36"><a href="image-processing.html#cb48-36" aria-hidden="true" tabindex="-1"></a>    mask <span class="ot">&lt;-</span> mask <span class="sc">&gt;</span> <span class="dv">0</span>                  <span class="co">#Inclusive Or</span></span>
+<span id="cb48-37"><a href="image-processing.html#cb48-37" aria-hidden="true" tabindex="-1"></a>    allmask <span class="ot">&lt;-</span> mask</span>
+<span id="cb48-38"><a href="image-processing.html#cb48-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb48-39"><a href="image-processing.html#cb48-39" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Filter out masks that are too small</span></span>
+<span id="cb48-40"><a href="image-processing.html#cb48-40" aria-hidden="true" tabindex="-1"></a>    labmask <span class="ot">&lt;-</span> EBImage<span class="sc">::</span><span class="fu">bwlabel</span>(mask)</span>
+<span id="cb48-41"><a href="image-processing.html#cb48-41" aria-hidden="true" tabindex="-1"></a>    toosmall <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">tabulate</span>(labmask) <span class="sc">&lt;</span> minBlobSize)</span>
+<span id="cb48-42"><a href="image-processing.html#cb48-42" aria-hidden="true" tabindex="-1"></a>    mask[labmask <span class="sc">%in%</span> toosmall] <span class="ot">&lt;-</span> F</span>
+<span id="cb48-43"><a href="image-processing.html#cb48-43" aria-hidden="true" tabindex="-1"></a>    final <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">as.integer</span>(mask), <span class="at">nrow =</span> <span class="fu">nrow</span>(mask), <span class="at">ncol =</span> <span class="fu">ncol</span>(mask))</span>
+<span id="cb48-44"><a href="image-processing.html#cb48-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb48-45"><a href="image-processing.html#cb48-45" aria-hidden="true" tabindex="-1"></a>    <span class="do">## If function ready, just return final</span></span>
+<span id="cb48-46"><a href="image-processing.html#cb48-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(final)</span>
+<span id="cb48-47"><a href="image-processing.html#cb48-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb48-48"><a href="image-processing.html#cb48-48" aria-hidden="true" tabindex="-1"></a>    <span class="do">## If troubleshooting, return all intermediate images</span></span>
+<span id="cb48-49"><a href="image-processing.html#cb48-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># processedImages &lt;- list(</span></span>
+<span id="cb48-50"><a href="image-processing.html#cb48-50" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   &#39;Norm&#39; = norm,</span></span>
+<span id="cb48-51"><a href="image-processing.html#cb48-51" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   &#39;LowPass&#39; = lowpass,</span></span>
+<span id="cb48-52"><a href="image-processing.html#cb48-52" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   &#39;detHess&#39; = dethessb,</span></span>
+<span id="cb48-53"><a href="image-processing.html#cb48-53" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   &#39;detHess masked&#39; = dethessb&gt;dethessbFloor,</span></span>
+<span id="cb48-54"><a href="image-processing.html#cb48-54" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   &#39;LoG&#39; = LoG,</span></span>
+<span id="cb48-55"><a href="image-processing.html#cb48-55" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   &#39;LoG masked&#39; = LoG&gt;LoGthresh,</span></span>
+<span id="cb48-56"><a href="image-processing.html#cb48-56" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   &#39;LowPass LoG&#39; = LoGLowPass,</span></span>
+<span id="cb48-57"><a href="image-processing.html#cb48-57" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   &#39;LowPass LoG masked&#39; = LoGLowPass&gt;LoGthreshLowPass,</span></span>
+<span id="cb48-58"><a href="image-processing.html#cb48-58" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   &#39;All masks&#39; = allmask,</span></span>
+<span id="cb48-59"><a href="image-processing.html#cb48-59" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   &#39;Masks after size filter&#39; = mask</span></span>
+<span id="cb48-60"><a href="image-processing.html#cb48-60" aria-hidden="true" tabindex="-1"></a>    <span class="co"># )</span></span>
+<span id="cb48-61"><a href="image-processing.html#cb48-61" aria-hidden="true" tabindex="-1"></a>    <span class="co"># return( processedImages )</span></span>
+<span id="cb48-62"><a href="image-processing.html#cb48-62" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb48-63"><a href="image-processing.html#cb48-63" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb48-64"><a href="image-processing.html#cb48-64" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( imList[[<span class="dv">1</span>]][<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>]<span class="sc">^</span><span class="fl">0.1</span> ), <span class="at">main=</span><span class="st">&#39;Original (brightened)&#39;</span>)</span>
+<span id="cb48-65"><a href="image-processing.html#cb48-65" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( <span class="fu">myCustomMask</span>(imList[[<span class="dv">1</span>]])[<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>] ), <span class="at">main=</span><span class="st">&#39;Custom mask&#39;</span>)</span></code></pre></div>
+<p><img src="_main_files/figure-html/improc-myCustomMaskShowcase-1.png" width="672" /></p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="image-processing.html#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<p>Voila! A new custom masking function.</p>
+<p>Having explained how to create a custom function, we will discuss how these custom functions can be looped through their image list.</p>
+</div>
+<div id="feeding-image-processing-pipelines-into-getimagemetrics" class="section level2 hasAnchor" number="4.5">
+<h2><span class="header-section-number">4.5</span> Feeding image processing pipelines into <code>getImageMetrics</code><a href="image-processing.html#feeding-image-processing-pipelines-into-getimagemetrics" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>By listing looping functions in a named list <code>imageFunctions</code> (much like what is done for <code>getAnchorParams</code>), users can perform different types of image processing using our <code>getImageMetrics</code> function. The result is a new environment object (<code>imMetrics</code>) that houses image lists that have been processed in different ways. As default, the following image processing is performed:</p>
 <ul>
 <li><code>ORIG</code>: unprocessed images.</li>
@@ -438,15 +658,15 @@ x = \frac{\log{ \frac{\log{ceiling}}{\log{floor}}} }{ \log{\frac{floor}{ceiling}
 <li><code>DECODE</code>: images that have been optimised for decoding.</li>
 <li><code>MASK</code>: images where pixels worth bringing forward for decoding have been masked as <code>TRUE</code>.</li>
 </ul>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="image-processing.html#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getImageMetrics</span>( </span>
-<span id="cb41-2"><a href="image-processing.html#cb41-2" aria-hidden="true" tabindex="-1"></a>  imList,</span>
-<span id="cb41-3"><a href="image-processing.html#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageFunctions =</span> <span class="fu">list</span>(</span>
-<span id="cb41-4"><a href="image-processing.html#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;ORIG&#39;</span> <span class="ot">=</span> imReturn,</span>
-<span id="cb41-5"><a href="image-processing.html#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;NORM&#39;</span> <span class="ot">=</span> imWinsorIntensities,</span>
-<span id="cb41-6"><a href="image-processing.html#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;COARSE&#39;</span> <span class="ot">=</span> imLowPass,</span>
-<span id="cb41-7"><a href="image-processing.html#cb41-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;DECODE&#39;</span> <span class="ot">=</span> imForDecode,</span>
-<span id="cb41-8"><a href="image-processing.html#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;MASK&#39;</span> <span class="ot">=</span> imForMask</span>
-<span id="cb41-9"><a href="image-processing.html#cb41-9" aria-hidden="true" tabindex="-1"></a>  ))</span></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="image-processing.html#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getImageMetrics</span>( </span>
+<span id="cb50-2"><a href="image-processing.html#cb50-2" aria-hidden="true" tabindex="-1"></a>  imList,</span>
+<span id="cb50-3"><a href="image-processing.html#cb50-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageFunctions =</span> <span class="fu">list</span>(</span>
+<span id="cb50-4"><a href="image-processing.html#cb50-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;ORIG&#39;</span> <span class="ot">=</span> imReturn,</span>
+<span id="cb50-5"><a href="image-processing.html#cb50-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;NORM&#39;</span> <span class="ot">=</span> imWinsorIntensities,</span>
+<span id="cb50-6"><a href="image-processing.html#cb50-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;COARSE&#39;</span> <span class="ot">=</span> imLowPass,</span>
+<span id="cb50-7"><a href="image-processing.html#cb50-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;DECODE&#39;</span> <span class="ot">=</span> imForDecode,</span>
+<span id="cb50-8"><a href="image-processing.html#cb50-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;MASK&#39;</span> <span class="ot">=</span> imForMask</span>
+<span id="cb50-9"><a href="image-processing.html#cb50-9" aria-hidden="true" tabindex="-1"></a>  ))</span></code></pre></div>
 <pre><code>## 
 ## Preparing imMetrics environment...</code></pre>
 <pre><code>## 
@@ -461,57 +681,46 @@ x = \frac{\log{ \frac{\log{ceiling}}{\log{floor}}} }{ \log{\frac{floor}{ceiling}
 ## Looping MASK function...
 ## 1 of 16...2 of 16...3 of 16...4 of 16...5 of 16...6 of 16...7 of 16...8 of 16...9 of 16...10 of 16...11 of 16...12 of 16...13 of 16...14 of 16...15 of 16...16 of 16...</code></pre>
 <p><strong>ALWAYS plot to check how your image processing has altered your image!</strong></p>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="image-processing.html#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>))</span>
-<span id="cb45-2"><a href="image-processing.html#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>( imMetricName <span class="cf">in</span> <span class="fu">ls</span>(imMetrics) ){</span>
-<span id="cb45-3"><a href="image-processing.html#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( imMetrics[[imMetricName]][[<span class="dv">1</span>]][<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>] ), <span class="at">main =</span> imMetricName)</span>
-<span id="cb45-4"><a href="image-processing.html#cb45-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb45-5"><a href="image-processing.html#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="image-processing.html#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>))</span>
+<span id="cb54-2"><a href="image-processing.html#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>( imMetricName <span class="cf">in</span> <span class="fu">ls</span>(imMetrics) ){</span>
+<span id="cb54-3"><a href="image-processing.html#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( imMetrics[[imMetricName]][[<span class="dv">1</span>]][<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>] ), <span class="at">main =</span> imMetricName)</span>
+<span id="cb54-4"><a href="image-processing.html#cb54-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb54-5"><a href="image-processing.html#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
 <p><img src="_main_files/figure-html/improc-imagemetrics-zoomed-1.png" width="672" /></p>
 <p>Users can do the same, and visualise how their function performs on one FOV. When satisfied, that custom function can be looped through all images in the <code>imList</code> with <code>getImageMetrics</code>:</p>
-<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="image-processing.html#cb46-1" aria-hidden="true" tabindex="-1"></a>userCustomFunction <span class="ot">&lt;-</span> <span class="cf">function</span>( im ){</span>
-<span id="cb46-2"><a href="image-processing.html#cb46-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## User to decide on how they want the image to be processed</span></span>
-<span id="cb46-3"><a href="image-processing.html#cb46-3" aria-hidden="true" tabindex="-1"></a>  ...</span>
-<span id="cb46-4"><a href="image-processing.html#cb46-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb46-5"><a href="image-processing.html#cb46-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-6"><a href="image-processing.html#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Loop the custom function across all images</span></span>
-<span id="cb46-7"><a href="image-processing.html#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="fu">getImageMetrics</span>( </span>
-<span id="cb46-8"><a href="image-processing.html#cb46-8" aria-hidden="true" tabindex="-1"></a>  imList,</span>
-<span id="cb46-9"><a href="image-processing.html#cb46-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageFunctions =</span> <span class="fu">list</span>(</span>
-<span id="cb46-10"><a href="image-processing.html#cb46-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;ORIG&#39;</span> <span class="ot">=</span> imReturn,</span>
-<span id="cb46-11"><a href="image-processing.html#cb46-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;NORM&#39;</span> <span class="ot">=</span> imWinsorIntensities,</span>
-<span id="cb46-12"><a href="image-processing.html#cb46-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;COARSE&#39;</span> <span class="ot">=</span> imLowPass,</span>
-<span id="cb46-13"><a href="image-processing.html#cb46-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;DECODE&#39;</span> <span class="ot">=</span> imForDecode,</span>
-<span id="cb46-14"><a href="image-processing.html#cb46-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;MASK&#39;</span> <span class="ot">=</span> imForMask,</span>
-<span id="cb46-15"><a href="image-processing.html#cb46-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;CUSTOM&#39;</span> <span class="ot">=</span> userCustomFunction <span class="co">#New function  (or replace one of the above with your new function)</span></span>
-<span id="cb46-16"><a href="image-processing.html#cb46-16" aria-hidden="true" tabindex="-1"></a>  ))</span></code></pre></div>
-<p>As an example of a custom function: say users want to mask all pixels brighter than some value. This can be done by creating a function:</p>
-<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="image-processing.html#cb47-1" aria-hidden="true" tabindex="-1"></a>myCustomMask <span class="ot">&lt;-</span> <span class="cf">function</span>( im ){</span>
-<span id="cb47-2"><a href="image-processing.html#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>( im<span class="sc">&gt;</span><span class="fl">0.1</span> )</span>
-<span id="cb47-3"><a href="image-processing.html#cb47-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb47-4"><a href="image-processing.html#cb47-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-5"><a href="image-processing.html#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>))</span>
-<span id="cb47-6"><a href="image-processing.html#cb47-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( imList[[<span class="dv">1</span>]][<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>] ), <span class="at">main=</span><span class="st">&#39;Original&#39;</span>)</span>
-<span id="cb47-7"><a href="image-processing.html#cb47-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( <span class="fu">imForMask</span>(imList[[<span class="dv">1</span>]])[<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>] ), <span class="at">main=</span><span class="st">&#39;Default mask&#39;</span>)</span>
-<span id="cb47-8"><a href="image-processing.html#cb47-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imager<span class="sc">::</span><span class="fu">as.cimg</span>( <span class="fu">myCustomMask</span>(imList[[<span class="dv">1</span>]][<span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>, <span class="dv">1000</span><span class="sc">:</span><span class="dv">1500</span>]) ), <span class="at">main=</span><span class="st">&#39;Custom mask&#39;</span>)</span></code></pre></div>
-<p><img src="_main_files/figure-html/improc-customMask-1.png" width="672" /></p>
-<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="image-processing.html#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="image-processing.html#cb55-1" aria-hidden="true" tabindex="-1"></a>userCustomFunction <span class="ot">&lt;-</span> <span class="cf">function</span>( im ){</span>
+<span id="cb55-2"><a href="image-processing.html#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## User to decide on how they want the image to be processed</span></span>
+<span id="cb55-3"><a href="image-processing.html#cb55-3" aria-hidden="true" tabindex="-1"></a>  ...</span>
+<span id="cb55-4"><a href="image-processing.html#cb55-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb55-5"><a href="image-processing.html#cb55-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-6"><a href="image-processing.html#cb55-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Loop the custom function across all images</span></span>
+<span id="cb55-7"><a href="image-processing.html#cb55-7" aria-hidden="true" tabindex="-1"></a><span class="fu">getImageMetrics</span>( </span>
+<span id="cb55-8"><a href="image-processing.html#cb55-8" aria-hidden="true" tabindex="-1"></a>  imList,</span>
+<span id="cb55-9"><a href="image-processing.html#cb55-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageFunctions =</span> <span class="fu">list</span>(</span>
+<span id="cb55-10"><a href="image-processing.html#cb55-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;ORIG&#39;</span> <span class="ot">=</span> imReturn,</span>
+<span id="cb55-11"><a href="image-processing.html#cb55-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;NORM&#39;</span> <span class="ot">=</span> imWinsorIntensities,</span>
+<span id="cb55-12"><a href="image-processing.html#cb55-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;COARSE&#39;</span> <span class="ot">=</span> imLowPass,</span>
+<span id="cb55-13"><a href="image-processing.html#cb55-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;DECODE&#39;</span> <span class="ot">=</span> imForDecode,</span>
+<span id="cb55-14"><a href="image-processing.html#cb55-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;MASK&#39;</span> <span class="ot">=</span> imForMask,</span>
+<span id="cb55-15"><a href="image-processing.html#cb55-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;CUSTOM&#39;</span> <span class="ot">=</span> userCustomFunction <span class="co">#New function  (or replace one of the above with your new function)</span></span>
+<span id="cb55-16"><a href="image-processing.html#cb55-16" aria-hidden="true" tabindex="-1"></a>  ))</span></code></pre></div>
 <p>It is important to note that <code>imMetrics$MASK</code> will determine which pixels are brought forwards for decoding during the later <code>consolidateImageMetrics</code> function; and that decoding will be performed on <code>imMetrics$DECODE</code>. The <code>DECODE</code> and <code>MASK</code> metrics should thus be the image processing pipelines that users should focus on when optimising.</p>
 <p>If users want to decode on the whole image (which may be memory intensive), removing <code>MASK</code> from <code>imMetrics</code> (an example below), or creating a <code>imMetrics$MASK</code> with <code>TRUE</code> for every pixel will work. In so doing, spotcalling will only depend on the <code>DECODE</code> images.</p>
-<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="image-processing.html#cb49-1" aria-hidden="true" tabindex="-1"></a>myCustomMask <span class="ot">&lt;-</span> <span class="cf">function</span>(im){</span>
-<span id="cb49-2"><a href="image-processing.html#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>( im <span class="sc">&gt;</span> <span class="sc">-</span><span class="cn">Inf</span> ) <span class="co">#Return TRUE for every pixel</span></span>
-<span id="cb49-3"><a href="image-processing.html#cb49-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb49-4"><a href="image-processing.html#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="fu">getImageMetrics</span>( </span>
-<span id="cb49-5"><a href="image-processing.html#cb49-5" aria-hidden="true" tabindex="-1"></a>  imList,</span>
-<span id="cb49-6"><a href="image-processing.html#cb49-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageFunctions =</span> <span class="fu">list</span>(</span>
-<span id="cb49-7"><a href="image-processing.html#cb49-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;ORIG&#39;</span> <span class="ot">=</span> imReturn,</span>
-<span id="cb49-8"><a href="image-processing.html#cb49-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;NORM&#39;</span> <span class="ot">=</span> imWinsorIntensities,</span>
-<span id="cb49-9"><a href="image-processing.html#cb49-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;COARSE&#39;</span> <span class="ot">=</span> imLowPass,</span>
-<span id="cb49-10"><a href="image-processing.html#cb49-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;DECODE&#39;</span> <span class="ot">=</span> imForDecode,</span>
-<span id="cb49-11"><a href="image-processing.html#cb49-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;MASK&#39;</span> <span class="ot">=</span> myCustomMask <span class="co">#User replacing the mask function</span></span>
-<span id="cb49-12"><a href="image-processing.html#cb49-12" aria-hidden="true" tabindex="-1"></a>  ))</span>
-<span id="cb49-13"><a href="image-processing.html#cb49-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb49-14"><a href="image-processing.html#cb49-14" aria-hidden="true" tabindex="-1"></a><span class="do">## Alternatively, users can remove the MASK</span></span>
-<span id="cb49-15"><a href="image-processing.html#cb49-15" aria-hidden="true" tabindex="-1"></a>imMetrics<span class="sc">$</span>MASK <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code></pre></div>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="image-processing.html#cb56-1" aria-hidden="true" tabindex="-1"></a>myCustomMask <span class="ot">&lt;-</span> <span class="cf">function</span>(im){</span>
+<span id="cb56-2"><a href="image-processing.html#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>( im <span class="sc">&gt;</span> <span class="sc">-</span><span class="cn">Inf</span> ) <span class="co">#Return TRUE for every pixel</span></span>
+<span id="cb56-3"><a href="image-processing.html#cb56-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb56-4"><a href="image-processing.html#cb56-4" aria-hidden="true" tabindex="-1"></a><span class="fu">getImageMetrics</span>( </span>
+<span id="cb56-5"><a href="image-processing.html#cb56-5" aria-hidden="true" tabindex="-1"></a>  imList,</span>
+<span id="cb56-6"><a href="image-processing.html#cb56-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageFunctions =</span> <span class="fu">list</span>(</span>
+<span id="cb56-7"><a href="image-processing.html#cb56-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;ORIG&#39;</span> <span class="ot">=</span> imReturn,</span>
+<span id="cb56-8"><a href="image-processing.html#cb56-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;NORM&#39;</span> <span class="ot">=</span> imWinsorIntensities,</span>
+<span id="cb56-9"><a href="image-processing.html#cb56-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;COARSE&#39;</span> <span class="ot">=</span> imLowPass,</span>
+<span id="cb56-10"><a href="image-processing.html#cb56-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;DECODE&#39;</span> <span class="ot">=</span> imForDecode,</span>
+<span id="cb56-11"><a href="image-processing.html#cb56-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;MASK&#39;</span> <span class="ot">=</span> myCustomMask <span class="co">#User replacing the mask function</span></span>
+<span id="cb56-12"><a href="image-processing.html#cb56-12" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb56-13"><a href="image-processing.html#cb56-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-14"><a href="image-processing.html#cb56-14" aria-hidden="true" tabindex="-1"></a><span class="do">## Alternatively, users can remove the MASK</span></span>
+<span id="cb56-15"><a href="image-processing.html#cb56-15" aria-hidden="true" tabindex="-1"></a>imMetrics<span class="sc">$</span>MASK <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code></pre></div>
 <p>Experiment and find what works for your dataset. Don’t forget to make use of functions like <code>filterDF</code> and <code>spotcall_troubleshootPlots</code> to help you troubleshoot (see Chapter <a href="spotcalling.html#spotcalling">3</a>).</p>
 <p><strong>Users are encouraged to optimise their image processing pipelines on one FOV, before applying the same pipelines to all other FOVs.</strong></p>
 

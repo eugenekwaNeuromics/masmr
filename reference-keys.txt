@@ -54,3 +54,4 @@ qc-plotting
 next-steps
 troubleshooting
 url-your-book-url-like-httpsbookdown.orgyihuibookdown
+building-your-own-function-an-example
