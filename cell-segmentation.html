@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-03-24" />
+<meta name="date" content="2025-03-26" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -321,10 +321,10 @@ div.csl-indent {
 <li><code>pythonLocation</code>: location of the user’s Python environment. The Python environment should contain all the packages necessary to run the cell segmen tation model of choice.</li>
 </ul>
 <p>Details on the setting up of the Python environment is beyond the scope of this book. Briefly, there exist various tools (e.g. <code>miniconda</code> and <code>anaconda</code>) that allow users to create a Python environment for installing necessary software. We will then interface with that environment through <code>reticulate</code>. Below are a series of commands (input into the <code>anaconda</code> command prompt) to set up a Python environment called <code>scipyenv</code> that is compatible with <code>stardist</code> and <code>cellpose</code>. Users should take note of where the environment is created, and provide the location of the folder in <code>pythonLocation</code>.</p>
-<pre><code>conda create -n scipyenv python=3.9 notebook pandas
+<pre><code>conda create -n scipyenv python=3.9 notebook pandas numpy=1.26.4
 conda activate scipyenv
 conda install pytorch=1.8.2 cudatoolkit=10.2 -c pytorch-lts
-pip install cellpose
+pip install cellpose==3.0.11
 pip install tensorflow
 pip install stardist</code></pre>
 <p>Additionally, similar to spotcalling, we also <code>readImageMetaData</code>, though this time for DAPI images specifically. Because there will be no decoding, warnings about codebook column names not matching can be safely ignored.</p>
@@ -594,7 +594,7 @@ DAPI_1_dapi
 <pre><code>## [1] &quot;CELLPOSE&quot;</code></pre>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="cell-segmentation.html#cb23-1" aria-hidden="true" tabindex="-1"></a>cellSeg<span class="sc">$</span>CELLPOSE</span></code></pre></div>
 <pre><code>## $model
-## &lt;cellpose.models.CellposeModel object at 0x0000027502132340&gt;
+## &lt;cellpose.models.CellposeModel object at 0x000002273FAB2340&gt;
 ## 
 ## $outputs
 ## [1] &quot;masks&quot;  &quot;flows&quot;  &quot;styles&quot; &quot;diams&quot;</code></pre>
@@ -603,6 +603,7 @@ DAPI_1_dapi
 <div id="running-cell-segmentation" class="section level2 hasAnchor" number="5.2">
 <h2><span class="header-section-number">5.2</span> Running cell segmentation<a href="cell-segmentation.html#running-cell-segmentation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>For memory management, it is recommended that FOVs are processed as individual tiles. Below, we read in a specific FOV (and as recommended, save the current FOV in <code>params$current_fov</code>). We can use <code>readImage</code> for a specific file, or – if we know which FOV we want – with <code>readImageList</code>.</p>
+<p><strong>NOTE: below may be more complicated for Z-stacks and multiple channels. Process accordingly so that</strong><code>im</code><strong>is a single matrix of the DAPI channel.</strong></p>
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="cell-segmentation.html#cb25-1" aria-hidden="true" tabindex="-1"></a>params<span class="sc">$</span>current_fov <span class="ot">&lt;-</span> params<span class="sc">$</span>fov_names[<span class="dv">38</span>]</span>
 <span id="cb25-2"><a href="cell-segmentation.html#cb25-2" aria-hidden="true" tabindex="-1"></a>im <span class="ot">&lt;-</span> <span class="fu">readImageList</span>( params<span class="sc">$</span>current_fov )[[<span class="dv">1</span>]] <span class="co">#List of 1</span></span></code></pre></div>
 <pre><code>## 
