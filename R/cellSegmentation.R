@@ -205,7 +205,11 @@ saveCellSegMasks <- function(
   cellSegType <- paste(sort(ls(cellSeg)), collapse='')
   df <- as.data.frame(imager::as.cimg(masks))
   df <- df[df$value>0,]
-
+  
+  if(nrow(df)==0){
+    #warning('No mask found...Will not save...')
+    return(message('No mask found...Will not save...'))
+  }
 
   ## Prepare dataframe to be saved
   gcx <- params$global_coords
