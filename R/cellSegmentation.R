@@ -204,6 +204,7 @@ saveCellSegMasks <- function(
   }
   cellSegType <- paste(sort(ls(cellSeg)), collapse='')
   df <- as.data.frame(imager::as.cimg(masks))
+  df$value[is.na(df$value) | is.infinite((df$value))] <- 0
   df <- df[df$value>0,]
   
   if(nrow(df)==0){
