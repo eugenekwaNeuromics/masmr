@@ -129,7 +129,7 @@ readImagesForStitch <- function(
 
   imList <- setNames( lapply(imList, function(im){
     if( is.list(im) ){ im <- im[[1]] }
-    if( is.na(im) ){ return(NA) }
+    if( any(is.na(im)) ){ return(NA) }
     imageFunction(im, ...)
     }), names(imList) )
   imList <- imList[!is.na(imList)]
@@ -158,7 +158,7 @@ stitchImages <- function(
     message('No neighbours found...Returning empty dataframe...')
     return(data.frame())
   }
-  
+
   gcxi <- stitchParams$global_coords
   if(!all(names(nnlist) %in% gcxi$fov)){
     stop('Names of imList needs to be in stitchParams$global_coords$fov!')
