@@ -86,13 +86,18 @@ readImagesForStitch <- function(
       names(regims) <- strsplit2(regims, '_')[,ncol(strsplit2(regims, '_'))]
       names(regims) <- strsplit2(names(regims), '[.]')[,1]
       regims <- regims[match(chosen_fovs, names(regims))]
-      if( length(regims) != length(chosen_fovs) | any(is.na(regims)) ){
-        warning('Unable to find sufficient number of processed images: loaded raw images instead')
+      names(regims) <- chosen_fovs
+      if( all(is.na(regims)) ){
+        warning('Unable to find any processed images: loaded raw images instead')
         loadProcessedImages = F
       }
       if(loadProcessedImages){
         imList <- list()
         for( i  in 1:length(regims) ){
+          if(is.na(regims[i])){
+            imList[[names(regims)[i]]] <- NA
+            next
+          }
           imList[[names(regims)[i]]] <-
             readImage( regims[i],
                        nrows = as.numeric(resolutions$xydimensions_pixels)[1],
@@ -124,9 +129,10 @@ readImagesForStitch <- function(
 
   imList <- setNames( lapply(imList, function(im){
     if( is.list(im) ){ im <- im[[1]] }
+    if( is.na(im) ){ return(NA) }
     imageFunction(im, ...)
     }), names(imList) )
-
+  imList <- imList[!is.na(imList)]
   imList <- imList[c(currentFOVName, names(imList)[names(imList) != currentFOVName])]
 
   return(imList)
@@ -148,6 +154,11 @@ stitchImages <- function(
   }
   refx <- imList[[registerTo]]
   nnlist <- imList[-registerTo]
+  if(length(nnlist)==0){
+    message('No neighbours found...Returning empty dataframe...')
+    return(data.frame())
+  }
+  
   gcxi <- stitchParams$global_coords
   if(!all(names(nnlist) %in% gcxi$fov)){
     stop('Names of imList needs to be in stitchParams$global_coords$fov!')
