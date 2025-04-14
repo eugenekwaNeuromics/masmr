@@ -7,6 +7,7 @@ readImagesForStitch <- function(
     subDirectory = 'IM',
     loadProcessedImages = F,
     registerTo = 1,
+    zSlice = 1,
     imageFunction = function(im){ return(im) },
     params = get('params', envir=globalenv()),
     ...
@@ -65,6 +66,7 @@ readImagesForStitch <- function(
     sapply(resolutions$channel_order, function(x){
       grepl(tolower(x), tolower(chosen_bit))
     }))
+  gcxi <- gcxi[!duplicated(gcxi$fov),] #To account for scenarios with multiple Z depths
   chosen_fovs <- c( gcxi[gcxi$ref, 'fov'], gcxi[gcxi$nn, 'fov']  )
   fov_idx <- match(chosen_fovs, resolutions$fov_names)
   fs <- c(gcxi[gcxi$ref, 'image_file'], gcxi[gcxi$nn, 'image_file'] )
@@ -83,8 +85,7 @@ readImagesForStitch <- function(
   if(loadProcessedImages){
     regims <- list.files( paste0(params$parent_out_dir, '/', subDirectory), pattern='REGIM_', full.names = T)
     if(length(regims) > 0){
-      names(regims) <- strsplit2(regims, '_')[,ncol(strsplit2(regims, '_'))]
-      names(regims) <- strsplit2(names(regims), '[.]')[,1]
+      names(regims) <- gsub('^REGIM_', '', basename(regims))
       regims <- regims[match(chosen_fovs, names(regims))]
       names(regims) <- chosen_fovs
       if( all(is.na(regims)) ){
@@ -112,13 +113,26 @@ readImagesForStitch <- function(
   }
 
   if(!loadProcessedImages){
-    imList <- readImageList(
-      fileNames = fs,
-      safeLoad = F,
-      params = tmp_param,
-      subset = list( c = channel_index ),
-      ...
-    )
+    
+    if(as.numeric(resolutions$zslices)>1){
+      warning( paste0("Detected multiple z-slices...Defaulting to zSlice = ", zSlice, '...'))
+      imList <- readImageList(
+        fileNames = fs,
+        safeLoad = F,
+        params = tmp_param,
+        subset = list( c = channel_index, z = zSlice ),
+        ...
+      )
+    }else{
+      imList <- readImageList(
+        fileNames = fs,
+        safeLoad = F,
+        params = tmp_param,
+        subset = list( c = channel_index ),
+        ...
+      )
+    }
+
   }
 
   tmp_param$processed_images_loaded <- loadProcessedImages
