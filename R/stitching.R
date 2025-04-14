@@ -172,6 +172,10 @@ stitchImages <- function(
     message('No neighbours found...Returning empty dataframe...')
     return(data.frame())
   }
+  if(is.na(refx) | is.null(refx)){
+    message('No reference image found...Returning empty dataframe...')
+    return(data.frame())
+  }
 
   gcxi <- stitchParams$global_coords
   if(!all(names(nnlist) %in% gcxi$fov)){
