@@ -172,7 +172,7 @@ stitchImages <- function(
     message('No neighbours found...Returning empty dataframe...')
     return(data.frame())
   }
-  if(is.na(refx) | is.null(refx)){
+  if( all(is.na(refx)) | all(is.null(refx)) ){
     message('No reference image found...Returning empty dataframe...')
     return(data.frame())
   }
