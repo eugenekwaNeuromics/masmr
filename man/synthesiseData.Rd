@@ -11,6 +11,7 @@ synthesiseData(
     nLeadingZeroes = 5,
     cellOverlapFraction = 0.25,
     removeRedundancy = TRUE,
+    subsetFOV = NULL,
     params = get('params', envir = globalenv())
 )
 }
@@ -20,6 +21,7 @@ synthesiseData(
 \item{ nLeadingZeroes }{ Numeric. Number of leading zeroes to append before cell number. Ideally, select a value bigger than the maximum number of cells per FOV. E.g. if there are at most 9999 cells in any FOV, then a safe \code{nLeadingZeroes} value is >4. }
 \item{ cellOverlapFraction }{ Numeric between 0 and 1. Fraction of cell overlap, above which one of the overlapping cells has to be dropped (as opposed to removing overlapping pixels). }
 \item{ removeRedundancy }{ Boolean. Determines if redundant cell segmentation and spotcalls are filtered out. See Details. }
+\item{ subsetFOV }{ Boolean or character vector. Specifies which subset of FOVs to consider. To be used when there are FOVs that are not connected to each other (e.g. multiple samples). }
 \item{ params }{ The parameters environment. }
 }
 \value{
@@ -41,6 +43,7 @@ synthesiseData(
   \item{ Removes redundant cells: If two cells overlap <\code{X}\%, overlapping pixels between cell masks from different FOVs are ignored. If two cells overlap >\code{X}\%, the smaller cell is dropped. If a given cell in the current FOV overlaps with more than two cells significantly (>\code{X}\%), that cell is also dropped. \code{X} is determined from \code{cellOverlapFraction}. }
   }
 
+  When there are multiple samples FOVs can be disjointed. Users will need to subset FOVs belonging to each sample. This subsetting is reflected in the outputs being saved in their own subdirectories (named for the reference FOV in each subset). 
 }
 \seealso{
 }
