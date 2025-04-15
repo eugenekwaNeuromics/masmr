@@ -7,15 +7,17 @@ Creates default quality control (QC) plots for evaluating MERFISH performance.
 \usage{
 plotQC(
     includeNewBlanks = T,
+    synthesisDir = NULL,
     params = get('params', envir = globalenv())
 )
 }
 \arguments{
 \item{ includeNewBlanks }{ Boolean. Determines if any new blanks added during \code{prepareCodebook} are to be included in evaluation. }
+\item{ synthesisDir }{ File path. If specified, files read from this file path. When unspecified, defaults to \code{params$out_dir}. }
 \item{ params }{  The parameters environment. }
 }
 \value{
-  Various quality control plots as \code{.png} in the \code{/OUT/QC/} subdirectory of \code{params$parent_out_dir}.
+  Various quality control plots as \code{.png} in the \code{/OUT/QC/} subdirectory of \code{params$parent_out_dir}. Where there are multiple subsets, \code{/QC/} subdirectories are created within subset directories.
 }
 \details{
   Plots returned include:

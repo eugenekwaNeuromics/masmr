@@ -16,20 +16,23 @@ synthesiseData <- function(
   if(!dir.exists(params$out_dir)){
     dir.create(params$out_dir)
   }
-  fileChecks <- c(
-    'OUT_GLOBALCOORD.csv',
-    'OUT_SPOTCALL_PIXELS.csv.gz',
-    'OUT_CELLSEG_PIXELS.csv.gz',
-    'OUT_CELLEXPRESSION.csv.gz',
-    'OUT_CELLS.csv.gz')
-  fileChecks <- fileChecks[fileChecks %in% list.files(params$out_dir)]
-  if( length(fileChecks) > 0 ){
-    warning('Overwriting existing files')
-    t <- suppressWarnings(try(file.remove( paste0(params$out_dir, fileChecks) )))
-    if(inherits(t, 'try-error')){
-      stop('Unable to delete existing files!')
+  if(!is.null(subsetFOV)){
+    fileChecks <- c(
+      'OUT_GLOBALCOORD.csv',
+      'OUT_SPOTCALL_PIXELS.csv.gz',
+      'OUT_CELLSEG_PIXELS.csv.gz',
+      'OUT_CELLEXPRESSION.csv.gz',
+      'OUT_CELLS.csv.gz')
+    fileChecks <- fileChecks[fileChecks %in% list.files(params$out_dir)]
+    if( length(fileChecks) > 0 ){
+      warning('Overwriting existing files')
+      t <- suppressWarnings(try(file.remove( paste0(params$out_dir, fileChecks) )))
+      if(inherits(t, 'try-error')){
+        stop('Unable to delete existing files!')
+      }
     }
   }
+
   ## Load files
   fs <- list.files( params$parent_out_dir, full.names = T, recursive = T, all.files = T)
   fs <- fs[!grepl(params$out_dir, fs)]

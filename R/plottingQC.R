@@ -6,16 +6,21 @@ require(reshape2)
 
 plotQC <- function(
     includeNewBlanks = T,
+    synthesisDir = NULL,
     params = get('params', envir = globalenv())
 ){
-  if(!dir.exists(paste0(params$parent_out_dir, '/OUT/'))){
-    stop('This function requires synthesiseData() to have been run!')
+  if( is.null(synthesisDir) ){
+    if(!dir.exists(paste0( params$out_dir )) | !grepl('/OUT/|/OUT$', params$out_dir) ){
+      stop('This function requires synthesiseData() to have been run!')
+    }
+    synthesisDir <- params$out_dir
   }
-  fs <- list.files( paste0(params$parent_out_dir, '/OUT/'), full.names = T )
+
+  fs <- list.files( synthesisDir, full.names = T )
   names(fs) <- gsub('[.]csv|[.]gz|OUT_', '', basename(fs))
 
   ## Modify params
-  params$out_dir <<- gsub('[/][/]', '/', paste0(params$parent_out_dir, '/OUT/QC/'))
+  params$out_dir <<- gsub('[/][/]', '/', paste0( synthesisDir, '/QC/'))
   if(!dir.exists(params$out_dir)){
     dir.create(params$out_dir)
   }
