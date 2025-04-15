@@ -50,7 +50,7 @@ synthesiseData <- function(
   resolutions <- setNames(val, n)
   fov_names <- resolutions$fov_names
   params$all_fovs <<- fov_names
-  
+
   ## Subset FOVs...
   if( !is.null(subsetFOV) ){
     message('Subsetting FOVs...')
@@ -66,11 +66,11 @@ synthesiseData <- function(
     }
     fov_names <- fov_names[fov_names %in% subsetFOV]
   }
-  
+
   if(length(fov_names)<=1){
     stop('Insufficient FOVs to attempt data synthesis! Ensure all FOVs have been processed, or that subsets have >1 FOV!')
   }
-  
+
   params$fov_names <<- fov_names
   params$global_coords <<- global_coords[global_coords$fov %in% fov_names,]
   params$resolutions <<- resolutions
@@ -87,10 +87,10 @@ synthesiseData <- function(
   g <- rownames(codebook)
 
   ## Prepare file subsets
-  fs <- fs[Reduce('+', lapply(fov_names, function(x) grepl(x, fs))) > 0]
-  spotcallfs <- fs[grepl('^SPOTCALL_', basename(fs))]
-  cellsegfs <- fs[grepl('^CELLSEG_', basename(fs))]
-  stitchfs <- fs[grepl('^STITCH_', basename(fs))]
+  fovfs <- fs[Reduce('+', lapply(fov_names, function(x) grepl(x, fs))) > 0]
+  spotcallfs <- fovfs[grepl('^SPOTCALL_', basename(fovfs))]
+  cellsegfs <- fovfs[grepl('^CELLSEG_', basename(fovfs))]
+  stitchfs <- fovfs[grepl('^STITCH_', basename(fovfs))]
   if( length(spotcallfs)== 0 ){
     stop('Unable to find SPOTCALL_{FOV}.csv.gz files!')
   }
@@ -114,7 +114,7 @@ synthesiseData <- function(
     stop( paste0('FOV chosen (', referenceFOV, ' ) not in fov_names! Please check params$fov_names!'))
   }
   message( paste0('FOV chosen: ', referenceFOV, '...') )
-  
+
   if( !is.null(subsetFOV) ){
     ## Update out_dir name
     params$out_dir <<- gsub('[/][/]', '/', paste0(params$parent_out_dir, '/OUT/SUBSET_', referenceFOV, '/'))
@@ -143,9 +143,7 @@ synthesiseData <- function(
     warning('More than one stitch dataframe column specified: taking mean of vectors...')
   }
   gcx <- global_coords[,c('x_microns', 'y_microns', 'z_microns', 'fov')]
-  stitchResults <- setNames(lapply(1:length(stitchfs), function(i){
-    #message( paste0(i, ' of ', length(stitchfs), '...') )
-    fx <- stitchfs[i]
+  stitchResults <- setNames(lapply(stitchfs, function(fx){
     dfx <- data.table::fread(fx, data.table = F)
     newdf <- NULL
     if( all(is.character(stitchChosenColumn)) ){
@@ -201,6 +199,8 @@ synthesiseData <- function(
     subStitchResults <- stitchResults[ grepl( paste(paste0(names(new_gcx),'.csv'), collapse='|'), names(stitchResults)) ]
     for(j in 1:length(subStitchResults)){
       ref_cx <- sapply(names(new_gcx), function(x) grepl(paste0(x, '.csv'), names(subStitchResults)[j]) )
+      if( !is.logical(ref_cx) ){ next }
+      if( all(!ref_cx) ){ next }
       ref_cx <- new_gcx[[names(ref_cx)[ref_cx]]]
       df <- subStitchResults[[j]]
       df <- df[!(df$fov %in% names(new_gcx)),]
@@ -221,21 +221,21 @@ synthesiseData <- function(
     if( length(new_gcx)<length(fovs_processed) & (new_length == current_length) ){
       problemCounter = problemCounter + 1 #Technically, this needs only fail once, but to be safe, let it loop 5 times
       if( problemCounter > 5 ){
-        STOP = T 
+        STOP = T
       }
     }
   }
-  
+
   if(length(new_gcx) < length(fovs_processed)){
     stop(
     '
-    Stitched coordinates cannot be propagated to some FOVs! 
+    Stitched coordinates cannot be propagated to some FOVs!
     Ensure that FOVs are adjacent in your STITCH folder.
-    If you have disjoint FOVs (e.g. multiple samples), 
+    If you have disjoint FOVs (e.g. multiple samples),
     use the subsetFOVs field to restrict to just FOVs belonging to each intact sample.
     ')
   }
-  
+
   gcx <- gcx[gcx$fov %in% names(new_gcx),]
   if(nrow(gcx)==0){
     stop('FOV names not consistently preserved!')
