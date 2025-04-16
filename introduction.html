@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-03-24" />
+<meta name="date" content="2025-04-15" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -489,14 +489,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-28"><a href="introduction.html#cb3-28" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Stitch with respect to reference bit</span></span>
 <span id="cb3-29"><a href="introduction.html#cb3-29" aria-hidden="true" tabindex="-1"></a>  imList <span class="ot">&lt;-</span> <span class="fu">readImagesForStitch</span>( <span class="at">subDirectory =</span> <span class="st">&#39;IM&#39;</span>, <span class="at">loadProcessedImages =</span>  T ) <span class="co">#Assume spotcalling done</span></span>
 <span id="cb3-30"><a href="introduction.html#cb3-30" aria-hidden="true" tabindex="-1"></a>  stitchResults <span class="ot">&lt;-</span> <span class="fu">stitchImages</span>( imList )</span>
-<span id="cb3-31"><a href="introduction.html#cb3-31" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> stitchResults</span>
-<span id="cb3-32"><a href="introduction.html#cb3-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(df)[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&#39;merfish_&#39;</span>, <span class="fu">colnames</span>(stitchResults)[<span class="dv">2</span>])</span>
-<span id="cb3-33"><a href="introduction.html#cb3-33" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-34"><a href="introduction.html#cb3-34" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Stitch with respect to DAPI image</span></span>
+<span id="cb3-31"><a href="introduction.html#cb3-31" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-32"><a href="introduction.html#cb3-32" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Optional: Stitch with respect to DAPI image</span></span>
+<span id="cb3-33"><a href="introduction.html#cb3-33" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> stitchResults</span>
+<span id="cb3-34"><a href="introduction.html#cb3-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(df)[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&#39;merfish_&#39;</span>, <span class="fu">colnames</span>(stitchResults)[<span class="dv">2</span>]) <span class="co">#Save the stitch results from merfish in its own column</span></span>
 <span id="cb3-35"><a href="introduction.html#cb3-35" aria-hidden="true" tabindex="-1"></a>  imList <span class="ot">&lt;-</span> <span class="fu">readImagesForStitch</span>( <span class="at">subDirectory =</span> <span class="st">&#39;DAPI&#39;</span>, <span class="at">loadProcessedImages =</span>  T ) <span class="co">#Assume cell segmentation done</span></span>
 <span id="cb3-36"><a href="introduction.html#cb3-36" aria-hidden="true" tabindex="-1"></a>  stitchResults <span class="ot">&lt;-</span> <span class="fu">stitchImages</span>( imList )</span>
 <span id="cb3-37"><a href="introduction.html#cb3-37" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-38"><a href="introduction.html#cb3-38" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Consolidate into a single dataframe</span></span>
+<span id="cb3-38"><a href="introduction.html#cb3-38" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Optional: If have both merfish and cell segmentation stich vectors, consolidate into a single dataframe</span></span>
 <span id="cb3-39"><a href="introduction.html#cb3-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(stitchResults)[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&#39;dapi_&#39;</span>, <span class="fu">colnames</span>(stitchResults)[<span class="dv">2</span>])</span>
 <span id="cb3-40"><a href="introduction.html#cb3-40" aria-hidden="true" tabindex="-1"></a>  stitchResults[,<span class="fu">colnames</span>(df)[<span class="dv">2</span>]] <span class="ot">&lt;-</span> df[<span class="fu">match</span>(stitchResults[,<span class="dv">1</span>], df[,<span class="dv">1</span>]),<span class="dv">2</span>]</span>
 <span id="cb3-41"><a href="introduction.html#cb3-41" aria-hidden="true" tabindex="-1"></a>  </span>
