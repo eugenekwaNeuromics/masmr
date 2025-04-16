@@ -1,0 +1,819 @@
+# Spotcalling 
+
+MERFISH data comprises fluorescent images across different channels and imaging cycles. The desired end result are spot coordinates and spot identities.
+
+To that end, we need to perform several subtasks: (1) establish parameters and parse necessary metadata, (2) load and process relevant images, (3) consolidate information across images and decode intensity vectors using the MERFISH codebook, (3) filter out low quality spots, and finally (4) save the output. Subtasks 2-4 are repeatedly performed as we loop through FOVs.  
+
+```{r spotcall-lib, message=FALSE}
+library(masmr)
+library(ggplot2)
+```
+
+## Pre-processing
+
+Before running your pipeline proper, there are a series of pre-processing steps that each script needs to perform. These will be explained in detail here, but the same principles apply to cell segmentation and consolidation scripts.
+
+### Establishing parameters
+
+All scripts should begin by establishing parameters: e.g. location of files to read, location to output files, file formats etc.
+
+This is accomplished in `masmr` using the `establishParams()` function, which automatically creates an environment object called `params` in the global environment that will be repeatedly referenced by downstream functions.
+
+```{r spotcall-params}
+data_dir = 'C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/'
+establishParams(
+  imageDirs = paste0(data_dir, 'S10/'),
+  imageFormat = '.ome.tif',
+  codebookFileName = list.files(paste0(data_dir, 'codebook/'), pattern='codebook', full.names = TRUE),
+  codebookColumnNames = paste0(rep(c(0:3), 4), '_', rep(c('cy3', 'alexa594', 'cy5', 'cy7'), each=4) ),
+  outDir = 'C:/Users/kwaje/Downloads/JYOUT/',
+  dapiDir = paste0(data_dir, 'DAPI_1/'),
+  pythonLocation = 'C:/Users/kwaje/AppData/Local/anaconda3/envs/scipyenv/',
+  fpkmFileName = list.files(paste0(data_dir, 'FPKM_data/'), pattern='FPKM', full.names = TRUE),
+  nProbesFileName = list.files(paste0(data_dir), pattern='ProbesPerGene.csv', recursive = T, full.names = TRUE)
+)
+```
+
+As the bare minimum, users need to establish:
+
+* `imageDirs`: where the MERFISH image files are located.
+* `imageFormat`: what image file formats to read. Typically `.ome.tif` or `.dax`, but other formats compatible with Bioformats are acceptable too.
+* `codebookFileName`: location of MERFISH codebook.
+* `codebookColumnNames`: names of every bit in the MERFISH codebook. Each "bit name" should typically comprise the image index (e.g. image 1, 2, 3 etc) and channel (e.g. Cy3, Alexa-594 etc): so a bit titled `0_cy3` tells us that the image to be loaded is the Cy3 channel of the first image in the set (here, starting from 0). This is important because the order images are loaded in may not match up with the order of bits in the codebook.
+* `outDir`: where output files should be written to.
+
+Other parameters such as `dapiDir` and `pythonLocation` will be discussed subsequently for Cell Segmentation. 
+
+There also exist some parameters such as `fpkmFileName` (file containing FPKM data) and `nProbesFileName` (file containing number of MERFISH encoding probes per gene), which are files to be read for quality control purposes. However, these parameters are designed to be optional, and your code should run fine even if they are not specified.
+
+The information stored in the `params` object can be read for further details:
+
+```{r spotcall-ls-params}
+ls( envir = params )
+```
+
+Note the existence of the `params$resumeMode` object. This houses a boolean that determines if functions are skipped if there is evidence that they have been run before. As default, to save time, this is set to `TRUE`.
+
+### Getting parameters from image metadata
+
+The next step is to obtain image metadata that accompanies most microscopy images. This is typically found in the same file as your image data (e.g. `.ome.tif`) but can sometimes be in a separate file (e.g. `.xml` that accompany `.dax` images). `masmr` will attempt to guess which meta data format is appropriate, but users can change values in `params` as needed.
+
+We can check what values have been entered into `params`:
+
+```{r spotcall-params-meta}
+params$meta_format
+```
+
+If unsatisfied, we can update as follows:
+
+```{r spotcall-params-update}
+params$meta_format <- '.dax'
+print(params$meta_format)
+params$meta_format <- '.ome.tif'
+print(params$meta_format)
+```
+
+Having specified our meta data formats, we can then load additional meta data information with the `readImageMetaData` function.
+
+```{r spotcall-readimagemeta}
+readImageMetaData()
+```
+
+This adds additional information to `params`, such as resolution information:
+
+```{r spotcall-resolutions}
+print( params$resolutions )
+```
+
+It also creates a dataframe that stores file information for every bit. This will be referenced heavily by downstream functions.
+
+```{r spotcall-globalcoords}
+knitr::kable( head( params$global_coords ), format = 'html', booktabs = TRUE )
+```
+
+Note that as default, the above information is saved to a sub-directory in your chosen output folder.
+
+```{r spotcall-outdir}
+print( params$parent_out_dir )
+print( params$out_dir )
+```
+
+### Preparing the codebook
+
+A codebook is a table of indicating the sequence of ON (1) and OFF (0) bits for each gene (example below). `masmr` expects this to be a table (e.g. `.csv` or `.txt`) that contains N rows for N genes/blanks, and M+1 columns for M bits (e.g. below is a 16-bit setup) and 1 gene column.
+
+```{r spotcall-codebookexample}
+knitr::kable( head(data.table::fread( params$codebook_file, data.table = F )), format = 'html', booktabs = TRUE )
+```
+
+Unique to spotcalling, users must "prepare" their codebooks. This typically involves ensuring that the order of bits matches the order of image loading that `masmr` performs. Additionally, `masmr` also provides the option to add more "blanks" beyond those already specified by the user.
+
+```{r spotcall-prepcodebook}
+prepareCodebook( exhaustiveBlanks = T )
+```
+
+The new ordered codebook is stored in the output directory, and users can refer to it as follows:
+
+```{r spotcall-codebook-report}
+knitr::kable( head( params$ordered_codebook ), format = 'html', booktabs = TRUE )
+```
+
+### House-keeping
+
+Having performed all the necessary pre-processing, it may be useful for users to take a snapshot of the current environment. Unnecessary data can then be cleared from memory in subsequent steps to return the global environment to that snapshot. This is accomplished using our `establishCleanSlate` and `cleanUp` functions. 
+
+An example use-case is provided below:
+
+```{r spotcall-clean}
+establishCleanSlate()
+print(cleanSlate)
+x = '12345'
+exists('x')
+cleanUp()
+exists('x')
+```
+
+## Preparing to loop through images
+
+Having done the necessary pre-processing, users may now begin processing each FOV. This is done by looping through `params$fov_names`. It is also recommended that the current FOV be saved in `params$current_fov`.
+
+```{r spotcall-handlingimages}
+head(params$fov_names)
+params$current_fov <- params$fov_names[38]
+print(params$current_fov)
+```
+
+Users may also wish to check if they are ready to loop with our `checkReadyLoop` function, but this is entirely optional.
+
+```{r spotcall-checkloop}
+checkReadyLoop()
+```
+
+### Image reading
+
+To read images, we rely on the `RBioformats` package, which is able to read most image file formats. One exception is `.dax` files -- however, these are binary files and can be read by base R. To account for these different types of images, we can use the `readImage` function in  `masmr`. 
+
+Below, I provide an example of a `.dax` file:
+
+```{r spotcall-imageread-dax}
+file <- 'C:/Users/kwaje/Downloads/LIU_CONNECT_CORTICALORGANOID_240902/DATA/20240902/cont/Alexa594_0_10.dax'
+im <- readImage( file )
+plot(imager::as.cimg(im), main = paste0('Image dimensions: ', paste(dim(im), collapse = ' x ') ))
+```
+
+For `.ome.tif` files, the same function can be used. However, we need to specify an additional `series` parameter: otherwise, all FOVs will be loaded. For more details, we recommend reading the documentation for `RBioformats::read.image`. Below, I provide an example of reading the second channel for the current FOV (specified above).
+
+```{r spotcall-imageread-ometif}
+file <- unique( params$global_coords[params$global_coords$fov==params$fov_names, 'image_file'] )[1]
+series <- which( params$fov_names == params$current_fov )
+im <- readImage( file, series = series )
+plot(imager::as.cimg(im[,,2]), main = paste0('Image dimensions: ', paste(dim(im), collapse = ' x ') ) )
+```
+
+Note that `readImage` as written above reads all four channels into memory, and we subset the second channel using `im[,,2]`. An alternative is to just load the second channel directly using the `subset` parameter in `RBioformats::read.image`. This is useful for memory management.
+
+```{r spotcall-imageread-onechannel}
+im <- readImage( file, series = series, subset = list(c = 2) )
+plot(imager::as.cimg(im), main = paste0('Image dimensions: ', paste(dim(im), collapse = ' x ') ) )
+```
+
+For MERFISH, we typically have to handle multiple images at once. We have thus created an additional image reading function called `readImageList` that loads all images for a given FOV, by cross-referencing `params$global_coords` to find all relevant files.
+
+```{r spotcall-readimagelist}
+imList <- readImageList( params$current_fov )
+names(imList)
+```
+
+:::: {.blackbox data-latex=""}
+::: {.center data-latex=""}
+**On working with image stacks**
+:::
+
+The current implementation of `readImage` and `readImageList` assume 2D images, and are not yet designed to work on image stacks with different z-depths. A quick work around is to include `subset = list(z = 1)` among the parameters for `readImage` or `readImageList`, which will load the first z-slice; this can then be iterated to obtain the other z-slices. Multiple z-slices can then be merged using e.g. a maximum intensity projection. Do note that this option only works for images that can be read with `RBioFormats`. For an example of how to do this, kindly refer to Chapter \@ref(troubleshooting).
+::::
+
+### Establishing global image parameters
+
+As a first step, it is recommended that we determine the dynamic range of intensity values: i.e. the brightness value for below which (i.e. minimum brightness / floor) and above which (i.e. maximum brightness / ceiling) we can safely ignore gradation. A sensible minimum brightness would be intensities for background pixels where no tissue is imaged. For maximum brightness, we want a cap where all super-threshold intensities can effectively be considered 'ON'. Ideally, these limits should be relatively consistent across FOVs.
+
+We have created a function `getAnchorParams` that loads multiple FOVs and attempts to get global image parameters. As default, `brightness_max` and `brightness_min` are returned. For details, see the documentation for `getAnchorParams`.
+
+```{r spotcall-anchors-default}
+getAnchorParams( nSamples = 5 )
+```
+
+These values are appended to `params`:
+
+```{r spotcall-minbright-default}
+params$brightness_min
+```
+
+Anchor FOVs are those used to derive global image parameters. These can be user-specified, or automatically determined with `getAnchorParams`. If automatic, `nSamples` number of FOVs are randomly selected. These can be visualised (in red) after running `getAnchorParams`:
+
+```{r spotcall-showanchors}
+print(params$anchors)
+print(params$anchors_plot)
+```
+
+Random sampling should work for most cases. For more regular FOVs, users may instead opt for grid-based selection of FOVs: evenly spaced FOVs internal to the outermost ring of FOVs are selected.
+
+```{r spotcall-showanchors_random, message=FALSE}
+getAnchorParams( anchorMode = 'grid' )
+```
+
+And so this returns a different subset of anchors.
+
+```{r spotcall-showanchors_random_plot}
+print(params$anchors)
+print(params$anchors_plot)
+```
+
+**Users should ensure that sufficient anchors are chosen for representative brightness caps and floors to be obtained.** Additionally, different brightness caps / floors may be required for different samples, depending on how consistent imaging parameters were across samples. Inconsistent imaging parameters may be expected if samples were e.g. imaged on different days.  
+
+Additionally, should users wish to obtain other global parameters, this can be achieved by altering the `imageFunctions` and `summaryFunctions` fields in `getAnchorParams`. 
+
+For instance, say we wish to also obtain the mean brightness per image (`brightness_mean`). We first write a function to perform this (`custom_getMeanBrightness`), which will then be looped over every anchor FOV. We include this function among the named list `users_imageFunctions`, which we then input to `imageFunctions`. This returns a vector of mean brightness values for every anchor image, which are then summarised by the corresponding function in `summaryFunctions` (as default, we recommend `conservativeMean` -- explained later -- or some summary function robust to outliers).
+
+```{r spotcall-custombrightness, message=FALSE}
+custom_getMeanBrightness <- function( im, ... ){
+  meanBrightness <- mean( im )
+  return( meanBrightness )
+}
+users_imageFunctions = list(
+  'brightness_min' = imsBrightnessMin,
+  'brightness_max' = imsBrightnessMax,
+  'brightness_mean' = custom_getMeanBrightness
+)
+users_summaryFunctions = list(
+  'brightness_min' = conservativeMean,
+  'brightness_max' = conservativeMean,
+  'brightness_mean' = conservativeMean
+)
+getAnchorParams( 
+  imageFunctions = users_imageFunctions, 
+  summaryFunctions = users_summaryFunctions,
+  anchorMode = 'grid'
+)
+```
+
+On `conservativeMean`: this is a function that takes the mean within a specific range, delimited by a certain number of standard deviations (default = 0.9). This should return mean values less skewed by outliers. An alternative could be `median`, or some user-defined function. 
+
+```{r spotcall-conservativemean}
+set.seed(12345)
+test <- rgamma( 1E4, 2, 1 )
+hist( test, breaks=100, main='Histogram of values with mean (red) and conservativeMean (blue)', xlab='Gamma distribution' ); 
+abline(v=mean(test), col='red'); 
+abline(v=conservativeMean(test, nSDs = 0.9), col='blue')
+```
+
+## Looping through images
+
+After establishing global parameters (e.g. brightness floors and ceilings), we are now ready to loop through our image data. It is strongly recommended that the user keeps track of the current FOV being processed in `params$current_fov` as follows:
+
+```{r spotcall-example, eval=FALSE}
+for( fovName in params$fov_names ){
+  
+  ## Report current FOV / iteration 
+  cat( paste0('\n', fovName, ': ', 
+  which(params$fov_names==fovName), ' of ', 
+  length(params$fov_names), '...' ))
+  
+  ## Check if file has been created
+  if( params$resumeMode ){
+    checkFile <- file.exists( paste0(params$out_dir, 'SPOTCALL_', fovName, '.csv.gz') )
+    if(checkFile){
+      cat('FOV has been processed...Skipping...')
+      next
+    }
+  }
+  
+  ## Save the current_fov
+  params$current_fov <- fovName
+  
+  ## Image processing functions etc...
+}
+```
+
+### Default image processing
+
+Designing custom image processing functions is a topic worthy of its own chapter (Chapter \@ref(image-processing)). For now, we will use the default processing provided in `masmr`:
+
+```{r spotcall-imagemetrics}
+getImageMetrics( imList )
+```
+
+The processed images are stored in a new `imMetrics` environment, and can be visualised as follows:
+
+```{r spotcall-imagemetrics-zoomed}
+par(mfrow=c(2,3))
+for( imMetricName in ls(imMetrics) ){
+  plot(imager::as.cimg( imMetrics[[imMetricName]][[1]][1000:1500, 1000:1500] ), main = imMetricName)
+}
+par(mfrow=c(1,1))
+```
+
+### Image registration
+
+Images of the same FOV are rarely perfect overlaps of each other due to imprecise microscope movements. Additionally, optical distortions (e.g. chromatic aberration), may also cause images from different channels to become unaligned. It is thus highly recommended to align images before any downstream decoding (i.e. image registration). 
+
+It is up to the user to decide what image processing to perform to obtain images ideal for registration. We recommend a combination of low-pass and high-pass features: below, we combine images from `COARSE` and `DECODE` in `imMetrics` (i.e. band pass filtering).
+
+```{r spotcall-forregistration}
+forReg <- list()
+for(i in 1:length(imList)){
+  forReg[[i]] <- imNormalise( imMetrics$COARSE[[i]] + imMetrics$DECODE[[i]] )
+}
+names(forReg) <- names(imList)
+norm <- forReg[[1]]
+par(mfrow=c(1,2))
+plot( imager::as.cimg(norm), main = 'Band pass' )
+plot( imager::as.cimg(norm[1000:1500, 1000:1500]), main = 'Band pass (Zoom in)' )
+par(mfrow=c(1,1))
+```
+
+Registration is accomplished with our `registerImages` function. The function works by maximising cross-correlation between two images (in Fourier transformed space). [Strictly, cross-correlation is first passed through a Gaussian filter centred around the origin, to upweight small shifts. Gaussian filter parameters can be tweaked using relevant parameters -- see documentation for `registerImages`.]
+
+```{r spotcall-register}
+registerImages(forReg)
+```
+
+This function adds the necessary coordinate offsets to the `params` environment object. Shift vectors (and coordinates in general) are typically handled as complex numbers in `masmr`; with the real component reflecting the x-coordinate and the imaginary, y.
+
+```{r spotcall-shiftvectors}
+print( params$shifts )
+```
+
+These offsets are added to existing coordinates so as to better align images:
+
+```{r spotcall-checkshifts}
+df <- do.call(rbind, lapply(1:length(imList), function(i){
+  imi <- imList[[i]]
+  dfi <- as.data.frame(imager::as.cimg(imi))
+  dfi <- dfi[
+    dfi$x > 1000 &
+    dfi$x <= 1500 &
+    dfi$y > 1000 &
+    dfi$y <= 1500,
+  ]
+  dfi$norm <- (dfi$value - min(dfi$value)) / (max(dfi$value) - min(dfi$value)) 
+  dfi$cx <- dfi$x + 1i*dfi$y
+  dfi$shift <- params$shifts[i]
+  dfi$FOV <- i
+  return(dfi)
+}))
+
+cowplot::plot_grid( plotlist = list(
+  ggplot(df[df$norm>0.5,]) +
+    geom_point(aes(x=x, y=y, colour=factor(FOV), group=factor(FOV) ), shape=16, size=3, alpha=0.25) +
+    scale_colour_viridis_d(name='Bit', option='turbo') +
+    scale_y_reverse() +
+    theme_minimal(base_size=10) +
+    coord_fixed() +
+    guides(colour=guide_legend(override.aes = list('alpha' = 1))) +
+    ggtitle('Unaligned'),
+  
+  ggplot(df[df$norm>0.5,]) +
+    geom_point(aes(x=x+Re(shift), y=y+Im(shift), colour=factor(FOV), group=factor(FOV) ), shape=16, size=3, alpha=0.25) +
+    scale_colour_viridis_d(name='Bit', option='turbo') +
+    scale_y_reverse() +
+    theme_minimal(base_size=10) +
+    coord_fixed() +
+    guides(colour=guide_legend(override.aes = list('alpha' = 1))) +
+    ggtitle('Registered')
+), nrow=1 )
+```
+
+Additionally, the `registerImages` function also saves the reference bit image as a `REGIM_{ FOV Name }.png` file as part of its default behaviour. This can be called on for subsequent stitching.
+
+```{r spotcall-checkshiftoutput}
+file.exists( paste0(params$out_dir, 'REGIM_', params$current_fov, '.png') )
+```
+
+## Working with pixel-wise metrics
+
+Having aligned and processed our images, the next steps are to compile our images into a manageable data format, perform decoding, and successively filter out low quality pixels.  
+
+### Moving from image lists to a dataframe
+
+The first step is to convert our images into a dataframe for easier use. Hereafter, decoding and filtering will be performed on this dataframe. This is accomplished with `consolidateImageMetrics`. Additionally, as the previous image lists are no longer needed, it is recommended users clean their environment with `cleanUp`.
+
+If troubleshooting, users may wish to keep the `imMetrics` environment for the time being. However, do note that this tends to be a big object and may stretch memory requirements. [One solution, shown below, is to just keep a subset of the objects in `imMetrics`.]
+
+```{r spotcall-consolidateimagemetrics}
+spotcalldf <- consolidateImageMetrics()
+
+print( paste0('Size of entire imMetrics: ', sum(sapply(ls(imMetrics), function(x) as.numeric(object.size(imMetrics[[x]])))) * 1E-9, ' Gb') )
+for( ix in ls(imMetrics) ){
+  if( ix %in% c('DECODE') ){ next }
+  remove( list=ix, envir=imMetrics )
+}
+print( paste0('Size of imMetrics after filtering: ', sum(sapply(ls(imMetrics), function(x) as.numeric(object.size(imMetrics[[x]])))) * 1E-9, ' Gb') )
+
+cleanUp( c(
+  'spotcalldf', #Necessary: must be specified, otherwise the dataframe will be deleted
+  'imMetrics', #Optional: keep if want to make use of images in filterDF() later
+  cleanSlate) #Other things to keep
+)
+```
+
+The result is a dataframe with a unified coordinate system, in which pixels are rows and image metrics are columns.
+
+```{r spotcall-spotcalldfhead}
+knitr::kable( head( spotcalldf ), format = 'html', booktabs = TRUE )
+```
+
+### Decoding
+
+Decoding involves calculating distances between image metric vectors and expected vectors from the codebook. As default, our `decode` function takes columns with `DECODE_XX` format and calculates
+
+* `COS`: cosine distances,
+* `EUC`: Euclidean distances,
+* `L2E`: L2-normalised Euclidean distances
+
+between image and codebook vectors. Both the nearest match and next nearest match (prefixed with `B`) are returned.
+
+```{r spotcall-decode}
+spotcalldf <- decode(spotcalldf)
+```
+
+The relationship between the different distance metrics is illustrated below.
+
+```{r spotcall-distancerelations}
+cowplot::plot_grid( plotlist = list(
+  ggplot( spotcalldf ) +
+    geom_hex(aes(x=COS, y=L2E), bins=100) +
+    scale_fill_viridis_c(option = 'turbo', trans='log10') +
+    theme_minimal(base_size=14) +
+    theme(legend.position = 'top'),
+  ggplot( spotcalldf ) +
+    geom_hex(aes(x=COS, y=EUC), bins=100) +
+    scale_fill_viridis_c(option = 'turbo', trans='log10') +
+    theme_minimal(base_size=14) +
+    theme(legend.position = 'top'),
+  ggplot( spotcalldf ) +
+    geom_hex(aes(x=EUC, y=L2E), bins=100) +
+    scale_fill_viridis_c(option = 'turbo', trans='log10') +
+    theme_minimal(base_size=14) +
+    theme(legend.position = 'top')
+), nrow=1 )
+```
+
+At this stage, pixels are assigned a preliminary gene label under the `g` column. As default, this is dependent on the nearest codebook match in cosine distance (column `COSLAB` in the dataframe).
+
+```{r spotcall-distancelabels}
+knitr::kable( head(spotcalldf[,grepl('^g$|LAB$', colnames(spotcalldf))]), format = 'html', booktabs = TRUE )
+```
+
+### Annotating blanks
+
+Users are recommended to filter out pixels with large distance metrics: i.e. those we cannot confidently decode. These thresholds can be determined _a priori_, or determined empirically by finding the threshold that separates blanks from non-blank calls. 
+
+There are several ways to define "blanks" that are provided in `masmr`:
+
+* `gBlank`: Whether the name of the gene assigned to a given pixel has the word "blank" in it.
+* `bPossible`: Whether the next closest gene label for selected distance metrics are possible. 
+* `gbPossible`: Whether the next closest gene label for the default distance metric (`COS`) are possible.
+* `consistentLabel`: Whether the gene labels agree across distance metrics.
+
+As default, `gBlank`, `gbPossible`, and `consistentLabel` tests are run. The number of tests failed is reported by `scoreBlanks`.
+
+```{r spotcall-blanklabels}
+nBlankTestsFailed <- scoreBlanks( spotcalldf )
+table(nBlankTestsFailed)
+spotcalldf$BLANK <- nBlankTestsFailed >0
+```
+
+Say we decide that "blanks" are those that fail even one test. We can then examine the range of distance metrics between blanks and non-blanks. In general, distance metrics should be larger for blanks.
+
+```{r spotcall-blanksvnonblanks-distances}
+ggplot( reshape2::melt(spotcalldf, measure.vars=c('COS', 'EUC', 'L2E'))  ) +
+  geom_violin(aes(x=BLANK, y=value, colour=BLANK) ) +
+  geom_boxplot(aes(x=BLANK, y=value, colour=BLANK), fill='transparent', width=0.25 ) +
+  facet_wrap(~variable, scales='free') +
+  ylab('') +
+  theme_minimal(base_size=14) +
+  scale_colour_manual(values=c('TRUE' = 'red', 'FALSE' = 'black')) +
+  theme(legend.position = 'none')
+```
+
+A reasonable distance threshold might be the average of medians. This can be easily obtained with the `findThreshold` or `thresh_Quantile` function (see documentation for details).
+
+```{r spotcall-distancethresholding}
+filtout <- rep(0, nrow(spotcalldf))
+for( distanceMetric in c('COS', 'EUC', 'L2E') ){
+  thresh <- thresh_Quantile( spotcalldf[,distanceMetric], label = spotcalldf$BLANK, quantileFalse = 0.5, quantileTrue = 0.5 )
+  cat(paste0( '\n', distanceMetric, ' threshold: ', thresh ))
+  filtout <- filtout + spotcalldf[,distanceMetric] > thresh
+}
+table(filtout > 0)
+```
+
+### Filtering and evaluating your choice of filter
+
+How do we decide what is a good filter to apply to our data? 
+
+One idea is to use _a priori_ knowledge of gene distributions in space. For instance, in our example dataset of an organoid, we expect dividing cells to be concentrated near the lumen. Accordingly, filtering should enrich lumenal `MKI67` (a marker for cell division). 
+
+```{r spotcall-spatialdistributionmki67}
+cowplot::plot_grid( plotlist = list(
+  ggplot( spotcalldf[filtout>0 & spotcalldf$g=='MKI67',] ) +
+    geom_hex(aes(x=WX, y=WY), bins=100) +
+    scale_fill_viridis_c(option='turbo', trans='log10') +
+    scale_y_reverse() +
+    theme_void( base_size = 14 ) +
+    coord_fixed() + ggtitle('Drop'),
+  
+  ggplot( spotcalldf[filtout==0  & spotcalldf$g=='MKI67',] ) +
+    geom_hex(aes(x=WX, y=WY), bins=100) +
+    scale_fill_viridis_c(option='turbo', trans='log10') +
+    scale_y_reverse() +
+    theme_void( base_size = 14 ) +
+    coord_fixed() + ggtitle('Keep')
+), nrow=1)
+```
+
+Another option is to consider how filtering changes quality control metrics: e.g. a good filter should generally increase correlation between count profiles and previously obtained FPKM data, should decrease the percentage of blanks relative to true genes, etc. We provide a `filterDF` function that reports how a given filter changes these QC metrics (should relevant files be specified in `establishParams`).
+
+```{r spotcall-filter1}
+spotcalldf <- filterDF(spotcalldf, filtout>0, returnTroubleShootPlots = T, plotWindowRadius = 5)
+```
+
+Perhaps the safest option -- in that one that does not require _a priori_ assumptions -- is to perform some decoding by eye on a small FOV region, and ensure that one's spotcalling pipeline returns results that agree with these manually obtained results. To attempt this, we provide a `returnTroubleShootPlots` parameter in `filterDF`. When set to `TRUE` (default `FALSE`), plots are returned showing pixel intensity images for each bit, overlaid with gene labels. [Do note that these plots are only available if users have kept their `imMetrics` environment, or have specified a list of images (`imList`).]
+
+Plots show spots either `BEFORE` or `AFTER` filtering. 
+
+```{r spotcall-filter-QCBEFORE, fig.width=9, fig.height=9}
+print( troubleshootPlots[['BEFORE']][[1]] )
+```
+
+```{r spotcall-filter-QCAFTER, fig.width=9, fig.height=9}
+print( troubleshootPlots[['AFTER']][[1]] )
+```
+
+Under the hood, `filterDF` makes use of the `spotcall_troubleshootPlots` function to return plots, and parameters for `spotcall_troubleshootPlots` can be input into `filterDF` to modify the plots returned. Alternatively, users may simply use `spotcall_troubleshootPlots` directly.
+
+```{r spotcall-troubleshootplots, fig.width=9, fig.height=9}
+plotList <- spotcall_troubleshootPlots( 
+  spotcalldf, 
+  plotWindowRadius = 5, 
+  decodeMetric = 'DECODE', #Instead of DECODE, users may pick other objects in imMetrics
+  chosenCoordinate = c(
+    939 + 340i, #Specifying a custom coordinate
+    sum(as.numeric(spotcalldf[1,c('WX', 'WY')]) * c(1, 1i)) #Specifying the first pixel in spotcalldf
+    )
+  )
+for( i in 1:length(plotList) ){
+  p <- plotList[[i]]
+  print( p )
+}
+```
+
+**Users are encouraged to optimise their image processing pipelines on one FOV, before applying the same pipelines to all other FOVs.**
+
+### Binarising continuous values
+
+Note that the current image vector contains continuous values. Users may wish to binarise values, such that superthreshold values are unambiguously assigned as ON, and subthreshold as OFF. To that end, we provide the `bitsFromDecode` function that searches for the optimal threshold that maximises accuracy of ON/OFF calls per bit. There are several ways to assay accuracy:
+
+* `precision`: True positives / (True positives + False positives)
+* `recall`: True positives / (True positives + False negatives)
+* `f1` (default): 2 * Precision * Recall / (Precision + Recall)
+* `fb`: (1 + $\beta^2$) * Precision * Recall / ($\beta^2$ * Precision + Recall)
+
+After thresholding, we can also calculate Hamming Distance from codebook vectors, which is stored under the `HD` column.
+
+```{r spotcall-binarise}
+spotcalldf <- bitsFromDecode(spotcalldf)
+table(spotcalldf$HD)
+```
+
+It is recommended to filter out pixels whose Hamming Distance to their assigned gene is >1. 
+
+```{r spotcall-filter2}
+spotcalldf <- filterDF(spotcalldf, spotcalldf$HD > 1)
+```
+
+Binarisation is recommended if there is a clear cutoff in intensities between 0 vs 1 bits in the `DECODE` images. This assumption should be true in most cases, but may be violated if there are very different numbers of encoding probes for different genes: e.g. if there is a gene A that has 40 probes and a gene B with only 5 probes, ON for gene B will be dimmer than ON for gene A (and OFF for gene A may be brighter than OFF for gene B, depending on how thorough bleaching / washing was between imaging cycles). So a single intensity threshold separating ON vs OFF may not be appropriate here. **In this scenario, users may wish to skip binarisation entirely.**
+
+### Obtaining other QC metrics
+
+Beyond image-codebook vector distances, we also provide other functions that users may find useful for performing further quality control checks. We provide several options for thresholding:
+
+* `thresh_Otsu`: Otsu thresholding. Useful for separating a bimodal distribution.
+* `thresh_Elbow`: Identifies the elbow in a distribution. Useful for heavy tailed distributions.  
+* `thresh_Quantile`: Finds the average between quantiles in group A vs B. As default, the chosen quantiles are the medians of A and B.
+
+All thresholding functions are compatible with the `findThreshold` function. 
+
+```{r spotcall-thresholding-syntheticexample}
+set.seed(12345)
+groups <- sample(c(F, T), 1E4, T, c(0.5, 0.5))
+values <- rep(0, length(groups))
+values[groups] <- rnorm(sum(groups), mean = 1, sd = 0.1)
+values[!groups] <- rgamma(sum(!groups), shape = 1, scale = 0.5)
+hist(values, breaks=1000, main = 'Thresholds: Otsu (red), Elbow (blue), Quantile (green)' ); 
+abline(v=findThreshold(values, thresh_Otsu), col='red');
+abline(v=findThreshold(values[values > median(values)], thresh_Elbow, rightElbow = T), col='blue');
+abline(v=findThreshold(values, thresh_Quantile, labels = groups), col='green')
+```
+
+#### `scoreDeltaF` {-}
+
+This function calculates $\Delta F / F_0$ metrics across image metrics. As default, all image metrics generated by `getImageMetrics` (and whose names are saved in `params$imageMetrics`) will be processed. [NB When $F_0$ is 0, $\Delta F / F_0$ is default set to the highest valid value for that column.]
+
+Below, we show the $\Delta F / F_0$ alone, but users should read the `scoreDeltaF` documentation for the full list of metrics returned (e.g. $F_1$, $F_0$ etc). 
+
+```{r spotcall-deltaf}
+spotcalldf <- scoreDeltaF( spotcalldf )
+knitr::kable( head( spotcalldf[,grepl('^DFF0_', colnames(spotcalldf))] ), format = 'html', booktabs = TRUE )
+```
+
+We expect low confidence spots to on average have low $\Delta F / F_0$, i.e. their ON bits are less distinguishable from their OFF bits.
+
+```{r spotcall-deltaf-plot}
+ggplot(spotcalldf[spotcalldf$F0_DECODE!=0,]) +
+  geom_violin(aes(x=BLANK, y=DFF0_DECODE, colour=BLANK) ) +
+  geom_boxplot(aes(x=BLANK, y=DFF0_DECODE, colour=BLANK), fill='transparent', width=0.25 ) +
+  scale_y_log10() +
+  theme_minimal(base_size=20) +
+  scale_colour_manual(values=c('TRUE' = 'red', 'FALSE' = 'black')) +
+  theme(legend.position = 'none')
+```
+
+#### `spatialIsAdjacent` {-}
+
+The `spatialIsAdjacent` function searches in the immediate surroundings of a set of query coordinates. For instance, below, we ask if a given pixel is next to a blank. [Unsurprisingly, blanks will be reported as being next to blanks.]
+
+```{r spotcall-spatialisadj}
+isNextToBlank <- spatialIsAdjacent( spotcalldf, 'BLANK' )
+by(isNextToBlank, spotcalldf$BLANK, table)
+spotcalldf$NEXTTOBLANK <- isNextToBlank
+```
+
+In general, we are less confident about non-blank spots that _are_ next to blanks, as evidenced by their higher codebook distances below.
+
+```{r spotcall-spatialisadj-plot}
+ggplot( reshape2::melt( data.frame(spotcalldf)[!spotcalldf$BLANK, ], measure.vars=c('COS', 'EUC', 'L2E'))  ) +
+  geom_violin(aes(x=NEXTTOBLANK, y=value, colour=NEXTTOBLANK) ) +
+  geom_boxplot(aes(x=NEXTTOBLANK, y=value, colour=NEXTTOBLANK), fill='transparent', width=0.25 ) +
+  facet_wrap(~variable, scales='free') +
+  ylab('') +
+  theme_minimal(base_size=14) +
+  scale_colour_manual(values=c('TRUE' = 'red', 'FALSE' = 'black')) +
+  theme(legend.position = 'none') +
+  ggtitle('Non-blank spots') + xlab('Is next to a blank')
+```
+
+Users may thus wish to "trim" pixel clusters, by removing non-blanks that are next to blanks: this is beneficial for clustering (described later). [Obviously, blanks should not be subject to the same filtering.]
+
+```{r spotcall-filter3}
+spotcalldf <- filterDF(spotcalldf, spotcalldf$NEXTTOBLANK & !spotcalldf$BLANK)
+```
+
+#### `spatialHNNDist` {-}
+
+Another useful spatial metric is how far apart any two pixels with the same identity are from each other, here called "homotypic nearest neighbour (HNN) distance". This can be calculated using `spatialHNNDist`.
+
+```{r spotcall-spatialhnndist}
+HNNDist <- spatialHNNDist( spotcalldf )
+spotcalldf$HNNDIST <- HNNDist
+```
+
+In general, blanks are less likely to be next to each other (possibly because of erroneous single pixel calls in noisy regions), while spots from the same gene tend to cluster - i.e. tend to have low HNN distances (below). Users typically do not have to perform thresholding on HNN distances given the later clustering step; though the distribution of distances can be helpful for determining minimum intracluster distances later on. 
+
+```{r spotcall-hnndistbins}
+hnnDistBins <- factor(cut(spotcalldf$HNNDIST, breaks=c(0,1,2,3,4,5,Inf)))
+ggplot( data.frame(spotcalldf, hnnDistBins)  ) +
+  scale_fill_viridis_d(name = 'HNN distance range (pixels)', option='turbo') +
+  geom_bar(aes(x=BLANK, fill=hnnDistBins), position='fill' ) +
+  theme_minimal(base_size=14) +
+  theme(legend.position = 'right') + ylab('Proportion')
+```
+
+#### `scoreClassifier` {-}
+
+Finally, we have the `scoreClassifier` function. Under the hood, this function builds a classifier (logistic regression as default) to distinguish one class of pixels from another, using pixel-wise metrics in our dataframe. Users can specify covariates to include in the model; otherwise, all columns in the dataframe will be used.
+
+Below is an example of predicting blanks from non-blanks. We exclude bit-specific columns (e.g. `DECODE_01`), covariates that are likely to highly correlate with others (e.g. `F1_DECODE` and `DFF0_DECODE` are likely to highly correlate), coordinate information, and any covariate that is equivalent to `BLANK`.
+
+```{r spotcall-blankprobs}
+forExclusion <- c('Xm', 'Ym', 'fov', 'g', 'WX', 'WY', 'IDX', colnames(spotcalldf)[grepl('_\\d+$|^DFF0_|^F1_|CV_|LAB$', colnames(spotcalldf))])
+probabilityBLANK <- scoreClassifier(spotcalldf, 'BLANK', variablesExcluded = forExclusion)
+spotcalldf$PBLANK <- probabilityBLANK
+```
+
+Accordingly the probability of being a blank is higher for blanks than non-blanks.
+
+```{r spotcall-blankprobs-visualise}
+thresh <- thresh_Quantile(spotcalldf$PBLANK, spotcalldf$BLANK, quantileFalse = 0.5, quantileTrue = 0.25)
+ggplot( spotcalldf  ) +
+  geom_violin(aes(x=BLANK, y=PBLANK, colour=BLANK) ) +
+  geom_boxplot(aes(x=BLANK, y=PBLANK, colour=BLANK), fill='transparent', width=0.25 ) +
+  ylab('Probability of being a blank') +
+  theme_minimal(base_size=14) +
+  scale_colour_manual(values=c('TRUE' = 'red', 'FALSE' = 'black')) +
+  theme(legend.position = 'none') +
+  geom_hline(yintercept=thresh, linetype = 'dashed', colour='grey')
+```
+
+Thresholding and filtering can be performed using the classifier scores:
+
+```{r spotcall-filter4}
+spotcalldf <- filterDF(spotcalldf, spotcalldf$PBLANK > thresh)
+```
+
+### Clustering 
+
+Having performed QC to focus on pixels whose identity we are confident in, the next step is to cluster adjacent pixels with the same identity into a single punctum. This is accomplished with the `spatialClusterLeiden` function. Here, we want clusters at least 3 pixels big, and with a maximum distance between pixels of 2 pixels.
+
+```{r spotcall-spatialcluster}
+clusterInfo <- spatialClusterLeiden( spotcalldf, minNeighbours = 3, maxInterSpotDistancePixels = 2)
+spotcalldf[,colnames(clusterInfo)] <- clusterInfo
+```
+
+Users are recommended to visualise clusters across a small window. Note how specifying centroids only returns a single pixel coordinate per cluster.
+
+```{r spotcall-visualiseclustering}
+## Specify window to plot
+cxWindow <- c(1200, 1300, 1200, 1300)
+
+## Specify what genes assigned which colours
+## Manually:
+# genePalette <- setNames(
+#   viridis::turbo(nrow(params$ordered_codebook)),
+#   rownames(params$ordered_codebook) )
+## Using previously established palette (established during prepareCodebook):
+genePalette <- params$genePalette
+
+## Plot of labelled pixels vs centroids   
+cowplot::plot_grid( plotlist = list(
+  ggplot( 
+    spotcalldf[
+      spotcalldf$WX > cxWindow[1] 
+      & spotcalldf$WX < cxWindow[2] 
+      & spotcalldf$WY > cxWindow[3] 
+      & spotcalldf$WY < cxWindow[4], ]
+    ) + 
+    geom_text( aes(
+      x=WX, y=WY, label=g, 
+      colour=factor(g, levels=rownames(params$ordered_codebook))) 
+      ) +
+    scale_colour_manual( values=genePalette ) +
+    theme_void(base_size=14) +
+    theme(legend.position = 'none', 
+          plot.title = element_text(hjust=0.5)) +
+    scale_x_continuous( limits=c(cxWindow[1], cxWindow[2]) ) +
+    scale_y_reverse( limits=c(cxWindow[4], cxWindow[3]) ) +
+    ggtitle('All pixels'),
+  
+    ggplot( 
+    spotcalldf[
+      spotcalldf$CENTROID
+      & spotcalldf$WX > cxWindow[1] 
+      & spotcalldf$WX < cxWindow[2] 
+      & spotcalldf$WY > cxWindow[3] 
+      & spotcalldf$WY < cxWindow[4], ]
+    ) + 
+    geom_text( aes(
+      x=WX, y=WY, label=g, 
+      colour=factor(g, levels=rownames(params$ordered_codebook))) 
+      ) +
+    scale_colour_manual( values=genePalette ) +
+    theme_void(base_size=14) +
+    theme(legend.position = 'none', 
+          plot.title = element_text(hjust=0.5)) +
+    scale_x_continuous( limits=c(cxWindow[1], cxWindow[2]) ) +
+    scale_y_reverse( limits=c(cxWindow[4], cxWindow[3]) ) +
+    ggtitle('Centroids only')
+  
+), nrow=1 )
+```
+
+Depending on what the user wants, the non-centroid pixels can be filtered. Additionally, users may wish to examine cluster sizes to find an appropriate range of pixels per cluster.
+
+```{r spotcall-lookingatclustersizespercentroid}
+maxClusterSize = 50
+ggplot( spotcalldf[spotcalldf$CENTROID,] ) +
+  geom_histogram( aes(x=CLUSTER_SIZE, fill=BLANK), binwidth = 1) +
+  facet_wrap(~BLANK, ncol=1, scales='free_y', strip.position = 'right') +
+  theme_minimal(base_size=14) +
+  xlab('Cluster size') + ylab('N centroids') +
+  geom_vline(xintercept = maxClusterSize, col='grey', linetype='dashed') +
+  scale_fill_manual( values=c('FALSE' = 'black', 'TRUE' = 'red') )
+```
+
+As before, filtering is accomplished with `filterDF`:
+
+```{r spotcall-filter5}
+spotcalldf <- filterDF(spotcalldf, !(spotcalldf$CENTROID & spotcalldf$CLUSTER_SIZE < maxClusterSize) )
+```
+
+## Saving spot calls
+
+If we are satisified with our quality control, the final step is to use the `saveDF` function to save the dataframe. The default output is a `SPOTCALL_{ FOV Name }.csv.gz` file; users that have set `params$resumeMode` to `TRUE` may wish to first check if this file exists before proceeding with image processing.
+
+```{r spotcall-saving}
+saveDF( spotcalldf )
+file.exists( paste0(params$out_dir, 'SPOTCALL_', params$current_fov, '.csv.gz') )
+```
+
+Individual files are thereby generated for every FOV. 

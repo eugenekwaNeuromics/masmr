@@ -1,0 +1,361 @@
+# Cell segmentation
+
+Cell / nuclei segmentation is the task of identifying cells / nuclei in an appropriate image (we will be referring to cell and nuclei segmentation interchangeably here). There are numerous tools available for this purpose, but we will be covering two Python-based models specifically: `cellpose` [@stringer2021cellpose] and `stardist` [@schmidt2018cell; @weigert2022nuclei]. 
+
+As cell segmentation is performed on DAPI images, it can be performed in parallel with spotcalling. 
+
+```{r cellseg-libs, message=FALSE}
+library(masmr)
+library(ggplot2)
+```
+
+## Pre-processing
+
+### Establishing parameters
+
+Similar to spotcalling, we first need to establish some parameters. The same code used for spotcalling can be repeated here.
+
+```{r cellseg-params}
+data_dir = 'C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/'
+establishParams(
+  imageDirs = paste0(data_dir, 'S10/'),
+  imageFormat = '.ome.tif',
+  codebookFileName = list.files(paste0(data_dir, 'codebook/'), pattern='codebook', full.names = TRUE),
+  codebookColumnNames = paste0(rep(c(0:3), 4), '_', rep(c('cy3', 'alexa594', 'cy5', 'cy7'), each=4) ),
+  outDir = 'C:/Users/kwaje/Downloads/JYOUT/',
+  dapiDir = paste0(data_dir, 'DAPI_1/'),
+  pythonLocation = 'C:/Users/kwaje/AppData/Local/anaconda3/envs/scipyenv/',
+  fpkmFileName = list.files(paste0(data_dir, 'FPKM_data/'), pattern='FPKM', full.names = TRUE),
+  nProbesFileName = list.files(paste0(data_dir), pattern='ProbesPerGene.csv', recursive = T, full.names = TRUE)
+)
+```
+
+Of relevance to cell segmentation specifically are the `pythonLocation` and `dapiDir` parameters:
+
+* `dapiDir`: location of DAPI images. [Technically, any cell-based imaging will likely work here -- not just DAPI -- as long as they are compatible with the cell segmentation models.]
+* `pythonLocation`: location of the user's Python environment. The Python environment should contain all the packages necessary to run the cell segmen tation model of choice. 
+
+Details on the setting up of the Python environment is beyond the scope of this book. Briefly, there exist various tools (e.g. `miniconda` and `anaconda`) that allow users to create a Python environment for installing necessary software. We will then interface with that environment through `reticulate`. Below are a series of commands (input into the `anaconda` command prompt) to set up a Python environment called `scipyenv` that is compatible with `stardist` and `cellpose`. Users should take note of where the environment is created, and provide the location of the folder in `pythonLocation`.
+
+```
+conda create -n scipyenv python=3.9 notebook pandas numpy=1.26.4
+conda activate scipyenv
+conda install pytorch=1.8.2 cudatoolkit=10.2 -c pytorch-lts
+pip install cellpose==3.0.11
+pip install tensorflow
+pip install stardist
+```
+
+Additionally, similar to spotcalling, we also `readImageMetaData`, though this time for DAPI images specifically. Because there will be no decoding, warnings about codebook column names not matching can be safely ignored.
+
+```{r cellseg-readimagemeta}
+readImageMetaData( 'dapi_dir' )
+```
+
+As before, this adds additional metadata to the `params` object, albeit this time for DAPI images specifically:
+
+```{r cellseg-resolutions}
+print( params$resolutions )
+knitr::kable( head( params$global_coords ), format = 'html', booktabs = TRUE )
+```
+
+### Establishing the cell segmentation model
+
+Unique to the cell segmentation script, users must load their desired cell segmentation model into the environment. This is accomplished with the `establishCellSegModel` function, which returns a new environment object called `cellSeg`. 
+
+If no other parameters are specified, the `nuclei` model in `cellpose` is loaded. [We will showcase loading different models later in this chapter.] Additionally, GPU acceleration is turned off as default -- users able to access their computer's GPU may turn this on for time saving.
+
+```{r cellseg-establishmodel}
+establishCellSegModel()
+```
+
+The `cellSeg` environment keeps track of which model has been loaded and the outputs expected from that model. Users may load multiple models if they so wish but this will increase the run time: all models in `cellSeg` will be run on DAPI images. Below, we have a single model `CELLPOSE`, within which we have the model and the expected outputs. 
+
+```{r cellseg-cellpose}
+ls(cellSeg)
+cellSeg$CELLPOSE
+```
+
+## Running cell segmentation
+
+For memory management, it is recommended that FOVs are processed as individual tiles. Below, we read in a specific FOV (and as recommended, save the current FOV in `params$current_fov`). We can use `readImage` for a specific file, or -- if we know which FOV we want -- with `readImageList`.
+
+**NOTE: below may be more complicated for Z-stacks and multiple channels. Process accordingly so that**`im`**is a single matrix of the DAPI channel.**
+
+```{r cellseg-readimagelist}
+params$current_fov <- params$fov_names[38]
+im <- readImageList( params$current_fov )[[1]] #List of 1
+plot(imager::as.cimg(im))
+```
+
+## Running segmentation model
+
+Once the necessary parameters have been established, we are ready to run our cell segmentation model with the `runCellSegModel` function. Further image processing of DAPI images generally is not necessary as these models tend to have in-built image processing functions. However, we have found that modifying image parameters can influence cell segmentation; a more detailed discussion is provided below.
+
+### `cellpose`
+
+`cellpose` is our default choice owing to it being applicable to both nuclei and cellular segmentation. It is a deep-learning based segmentation model trained on a variety of image types including DAPI images alone (`nuclei`), and multi-channel images with both nuclei and cell boundary stains (`cyto`, `cyto2`, and `cyto3`).  
+
+An example of how to run the model within `masmr` is shown below. [As default, only the `mask` output is returned; this can be turned off by setting `masksOnly` to `FALSE`.]
+
+```{r cellseg-cellpose-defaultperformance}
+cellMask <- runCellSegModel(im, masksOnly = TRUE)
+df <- as.data.frame(imager::as.cimg(cellMask))
+ggplot() +
+  geom_raster( data = as.data.frame(imager::as.cimg(im)), 
+               aes(x=x, y=y, fill=value) ) +
+  scale_fill_gradient(low='black', high='white') +
+  geom_point( data=df[df$value>0,], 
+              aes(x=x, y=y, colour=factor(value)),
+              shape = '.') +
+  scale_colour_viridis_d( option='turbo' ) +
+  theme_void( base_size = 14 ) +
+  scale_y_reverse() +
+  coord_fixed() +
+  theme(legend.position = 'none')
+```
+
+The default `nuclei` model called for `cellpose` does not seem to be working very well for these images. There are several ways to troubleshoot:
+
+#### Altering model parameters {-}
+
+The default evaluation for `cellpose` assumes a diameter of 30 pixels. If we wish to increase this value, this can be accomplished by adding model parameters to `runCellSegModel`. Below, we increase the `diameter` parameter (specific to the `cellpose` model) to 50. [`masksOnly` is default `TRUE`, will not reproduce that parameter below.]
+
+```{r cellseg-cellpose-alteredparams}
+cellMask <- runCellSegModel(im, diameter = 50)
+df <- as.data.frame(imager::as.cimg(cellMask))
+ggplot() +
+  geom_raster( data = as.data.frame(imager::as.cimg(im)), 
+               aes(x=x, y=y, fill=value) ) +
+  scale_fill_gradient(low='black', high='white') +
+  geom_point( data=df[df$value>0,], 
+              aes(x=x, y=y, colour=factor(value)),
+              shape = '.') +
+  scale_colour_viridis_d( option='turbo' ) +
+  theme_void( base_size = 14 ) +
+  scale_y_reverse() +
+  coord_fixed() +
+  theme(legend.position = 'none')
+```
+
+#### Image processing {-}
+
+For some models, altering the intensity values (e.g. by brightening) can influence model performance. For `cellpose`, the model is generally robust to additional image processing. [Compare to `stardist` below.]
+
+```{r cellseg-cellpose-imageprocessed}
+norm <- im^0.5
+par(mfrow=c(1,2))
+plot(imager::as.cimg(im), main = 'Original image')
+plot(imager::as.cimg(norm), main = 'Brightened image')
+par(mfrow=c(1,1))
+
+cellMask <- runCellSegModel( norm )
+df <- as.data.frame(imager::as.cimg(cellMask))
+ggplot() +
+  geom_raster( data = as.data.frame(imager::as.cimg(im)), 
+               aes(x=x, y=y, fill=value) ) +
+  scale_fill_gradient(low='black', high='white') +
+  geom_point( data=df[df$value>0,], 
+              aes(x=x, y=y, colour=factor(value)),
+              shape = '.') +
+  scale_colour_viridis_d( option='turbo' ) +
+  theme_void( base_size = 14 ) +
+  scale_y_reverse() +
+  coord_fixed() +
+  theme(legend.position = 'none')
+```
+
+#### Loading a retrained model {-}
+
+If users have the resources to retrain the default `cellpose` model [@pachitariu2022cellpose], this retrained model can be loaded in lieu of the default models. To do so, user's model can be specified in `establishCellSegModel`. 
+
+[Model retraining is beyond the scope of this book. Users are encouraged to look up the documentation for `cellpose`.]
+
+```{r cellseg-cellpose-retrained}
+establishCellSegModel(
+  cellposePreTrainedModel =
+    'C:/Users/kwaje/OneDrive - A STAR/Documents/Workplace/Liu_Connect/Code/jinyue_cellpose_models/CP_model3_newB4_800epoch_lr0pt01_FINAL'
+)
+cellMask <- runCellSegModel(im)
+df <- as.data.frame(imager::as.cimg(cellMask))
+ggplot() +
+  geom_raster( data = as.data.frame(imager::as.cimg(im)), 
+               aes(x=x, y=y, fill=value) ) +
+  scale_fill_gradient(low='black', high='white') +
+  geom_point( data=df[df$value>0,], 
+              aes(x=x, y=y, colour=factor(value)),
+              shape = '.') +
+  scale_colour_viridis_d( option='turbo' ) +
+  theme_void( base_size = 14 ) +
+  scale_y_reverse() +
+  coord_fixed() +
+  theme(legend.position = 'none')
+```
+
+### `stardist`
+
+An alternative for nuclei segmentation is to use `stardist`: a deep-learning segmentation model that relies on star-convex polygons. The model has been trained on DAPI images (`2D_versatile_fluo`), and H&E stains (`2D_versatile_he`). It is typically faster than `cellpose`, allowing for looping through multiple hyperparameters -- should users be interested.
+
+```{r cellseg-stardist-default}
+establishCellSegModel( 'stardist' )
+cellMask <- runCellSegModel(im)
+df <- as.data.frame(imager::as.cimg(cellMask))
+ggplot() +
+  geom_raster( data = as.data.frame(imager::as.cimg(im)), 
+               aes(x=x, y=y, fill=value) ) +
+  scale_fill_gradient(low='black', high='white') +
+  geom_point( data=df[df$value>0,], 
+              aes(x=x, y=y, colour=factor(value)),
+              shape = '.') +
+  scale_colour_viridis_d( option='turbo' ) +
+  theme_void( base_size = 14 ) +
+  scale_y_reverse() +
+  coord_fixed() +
+  theme(legend.position = 'none')
+```
+
+As with `cellpose`, there are various ways to troubleshoot base `stardist` performance. 
+
+Like `cellpose`, users can tweak `stardist` model parameters during `runCellSegModel`. For instance, decreasing `prob_thresh` (default: 0.48) increases sensitivity.
+
+```{r cellseg-stardist-reparams}
+cellMask <- runCellSegModel(im, prob_thresh = 0.1)
+df <- as.data.frame(imager::as.cimg(cellMask))
+ggplot() +
+  geom_raster( data = as.data.frame(imager::as.cimg(im)), 
+               aes(x=x, y=y, fill=value) ) +
+  scale_fill_gradient(low='black', high='white') +
+  geom_point( data=df[df$value>0,], 
+              aes(x=x, y=y, colour=factor(value)),
+              shape = '.') +
+  scale_colour_viridis_d( option='turbo' ) +
+  theme_void( base_size = 14 ) +
+  scale_y_reverse() +
+  coord_fixed() +
+  theme(legend.position = 'none')
+```
+
+We have also found `stardist` to be more sensitive to brightness values / image processing than `cellpose`. For instance, brightening the image as before greatly impairs nuclei detection:
+
+```{r cellseg-stardist-brightnesseffect}
+norm <- im^0.5
+par(mfrow=c(1,2))
+plot(imager::as.cimg(im), main = 'Original image')
+plot(imager::as.cimg(norm), main = 'Brightened image')
+par(mfrow=c(1,1))
+
+cellMask <- runCellSegModel( norm )
+df <- as.data.frame(imager::as.cimg(cellMask))
+ggplot() +
+  geom_raster( data = as.data.frame(imager::as.cimg(im)), 
+               aes(x=x, y=y, fill=value) ) +
+  scale_fill_gradient(low='black', high='white') +
+  geom_point( data=df[df$value>0,], 
+              aes(x=x, y=y, colour=factor(value)),
+              shape = '.') +
+  scale_colour_viridis_d( option='turbo' ) +
+  theme_void( base_size = 14 ) +
+  scale_y_reverse() +
+  coord_fixed() +
+  theme(legend.position = 'none')
+```
+
+And darkening the image greatly increases sensitivity:
+
+```{r cellseg-stardist-darkening}
+norm <- im^1.5
+par(mfrow=c(1,2))
+plot(imager::as.cimg(im), main = 'Original image')
+plot(imager::as.cimg(norm), main = 'Darkened image')
+par(mfrow=c(1,1))
+
+cellMask <- runCellSegModel( norm )
+df <- as.data.frame(imager::as.cimg(cellMask))
+ggplot() +
+  geom_raster( data = as.data.frame(imager::as.cimg(im)), 
+               aes(x=x, y=y, fill=value) ) +
+  scale_fill_gradient(low='black', high='white') +
+  geom_point( data=df[df$value>0,], 
+              aes(x=x, y=y, colour=factor(value)),
+              shape = '.') +
+  scale_colour_viridis_d( option='turbo' ) +
+  theme_void( base_size = 14 ) +
+  scale_y_reverse() +
+  coord_fixed() +
+  theme(legend.position = 'none')
+```
+
+Given this sensitivity, and the relatively faster speed of `stardist`, users might wish to try different image processing prior to cell segmentation. This can be accomplished as below. Note that `runCellSegModel` accepts both a single image matrix, and a list of images. [The same is achievable for `cellpose` if desired, but users should be aware of the longer runtime.]
+
+```{r cellseg-stardist-powerranges}
+powerValues <- seq(0.5, 2, length.out = 6)
+par(mfrow=c(2, 3))
+imList <- lapply( powerValues, function(x){ 
+  norm <- im^x
+  plot( imager::as.cimg(norm), main = paste0('Image ^ ', round(x, digits=1) ) ) 
+  return(norm)
+  })
+names( imList ) <- paste0("Power", round(powerValues, digits=1))
+
+cellMasks <- runCellSegModel( imList )
+for(i in 1:length(cellMasks)){
+  plot( imager::as.cimg(cellMasks[[i]]), main = paste0('Masks of ', names(cellMasks)[i]) )
+}
+par(mfrow=c(1, 1))
+```
+
+To summarise a list of masks into a single mask matrix, we provide the `consolidateCellSegMasks` function. This works by overlaying all masks in the list, and only accepting image pixels that have been masked at least $n$ times. As default, $n = 1$, so if a pixel is masked at least once, it is brought forwards.
+
+```{r cellseg-stardist-consolidate}
+cellMask <- consolidateCellSegMasks( cellMasks )
+df <- as.data.frame(imager::as.cimg(cellMask))
+ggplot() +
+  geom_raster( data = as.data.frame(imager::as.cimg(im)), 
+               aes(x=x, y=y, fill=value) ) +
+  scale_fill_gradient(low='black', high='white') +
+  geom_point( data=df[df$value>0,], 
+              aes(x=x, y=y, colour=factor(value)),
+              shape = '.') +
+  scale_colour_viridis_d( option='turbo' ) +
+  theme_void( base_size = 14 ) +
+  scale_y_reverse() +
+  coord_fixed() +
+  theme(legend.position = 'none')
+```
+
+Increasing $n$ means pixels need to be masked more than once, and thus decreases the number of masks identified. Below shows $n = 2$:
+
+```{r cellseg-stardist-consolidaten2}
+cellMask <- consolidateCellSegMasks( cellMasks, minFlags = 2 )
+df <- as.data.frame(imager::as.cimg(cellMask))
+ggplot() +
+  geom_raster( data = as.data.frame(imager::as.cimg(im)), 
+               aes(x=x, y=y, fill=value) ) +
+  scale_fill_gradient(low='black', high='white') +
+  geom_point( data=df[df$value>0,], 
+              aes(x=x, y=y, colour=factor(value)),
+              shape = '.') +
+  scale_colour_viridis_d( option='turbo' ) +
+  theme_void( base_size = 14 ) +
+  scale_y_reverse() +
+  coord_fixed() +
+  theme(legend.position = 'none')
+```
+
+## Saving cell masks
+
+If users are satisfied with model performance, they can use `saveCellSegMasks` to save masks as a `.csv.gz` file. Additionally, it is recommended that users save the DAPI image used for cell segmentation. As default, the last image to be processed is stored under `params$cell_seg_image`, and will be saved if no other images are specified for `saveCellSegMasks`.
+
+```{r cellseg-currentprocessedimage}
+par(mfrow=c(1,2))
+plot( imager::as.cimg(im), main = 'Original image' )
+plot( imager::as.cimg(params$cell_seg_image), main = 'Last image processed' )
+par(mfrow=c(1,1))
+```
+
+Saving cell masks creates a `CELLSEG_{ Cell segmentation model }_{ FOV name }.csv.gz` file containing masks, and a `REGIM_{ FOV Name }.png` image (depending on what is input into the `im` parameter).
+
+```{r cellseg-savemasks}
+saveCellSegMasks(cellMask, im = im)
+file.exists( paste0(params$out_dir, 'REGIM_', params$current_fov, '.png') )
+```

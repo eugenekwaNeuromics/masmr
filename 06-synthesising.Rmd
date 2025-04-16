@@ -1,0 +1,286 @@
+# Synthesis
+
+Synthesis involves the consolidation of disparate outputs and is the final task. This will be the focus of this Chapter.
+
+```{r syn-libs, message=FALSE}
+library(masmr)
+library(ggplot2)
+```
+
+```{r syn-hidden-runmasmr, include=FALSE}
+source('./pipeline/run_masmr.R')
+```
+
+## Unifying outputs
+
+As a consequence of running scripts from preceding chapters, we expect three subdirectories in the user-specified output directory: one for spotcalling outputs (`IM`), one for cell segmentation (`DAPI`), and one for stitching (`STITCH`). The outputs from these three subdirectories will be combined, and output into a final `OUT` subdirectory.
+
+For illustrative purposes, we have processed just nine FOVs below. Also note the `removeRedundancy` parameter currently set to `FALSE` -- this will be explained later.
+
+```{r syn-paramsestablish}
+data_dir = 'C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/'
+establishParams(
+  imageDirs = paste0(data_dir, 'S10/'),
+  imageFormat = '.ome.tif',
+  codebookFileName = list.files(paste0(data_dir, 'codebook/'), pattern='codebook', full.names = TRUE),
+  codebookColumnNames = paste0(rep(c(0:3), 4), '_', rep(c('cy3', 'alexa594', 'cy5', 'cy7'), each=4) ),
+  outDir = 'C:/Users/kwaje/Downloads/JYOUT/',
+  dapiDir = paste0(data_dir, 'DAPI_1/'),
+  pythonLocation = 'C:/Users/kwaje/AppData/Local/anaconda3/envs/scipyenv/',
+  fpkmFileName = list.files(paste0(data_dir, 'FPKM_data/'), pattern='FPKM', full.names = TRUE),
+  nProbesFileName = list.files(paste0(data_dir), pattern='ProbesPerGene.csv', recursive = T, full.names = TRUE)
+)
+synthesiseData(removeRedundancy = F)
+```
+
+The files created in the `OUT` subdirectory are as follows:
+
+* `OUT_CELLEXPRESSION.csv.gz`: Gene expression per cell. [Only created if there are matching spotcall and cell segmentation files for that FOV.]
+* `OUT_CELLS.csv.gz`: Cellular coordinates, sizes, and other metadata. 
+* `OUT_CELLSEG_PIXELS.csv.gz`: Concatenated cell segmentation masks across all FOVs, with a unified coordinate system.
+* `OUT_GLOBALCOORD.csv`: Updated global coordinates for each FOV.
+* `OUT_SPOTCALL_PIXELS.csv.gz`: Concatenated spotcall dataframes across all FOVs, with a unified coordinate system.
+
+```{r syn-listoutdir}
+list.files( paste0(params$parent_out_dir, '/OUT/') )
+```
+
+Currently, with `removeRedundancy` turned off, dataframes are simply concatenated. This is problematic because FOVs overlap, causing spots to be counted more than once. This can be seen at FOV boundaries, that have higher count densities. 
+
+```{r syn-removeredundancyjustification-boundaries}
+spotcalldf <- data.table::fread(paste0(params$parent_out_dir, '/OUT/OUT_SPOTCALL_PIXELS.csv.gz'), data.table = F)
+cowplot::plot_grid( plotlist=list(
+  ggplot() +
+    geom_hex(data=spotcalldf, aes(x=Xm, y=Ym), bins=100) +
+    scale_fill_viridis_c(option='turbo') +
+    scale_y_reverse() +
+    theme_minimal(base_size=14) +
+    xlab('X (microns)') + ylab('Y (microns)') +
+    theme(legend.position = 'none') +
+    coord_fixed() + 
+    ggtitle('Spot density'), 
+  ggplot() +
+    geom_point(data=spotcalldf, aes(x=Xm, y=Ym, colour=fov), shape='.', alpha=0.5) +
+    scale_colour_viridis_d(name = '', option='turbo') +
+    scale_y_reverse() +
+    theme_minimal(base_size=14) +
+    xlab('X (microns)') + ylab('Y (microns)') +
+    guides(colour=guide_legend(override.aes = list(size=5, shape=16), ncol=1)) +
+    coord_fixed() +
+    theme(legend.position = 'none') +
+    ggtitle('Spots by FOV')
+), nrow=1)
+```
+
+We would expect there to be more cells, and more counts per cell.
+
+```{r syn-removeredundancyjustification-cellmetrics}
+cellExp <- data.table::fread(paste0(params$parent_out_dir, '/OUT/OUT_CELLEXPRESSION.csv.gz'), data.table = F)
+rownames(cellExp) <- cellExp[,1]
+cellExp[,1] <- NULL
+
+hist(log10(1+colSums(cellExp)), 
+     main = paste0( 
+       'Cells x genes: ', paste( dim(cellExp), collapse=' x '), 
+       ', Median nCounts: ', median(colSums(cellExp))), 
+     breaks=25, xlab = 'Log10 nCounts per cell'); 
+abline(v=log10(1+median(colSums(cellExp))), col='red')
+```
+
+To address this problem, we can turn `removeRedundancy` on (this is `TRUE` as default), which has the effect of:
+
+* *Removing redundant spots:* Spots per FOV in the overlapping region are counted. The FOV contributing fewer spots in the overlapping region is ignored.
+* *Removing redundant cells:* If cells from different FOVs overlap <$X$%, overlapping pixels are simply disregarded. However, if overlap >$X$%, then one of the cells has to be removed. In general, we drop smaller cells or cells that overlap with more than one cell in another FOV. The choice of $X$ depends on the `cellOverlapFraction` parameter (default is 0.25, i.e. 25%). 
+
+
+```{r syn-synproper}
+synthesiseData(removeRedundancy = T, cellOverlapFraction = 0.25)
+```
+
+Accordingly, removing duplicate calls reduces spot density at FOV boundaries...
+
+```{r syn-synproper-result}
+spotcalldf <- data.table::fread(paste0(params$parent_out_dir, '/OUT/OUT_SPOTCALL_PIXELS.csv.gz'), data.table = F)
+cowplot::plot_grid( plotlist=list(
+  ggplot() +
+    geom_hex(data=spotcalldf, aes(x=Xm, y=Ym), bins=100) +
+    scale_fill_viridis_c(option='turbo') +
+    scale_y_reverse() +
+    theme_minimal(base_size=14) +
+    xlab('X (microns)') + ylab('Y (microns)') +
+    theme(legend.position = 'none') +
+    coord_fixed() + 
+    ggtitle('Spot density'), 
+  ggplot() +
+    geom_point(data=spotcalldf, aes(x=Xm, y=Ym, colour=fov), shape='.', alpha=0.5) +
+    scale_colour_viridis_d(name = '', option='turbo') +
+    scale_y_reverse() +
+    theme_minimal(base_size=14) +
+    xlab('X (microns)') + ylab('Y (microns)') +
+    guides(colour=guide_legend(override.aes = list(size=5, shape=16), ncol=1)) +
+    coord_fixed() +
+    theme(legend.position = 'none') +
+    ggtitle('Spots by FOV')
+), nrow=1)
+```
+
+...and reduces the number of cells and counts per cell.
+
+```{r syn-synproper-cellwise}
+cellExp <- data.table::fread(paste0(params$parent_out_dir, '/OUT/OUT_CELLEXPRESSION.csv.gz'), data.table = F)
+rownames(cellExp) <- cellExp[,1]
+cellExp[,1] <- NULL
+
+hist(log10(1+colSums(cellExp)), 
+     main = paste0( 
+       'Cells x genes: ', paste( dim(cellExp), collapse=' x '), 
+       ', Median nCounts: ', median(colSums(cellExp))), 
+     breaks=25, xlab = 'Log10 nCounts per cell'); 
+abline(v=log10(1+median(colSums(cellExp))), col='red')
+```
+
+One final feature to consider is the use of the `subsetFOV` field. This is used when your FOVs are disjoint, i.e. not connected to each other (such as when there are multiple samples on the microscopy stage, and the FOVs in between samples are not captured). In such cases, one needs to subset just the FOVs belonging to one intact block.
+
+```{r syn-showingsubsetFOV}
+fovs_belonging_to_sample <- c(
+  'MMStack_1-Pos_002_004',
+  'MMStack_1-Pos_002_002',
+  'MMStack_1-Pos_002_003'
+)
+synthesiseData(removeRedundancy = T, cellOverlapFraction = 0.25, subsetFOV = fovs_belonging_to_sample)
+```
+
+Note that by subsetting, subdirectories within `\OUT` are created named in the `SUBSET_{ Reference FOV }` format. **WARNING:** It is assumed that no two subsets will have the same Reference FOV.
+
+```{r syn-showingsubdirectoriescreatedbysubsetFOV}
+print( params$out_dir )
+```
+
+Accordingly, the output within this subdirectory is only a subset of all the processed FOVs.
+
+```{r syn-subset-result}
+spotcalldf <- data.table::fread(paste0(params$out_dir, '/OUT_SPOTCALL_PIXELS.csv.gz'), data.table = F)
+cowplot::plot_grid( plotlist=list(
+  ggplot() +
+    geom_hex(data=spotcalldf, aes(x=Xm, y=Ym), bins=100) +
+    scale_fill_viridis_c(option='turbo') +
+    scale_y_reverse() +
+    theme_minimal(base_size=14) +
+    xlab('X (microns)') + ylab('Y (microns)') +
+    theme(legend.position = 'none') +
+    coord_fixed() + 
+    ggtitle('Spot density'), 
+  ggplot() +
+    geom_point(data=spotcalldf, aes(x=Xm, y=Ym, colour=fov), shape='.', alpha=0.5) +
+    scale_colour_viridis_d(name = '', option='turbo') +
+    scale_y_reverse() +
+    theme_minimal(base_size=14) +
+    xlab('X (microns)') + ylab('Y (microns)') +
+    guides(colour=guide_legend(override.aes = list(size=5, shape=16), ncol=1)) +
+    coord_fixed() +
+    theme(legend.position = 'none') +
+    ggtitle('Spots by FOV')
+), nrow=1)
+```
+
+## QC plotting
+
+We have provided a `plotQC` function that returns several default QC plots as `.png` files. This function depends on parameters input during `establishParams`: e.g. if `fpkmFileName` is missing, then FPKM correlations will not be plotted. Additionally, if users ran `prepareCodebook` with `exhaustiveBlanks`, the newly added blanks will be flagged. [Users wishing to ignore these new blanks can set `includeNewBlanks` in `plotQC` to `FALSE` (see below).]
+
+```{r syn-plotqc}
+plotQC( 
+  includeNewBlanks=T,
+  synthesisDir = 'C:/Users/kwaje/Downloads/JYOUT/OUT/' #To refer to previously generated (un-subset) output
+  )
+```
+
+```{r syn-hiddenqcplotcopy, include=FALSE}
+imgFiles <- list.files(paste0(params$parent_out_dir, '/OUT/QC/'), pattern='.png', full.names = T)
+file.copy( imgFiles, paste0('./images/', basename(imgFiles)), overwrite = TRUE ) 
+```
+
+The interpretation of these plots will be covered briefly below.
+
+### `FPKMCorrelation` {-}
+
+This plot returns the correlation between expected expression and the number of spots actually observed (bot log-transformed); strong correlations are ideal. In the title of this plot, we also report the percentage of spots that are blanks (specifically those with `blank` in their names), and the percentage of spots that overlap a cell mask.
+
+```{r syn-fpkmcorr, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics( paste0('./images/', 'FPKMCorrelation', '.png') )
+```
+
+### `CosineDistanceDistribution` {-}
+
+This shows a distribution of cosine distances (`COS`) per gene. Lower cosine distances implies higher confidence in the decoding of that spot. 
+
+```{r syn-cosinedistancedistribution, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics( paste0('./images/', 'CosineDistanceDistribution', '.png') )
+```
+
+### `SpotFOVDistribution` {-}
+
+This shows the distribution of spots, averaged across FOVs. This is used to check if spot coordinate in a given FOV influences its detection rate -- ideally, this should not occur. This plot is less useful if only a handful of FOVs were processed. 
+
+```{r syn-spotfovdistribution, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics( paste0('./images/', 'SpotFOVDistribution', '.png') )
+```
+
+### `CosineSpatialDistribution` {-}
+
+This plot shows the average cosine distances per 2D bin, across the entire tissue. Ideally, spatial location should not influence confidence in spot calls.
+
+```{r syn-cosspatialdist, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics( paste0('./images/', 'CosineSpatialDistribution', '.png') )
+```
+
+### `BitDetectionRate` {-}
+
+This shows how the ON / OFF status for each bit influences the number of spots called. We tabulate the number of spots per gene, and then split the genes into two groups for each bit: if they have a ON (1), or an OFF (0). This provides some indication as to whether separation of 0 vs 1 is clearer / more ambiguous for certain bits. Ideally, there should be no obvious bias in detection rate for any bits.
+
+```{r syn-bitdetectrateall, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics( paste0('./images/', 'BitDetectionRateAll', '.png') )
+```
+
+Below shows the same, but this time for spots that are non-blanks (`BitDetectionRateNonBlank.png`, instead of `BitDetectionRateAll.png`).
+
+```{r syn-bitdetectnonblank, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics( paste0('./images/', 'BitDetectionRateNonBlank', '.png') )
+```
+
+### `BitwiseErrorRates` {-}
+
+This barplot shows the percentage of ON to OFF and OFF to ON errors for every bit. Only reported if `bitsFromDecode` was run during spotcalling.
+
+From [@chen2015spatially], ON to OFF error rate is expected to be about 10%, and OFF to ON is about 4%. Of course, this might vary depending on data set and choice of hyperparameters during decoding.
+
+```{r syn-bitwiseerrorrate, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics( paste0('./images/', 'BitwiseErrorRates', '.png') )
+```
+
+### `FOVMetrics` {-}
+
+This shows some statistics averaged per FOV. Useful for determining if there are systematic failures in spot calling for certain FOVs.
+
+```{r syn-fovmetrics, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics( paste0('./images/', 'FOVMetrics', '.png') )
+```
+
+### `CellMetrics` {-}
+
+This shows cell-wise metrics. Below, we show average cell size (in pixels) per 2D bin.
+
+```{r syn-cellmetricspngsize, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics( paste0('./images/', 'CellMetrics_CellSize', '.png') )
+```
+
+Below shows average number of spots per 2D bin.
+
+```{r syn-cellmetricspngcounts, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics( paste0('./images/', 'CellMetrics_nCounts', '.png') )
+```
+
+## Next steps
+
+Yay! Your MERFISH pipeline is now done. If satisfied with the results, downstream analysis can be done on `OUT_CELLEXPRESSION.csv.gz` matrix -- which contains cell-wise gene expression -- using standard single cell RNA-sequencing pipelines. [More advanced bioinformaticians may wish to perform custom analysis to address e.g. lower counts per cell in spatial technologies (that violates assumptions of some normalisation algorithms used in scRNA-seq).]
+
+If unsatisfied, users can go back and re-process their data with tweaked parameters. Suggestions for troubleshooting are provided in the next chapter. 

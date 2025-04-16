@@ -1,0 +1,276 @@
+# Introduction
+
+## Why do you need `masmr`?
+
+Existing MERFISH decoding workflows are typically designed to be "plug and play": requiring minimal manual adjustment or re-parameterisation. These one-size-fits-all approaches work well when their assumptions about data hold true, but return dramatically reduced performance and erroneous decoding when not. 
+
+`masmr` was thus designed because we wanted more control over the MERFISH decoding, beyond what was offered by existing software. Our package is also designed to have an intuitive syntax, so that users can adapt the software without needing deep technical expertise.  
+
+## Background
+
+For most MERFISH pipelines, one wants to accomplish the following tasks:
+
+1. Spotcalling: This involves reading each fluorescence image, performing the necessary image processing steps, decoding, and returning of spot coordinates. This is typically performed one image / field-of-view (FOV) at a time. Ideally, users optimise their spotcalling pipeline on one FOV before looping through all the other FOVs, applying the same spotcalling criteria.
+
+2. Cell segmentation: Cell segmentation involves identifying nuclei or cells in an image and recording locations of each cell mask. Again, this is typically performed one FOV at a time. 
+
+3. Stitching: Stitching involves the alignment of partially overlapping FOVs, so that a coherent image and coordinate system is obtained. 
+
+4. Synthesis: Having processed every FOV, the final step is to consolidate all outputs into an easy-to-read format. Care must be taken to ensure coordinate information is comparable between spots and cell masks, and spots are assigned to the correct cells.
+
+It is recommended that each of the above tasks be accomplished with separate scripts. Furthermore, time-saving is possible by performing tasks (1), (2), and (3) in parallel, before consolidation in step (4).
+
+## Quick start scripts
+
+Below, we provide several quick start scripts for users who wish to immediately proceed with a default MERFISH pipeline. Details on what each step is doing is provided in the subsequent chapters.
+
+Spotcalling and Cell segmentation scripts can be run in parallel to save time. Stitching can also be run alongside Spotcalling and Cell segmentation, or after the previous two scripts. Finally, the Synthesis script is run to consolidate outputs of the previous three scripts.
+
+For users working with 3D image stacks, kindly refer to Troubleshooting (Chapter \@ref(troubleshooting)) for potential solutions.
+
+### Quick start: Spotcalling
+
+```{r intro-qs-spotcall, eval=FALSE}
+library(masmr)
+
+## Preparation ahead of looping through FOVs
+establishParams( ... ) #User to input
+readImageMetaData()
+prepareCodebook()
+getAnchorParams()
+establishCleanSlate()
+
+## Decide on verboseness: below is code to push messages into a file called messages.Rout
+notVerbose = F
+if( notVerbose ){
+  outMessageFile <- file( paste0(params$out_dir, 'messages.Rout'), open = 'wt' )
+  sink(outMessageFile, type = 'message')
+  message("\nRedirecting messages to messages.Rout...\n\n")
+}
+
+## Start loop
+for( fovName in params$fov_names ){
+  
+  ## Report current FOV / iteration 
+  message( paste0(
+    '\n', fovName, ': ', 
+    which(params$fov_names==fovName), ' of ', 
+    length(params$fov_names), '...' ) )
+  
+  ## Check if file has been created, skip if yes
+  if( params$resumeMode ){
+    checkFile <- file.exists( paste0(params$out_dir, 'SPOTCALL_', fovName, '.csv.gz') )
+    if(checkFile){
+      message('FOV has been processed...Skipping...')
+      next
+    }
+  }
+  
+  ## Keep track of the current_fov
+  params$current_fov <- fovName
+  
+  ## Load current FOV images
+  imList <- readImageList( params$current_fov )
+  
+  ## Check if image is largely empty, if so, skip
+  percBlank <- mean( sapply(1:length(imList), function(i){
+    sum( imList[[i]] < params$brightness_min[i] ) / length(imList[[i]])
+  }) )
+  if( percBlank >= 0.95 ){ next }
+  
+  ## Get image metrics
+  getImageMetrics( imList )
+  
+  ## Register
+  forReg <- list()
+  for(i in 1:length(imList)){
+    forReg[[i]] <- imNormalise( imMetrics$COARSE[[i]] + imMetrics$DECODE[[i]] )
+  }
+  names(forReg) <- names(imList)
+  registerImages(forReg)
+  
+  ## Consolidate into pixel wise metric dataframe
+  spotcalldf <- consolidateImageMetrics()
+  cleanUp( c('spotcalldf', cleanSlate) )
+  
+  ## Decode and annotate blanks
+  spotcalldf <- decode(spotcalldf)
+  spotcalldf$BLANK <- scoreBlanks( spotcalldf ) >0
+  
+  ## Binarise and threshold on Hamming distance
+  spotcalldf <- bitsFromDecode(spotcalldf, trainIndex = !spotcalldf$BLANK)
+  spotcalldf <- filterDF(spotcalldf, spotcalldf$HD>1)
+  
+  ## Distance-based filtering
+  filtout <- rep(0, nrow(spotcalldf))
+  for( distanceMetric in c('COS', 'EUC', 'L2E') ){
+    thresh <- thresh_Quantile( 
+      spotcalldf[,distanceMetric], 
+      label = spotcalldf$BLANK, 
+      quantileFalse = 0.5, quantileTrue = 0.5 )
+    filtout <- filtout + spotcalldf[,distanceMetric] > thresh
+  }
+  spotcalldf <- filterDF(spotcalldf, filtout>0)
+  
+  ## Filter nonblanks that are next to blanks
+  spotcalldf$NEXTTOBLANK <- spatialIsAdjacent( spotcalldf, 'BLANK' )
+  spotcalldf <- filterDF(spotcalldf, spotcalldf$NEXTTOBLANK & !spotcalldf$BLANK)
+ 
+  ## Filter using DFF0 metrics
+  spotcalldf <- scoreDeltaF( spotcalldf )
+  thresh <- thresh_Quantile( 
+    spotcalldf[,'DFF0_DECODE'], 
+    label = spotcalldf$BLANK, 
+    quantileFalse = 0.25, quantileTrue = 0.25 )
+  spotcalldf <- filterDF(spotcalldf, spotcalldf[,'DFF0_DECODE'] < thresh & spotcalldf$F0_DECODE!=0)
+  
+  ## Filter based on HNN distance
+  spotcalldf$HNNDIST <- spatialHNNDist( spotcalldf )
+  spotcalldf <- filterDF( spotcalldf, spotcalldf$HNNDIST > 5 | is.na(spotcalldf$HNNDIST) )
+  
+  ## Filter based on PBLANK  
+  forExclusion <- c('Xm', 'Ym', 'fov', 'g', 'WX', 'WY', 'IDX', 
+                    colnames(spotcalldf)[grepl('_\\d+$|^DFF0_|^F1_|CV_|LAB$', colnames(spotcalldf))])
+  spotcalldf$PBLANK <- scoreClassifier(spotcalldf, 'BLANK', variablesExcluded = forExclusion)
+  thresh <- thresh_Quantile(spotcalldf$PBLANK, spotcalldf$BLANK, quantileFalse = 0.5, quantileTrue = 0.25)
+  spotcalldf <- filterDF(spotcalldf, spotcalldf$PBLANK > thresh)
+  
+  ## Cluster
+  clusterInfo <- spatialClusterLeiden( spotcalldf, minNeighbours = 3, maxInterSpotDistancePixels = 3)
+  spotcalldf[,colnames(clusterInfo)] <- clusterInfo
+  maxClusterSize = 250
+  spotcalldf <- filterDF(spotcalldf, !(spotcalldf$CENTROID & spotcalldf$CLUSTER_SIZE < maxClusterSize) )
+  saveDF( spotcalldf )
+  
+  cleanUp()
+}
+```
+
+### Quick start: Cell segmentation
+
+```{r intro-qs-cellseg, eval=FALSE}
+library(masmr)
+
+## Preparation ahead of looping through FOVs
+establishParams( ... ) #User to input
+readImageMetaData( 'dapi_dir' ) #Switch to DAPI images and prepare meta data
+establishCellSegModel()
+establishCleanSlate()
+
+## Decide on verboseness: below is code to push messages into a file called messages.Rout
+notVerbose = F
+if( notVerbose ){
+  outMessageFile <- file( paste0(params$out_dir, 'messages.Rout'), open = 'wt' )
+  sink(outMessageFile, type = 'message')
+  message("\nRedirecting messages to messages.Rout...\n\n")
+}
+
+## Start loop
+for( fovName in params$fov_names ){
+  
+  ## Report current FOV / iteration 
+  message( paste0(
+    '\n', fovName, ': ', 
+    which(params$fov_names==fovName), ' of ', 
+    length(params$fov_names), '...' ) )
+  
+  ## Check if file has been created, skip if yes
+  if( params$resumeMode ){
+    checkFile <- file.exists( 
+      paste0(params$out_dir, 'CELLSEG_',
+             paste(sort(ls(cellSeg)), collapse=''), '_', 
+             fovName, '.csv.gz') )
+    if(checkFile){
+      message('FOV has been processed...Skipping...')
+      next
+    }
+  }
+  
+  ## Keep track of the current_fov
+  params$current_fov <- fovName
+  
+  ## Load current FOV image
+  im <- readImageList( params$current_fov )[[1]] #List of 1
+  
+  ## Cell segmentation and saving
+  cellMask <- runCellSegModel(im)
+  saveCellSegMasks(cellMask, im = im)
+  
+  cleanUp()
+}
+```
+
+### Quick start: Stitching
+
+```{r intro-qs-stitch, eval=FALSE}
+library(masmr)
+
+## Preparation ahead of looping through FOVs
+establishParams( ... ) #User to input
+establishCleanSlate()
+
+## Start loop
+for( fovName in params$fov_names ){
+  
+  ## Report current FOV / iteration 
+  message( paste0(
+    '\n', fovName, ': ', 
+    which(params$fov_names==fovName), ' of ', 
+    length(params$fov_names), '...' ) )
+  
+  ## Check if file has been created, skip if yes
+  if( params$resumeMode ){
+    checkFile <- file.exists( paste0(params$out_dir, 'STITCH_', fovName, '.csv') )
+    if(checkFile){
+      cat('FOV has been processed...Skipping...')
+      next
+    }
+  }
+  
+  ## Keep track of the current_fov
+  params$current_fov <- fovName
+  
+  ## Stitch with respect to reference bit
+  imList <- readImagesForStitch( subDirectory = 'IM', loadProcessedImages =  T ) #Assume spotcalling done
+  stitchResults <- stitchImages( imList )
+  
+  ## Optional: Stitch with respect to DAPI image
+  df <- stitchResults
+  colnames(df)[2] <- paste0('merfish_', colnames(stitchResults)[2]) #Save the stitch results from merfish in its own column
+  imList <- readImagesForStitch( subDirectory = 'DAPI', loadProcessedImages =  T ) #Assume cell segmentation done
+  stitchResults <- stitchImages( imList )
+  
+  ## Optional: If have both merfish and cell segmentation stich vectors, consolidate into a single dataframe
+  colnames(stitchResults)[2] <- paste0('dapi_', colnames(stitchResults)[2])
+  stitchResults[,colnames(df)[2]] <- df[match(stitchResults[,1], df[,1]),2]
+  
+  ## Save stitch dataframe
+  saveStitch( stitchResults )
+  
+  cleanUp()
+}
+```
+
+### Quick start: Synthesis
+
+```{r intro-qs-synthesis, eval=FALSE}
+library(masmr)
+
+## Establish params
+establishParams( ... ) #User to input
+
+## Decide on verboseness: below is code to push messages into a file called messages.Rout
+notVerbose = F
+if( notVerbose ){
+  outMessageFile <- file( paste0(params$out_dir, 'messages.Rout'), open = 'wt' )
+  sink(outMessageFile, type = 'message')
+  message("\nRedirecting messages to messages.Rout...\n\n")
+}
+
+## Function to synthesise data
+synthesizeData()
+
+## Function to generate QC plots
+plotQC()
+```
+

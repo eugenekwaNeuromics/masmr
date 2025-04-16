@@ -1,0 +1,208 @@
+# Stitching
+
+Stitching is the task of aligning adjacent overlapping FOVs, to obtain a coherent coordinate system across all FOVs. It can be done on DAPI images, or on the reference bit in MERFISH (i.e. the image that registration is performed with respect to -- typically the first bit). It can thus be done in parallel with the previous two tasks. 
+
+Alternatively, recall that as part of spotcalling (Chapter \@ref(image-registration)) and cell segmentation (Chapter \@ref(saving-cell-masks)), reference images are returned as `REGIM_{ FOV Name }.png`. Users may wish to use these instead; and so stitching will have to be performed _after_ the previous two tasks.
+
+```{r stitch-libs, message=FALSE}
+library(masmr)
+library(ggplot2)
+```
+
+## Pre-processing
+
+Parameters established as before.
+
+```{r stitch-params}
+data_dir = 'C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/'
+establishParams(
+  imageDirs = paste0(data_dir, 'S10/'),
+  imageFormat = '.ome.tif',
+  codebookFileName = list.files(paste0(data_dir, 'codebook/'), pattern='codebook', full.names = TRUE),
+  codebookColumnNames = paste0(rep(c(0:3), 4), '_', rep(c('cy3', 'alexa594', 'cy5', 'cy7'), each=4) ),
+  outDir = 'C:/Users/kwaje/Downloads/JYOUT/',
+  dapiDir = paste0(data_dir, 'DAPI_1/'),
+  pythonLocation = 'C:/Users/kwaje/AppData/Local/anaconda3/envs/scipyenv/',
+  fpkmFileName = list.files(paste0(data_dir, 'FPKM_data/'), pattern='FPKM', full.names = TRUE),
+  nProbesFileName = list.files(paste0(data_dir), pattern='ProbesPerGene.csv', recursive = T, full.names = TRUE)
+)
+```
+
+At this stage, relevant metadata files (`META_RESOLUTION.txt` and `GLOBALCOORD.csv`) should have been created for both DAPI and MERFISH data using the `readImageMetaData` function (see previous Chapters). This is the **minimum requirement** for stitching with `masmr`. [Both are generated early in their respective pipelines.]
+
+There should thus be two subdirectories as this stage, one for MERFISH data and one for DAPI data. Both should have the metadata files.
+
+```{r stitch-minimumrequirement}
+list.files( params$parent_out_dir, pattern = 'GLOBALCOORD.csv', recursive = T, full.names = T )
+list.files( params$parent_out_dir, pattern = 'META_RESOLUTION.txt', recursive = T, full.names = T )
+```
+
+## Loading images for stitching
+
+For stitching, we will need to load a reference FOV, and the FOVs immediately surrounding it. For instance, let's select the same FOV processed in previous Chapters. From one of the `GLOBALCOORD.csv` files, we expect to load the four FOVs in blue below, alongside our reference FOV (red).  
+
+```{r stitch-loadimages}
+params$current_fov <- 'MMStack_1-Pos_002_003'
+gcx <- data.table::fread( 
+  list.files( params$parent_out_dir, pattern = 'GLOBALCOORD.csv', recursive = T, full.names = T )[1],
+  data.table = F
+)
+gcx <- gcx[!duplicated(gcx$fov),]
+gcx$X <- as.integer( factor(gcx$x_microns) )
+gcx$Y <- as.integer( factor(gcx$y_microns) )
+gcx$CX <- gcx$X + 1i * gcx$Y
+gcx$fov_type <- ifelse(
+  gcx$fov==params$current_fov, 'Reference', 
+  ifelse(
+    Mod( gcx$CX - gcx$CX[gcx$fov==params$current_fov] ) == 1,
+    'Neighbour', 'Other'))
+gcx$short_name <- gsub('MMStack_1-Pos_|00', '', gcx$fov)
+ggplot( gcx ) +
+  geom_text( aes(x=x_microns, y=y_microns, label=short_name, colour = fov_type),
+             size = 5 ) +
+  scale_colour_manual( name='', values = c('Reference' = 'red', 'Neighbour' = 'blue', 'Other' = 'black')) +
+  scale_y_reverse() + xlab('X (microns)') + ylab('Y (microns)') +
+  theme_minimal(base_size=14)
+```
+
+The actual loading is accomplished with the  `readImagesForStitch` function. The default is to load MERFISH images.
+
+```{r stitch-readimagesforstitch}
+## params$current_fov specifies which image to load
+imList <- readImagesForStitch()
+par(mfrow=c(2,3))
+for(i in 1:length(imList)){
+  plot(imager::as.cimg(imList[[i]]), main=names(imList)[i])
+}
+par(mfrow = c(1,1))
+```
+
+The `subDirectory` parameter allows for easy swapping between DAPI and MERFISH images.
+
+```{r stitch-swappingsubdirectory}
+imList <- readImagesForStitch( subDirectory = 'DAPI' )
+par(mfrow=c(2,3))
+for(i in 1:length(imList)){
+  plot(imager::as.cimg(imList[[i]]), main=names(imList)[i])
+}
+par(mfrow = c(1,1))
+dapiList <- imList
+```
+
+Every time `readImagesForStitch` is run, a `stitchParams` environment object is generated. This functions similarly to `params`: it houses parameters for image handling and file saving. It also copies `params$current_fov` [It is separate from `params` owing to users possibly wishing to handle both MERFISH and DAPI images.]
+
+```{r stitch-listingstitchparams}
+ls( envir = stitchParams )
+```
+
+From above, it is apparent that raw MERFISH images may require some image processing prior to stitching (e.g. brightening of image). We recommend the same image processing as done during image registration (Chapter \@ref(image-registration)). 
+
+If stitching is done _after_ spotcalling is complete for all FOVs, processed images for the reference bit are accessible by setting `loadProcessedImages` to `TRUE`. As default, the `loadProcessedImages` parameter is `FALSE`. If `TRUE`, the function will first attempt to search for `REGIM_{ FOV Name }.png` images and load those instead. If unable to, `loadProcessedImages` is switched back to `FALSE`, and raw images loaded instead (failure to find processed images returned as a warning).
+
+Otherwise, we can reprocess the raw images by specifying the `imageFunction` parameter. [The minimum and maximum brightness below come from outputs of `getAnchorParams`; this done early during the spotcalling pipeline (see Chapter \@ref(establishing-global-image-parameters)).] 
+
+```{r stitch-customprocessingfunction}
+imFunction <- function( im ){
+  
+  minBrightness = 0.0370383157674109 #First bit floor
+  maxBrightness = 0.288414576071673  #First bit cap
+  
+  norm <- 
+    imLowPass(im, floorVal = minBrightness, ceilVal = maxBrightness) +
+    imForDecode(im, floorVal = minBrightness, ceilVal = maxBrightness)
+  norm <- imNormalise(norm)
+  
+  return( norm )
+}
+
+imList <- readImagesForStitch( subDirectory = 'IM', imageFunction = imFunction)
+par(mfrow=c(2,3))
+for(i in 1:length(imList)){
+  plot(imager::as.cimg(imList[[i]]), main=names(imList)[i])
+}
+par(mfrow = c(1,1))
+merList <- imList
+```
+
+## Performing stitching
+
+The task of stitching is similar to image registration and our stitching algorithm `stitchImages` similarly relies on cross-correlation to a reference image. As default, the first image in the list -- which should also be the current FOV being processed -- is used. 
+
+```{r stitch-actuallystitching}
+stitchResults <- stitchImages(merList)
+knitr::kable(stitchResults, format = 'html', booktabs = T)
+```
+
+Users may wish to stitch both DAPI and MERFISH images to compare.
+
+```{r stitch-actuallystitching-comparingdapi}
+df <- stitchResults
+colnames(df)[2] <- paste0('merfish_', colnames(stitchResults)[2])
+stitchResults <- stitchImages(dapiList)
+colnames(stitchResults)[2] <- paste0('dapi_', colnames(stitchResults)[2])
+stitchResults[,colnames(df)[2]] <- df[match(stitchResults[,1], df[,1]),2]
+knitr::kable(stitchResults, format = 'html', booktabs = T)
+```
+
+Stitching can be evaluated visually. Below we show how a FOV to the right of our reference FOV aligns prior to and after stitching.  
+
+```{r stitch-visualchecking}
+## Subset a portion of the reference image and query image
+refImage <- as.data.frame( imager::as.cimg( dapiList[[1]] ) ) #2_3
+querImage <- as.data.frame( imager::as.cimg( dapiList[[5]] ) ) #3_3, right of 2_3
+refImage <- refImage[refImage$x > 2000,] #Image dimensions: 2960 x 2960, values of x between 2000-2960
+querImage <- querImage[querImage$x < 960,] #Values of x between 0-960
+refImage$image <- names( dapiList )[1]
+querImage$image <- names( dapiList )[5]
+
+## Get corresponding shift vector
+shiftVector <- stitchResults[stitchResults$fov == names(dapiList)[5], 'dapi_shift_pixel']
+
+## Visualise: Note the difference between stitched and unstitched are the values added to x,y
+cowplot::plot_grid( plotlist = list(
+  ggplot() +
+    geom_raster( 
+      data=refImage, 
+      aes(x=x, y=y, alpha=value, fill = image), 
+      ) +
+    geom_raster( 
+      data=querImage, 
+      aes(x=x + 2960, y=y + 0, 
+          alpha=value, fill = image)) +
+    scale_fill_manual(name='', values=c('red', 'blue')) +
+    scale_alpha_continuous( range = c(0.75, 0) ) +
+    guides( alpha = 'none', fill = guide_legend(ncol=1) ) +
+    scale_y_reverse() +
+    theme_void( base_size= 14 ) +
+    theme(legend.position = 'bottom') +
+    coord_fixed() +
+    ggtitle('Unstitched'),
+  
+  ggplot() +
+    geom_raster( 
+      data=refImage, 
+      aes(x=x, y=y, alpha=value, fill = image), 
+      ) +
+    geom_raster( 
+      data=querImage, 
+      aes(x=x + Re(shiftVector), y=y + Im(shiftVector), 
+          alpha=value, fill = image)) +
+    scale_fill_manual(name='', values=c('red', 'blue')) +
+    scale_alpha_continuous( range = c(0.75, 0) ) +
+    guides( alpha = 'none', fill = guide_legend(ncol=1) ) +
+    scale_y_reverse() +
+    theme_void( base_size= 14 ) +
+    theme(legend.position = 'bottom') +
+    coord_fixed() +
+    ggtitle('Stitched')
+), nrow=1)
+```
+
+## Saving stitch vectors
+
+Finally, users may save the dataframe output using the `saveStitch` function. This is strictly _not_ necessary, but is recommended, as it would ensure standardised file names and compatability with the rest of `masmr`.
+
+```{r stitch-save}
+saveStitch( stitchResults )
+file.exists( paste0(stitchParams$out_dir, 'STITCH_', stitchParams$current_fov, '.csv') )
+```

@@ -1,0 +1,436 @@
+# Image processing 
+
+One key decision in your spotcalling script is choosing how to process your images. Here, we will cover the image processing functions that `masmr` provides, and how users may string together these functions for their own purposes.
+
+```{r improc-lib, message=FALSE}
+library(masmr)
+library(ggplot2)
+```
+
+## Pre-processing
+
+As before, specify your parameters.
+
+```{r improc-params}
+data_dir = 'C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/'
+establishParams(
+  imageDirs = paste0(data_dir, 'S10/'),
+  imageFormat = '.ome.tif',
+  codebookFileName = list.files(paste0(data_dir, 'codebook/'), pattern='codebook', full.names = TRUE),
+  codebookColumnNames = paste0(rep(c(0:3), 4), '_', rep(c('cy3', 'alexa594', 'cy5', 'cy7'), each=4) ),
+  outDir = 'C:/Users/kwaje/Downloads/JYOUT/',
+  dapiDir = paste0(data_dir, 'DAPI_1/'),
+  pythonLocation = 'C:/Users/kwaje/AppData/Local/anaconda3/envs/scipyenv/',
+  fpkmFileName = list.files(paste0(data_dir, 'FPKM_data/'), pattern='FPKM', full.names = TRUE),
+  nProbesFileName = list.files(paste0(data_dir), pattern='ProbesPerGene.csv', recursive = T, full.names = TRUE)
+)
+```
+
+Image processing is handled _within_ your spotcalling script, and consequently requires some pre-processing to have been done prior to looping through images. These are provided below (kindly refer to Chapter \@ref(spotcalling) for details).
+
+```{r improc-preproc}
+## Necessary pre-processing done before your loop
+readImageMetaData()
+prepareCodebook()
+getAnchorParams()
+establishCleanSlate()
+
+## Specify the current FOV (done inside the loop)
+params$current_fov <- params$fov_names[38]
+
+## Read the images for your current FOV (done inside loop)
+imList <- readImageList( params$current_fov )
+```
+
+## Building blocks of image processing
+
+The backbone of MERFISH pipelines is image processing. We provide several options, which we will showcase with the test image below. Note the use of `imager::as.cimg`, which converts image matrices to `.cimg` objects that are read by C++; so doing allows for rapid manipulation and plotting.
+
+**ALWAYS plot to check how your image processing has altered your image!**
+
+```{r improc-unaltered}
+im <- imList[[1]]
+par(mfrow=c(1,2))
+plot( imager::as.cimg(im), main = 'Unaltered image' )
+hist( im, breaks=1000, main = 'Unaltered image', xlab='Intensities', ylab='N pixels' )
+par(mfrow=c(1,1))
+```
+
+### `imNormalise` {-}
+
+Note the range of raw intensities. We can use `imNormalise` to perform a quick min-max normalisation so that values span 0 to 1.
+
+```{r improc-minmax}
+norm <- imNormalise(im)
+par(mfrow=c(1,2))
+plot( imager::as.cimg(norm), main = 'Min-max image' )
+hist( norm, breaks=1000, main = 'Min-max image', xlab='Intensities', ylab='N pixels' )
+par(mfrow=c(1,1))
+```
+
+Since we previously calculated min and max brightnesses, we may wish to winsorise intensity values (i.e. values trimmed to lie between min and max brightness). As before, we can use `imNormalise` but this time specifying the desired floor and ceiling values. [When these are unspecified, floor and ceiling values are defaulted to minimum and maximum intensities observed in the image, thereby performing a min-max normalisation.]
+
+```{r improc-winsored}
+norm <- imNormalise(im, floorVal = params$brightness_min[1], ceilVal = params$brightness_max[1] )
+par(mfrow=c(1,2))
+plot( imager::as.cimg(norm), main = 'Winsorised image' )
+hist( norm, breaks=1000, main = 'Winsorised image', xlab='Intensities', ylab='N pixels' )
+par(mfrow=c(1,1))
+```
+
+### `imAutobrighten` {-}
+
+Brightening an image is accomplished by raising the intensities (that lie between 0 and 1) to some power $x$, that maximises the distance between two user-specified values ($floor$ and $ceiling$). The optimal $x$ is found by solving:
+
+\begin{align}
+\frac{d}{dx}\left(ceiling^x - floor^x\right) = 0 \\
+ceiling^x \log{ceiling} - floor^x \log{floor} = 0 \\
+x = \frac{\log{ \frac{\log{ceiling}}{\log{floor}}} }{ \log{\frac{floor}{ceiling}} }
+\end{align}
+
+Note that `imAutoBrighten` will only be valid if `floor` is more than 0 and `ceiling` is less than 1. 
+
+This is the basis of the `imAutoBrighten` function. 
+
+```{r improc-autobright}
+norm <- imAutoBrighten(im, floorVal = params$brightness_min[1], ceilVal = params$brightness_max[1] )
+par(mfrow=c(1,2))
+plot( imager::as.cimg(norm), main = 'Autobrightened image' )
+hist( norm, breaks=1000, main = 'Autobrightened image', xlab='Intensities', ylab='N pixels' )
+par(mfrow=c(1,1))
+```
+
+### `imLaplacianOfGaussian` {-}
+
+The difference of Gaussian blurs (i.e. Laplacian of Gaussians, LoG) is useful for correcting for uneven lighting or blob detection. This is accomplished by subtracting an image that has been slightly blurred (determined by the `smallBlur` parameter) from an image that is blurrier (`bigBlur`).
+
+```{r improc-log}
+norm <- imLaplacianOfGaussian(im, smallBlur = 1, bigBlur = 5 )
+par(mfrow=c(1,2))
+plot( imager::as.cimg(norm), main = 'Laplacian of Gaussians' )
+plot( imager::as.cimg(norm[1000:1500, 1000:1500]), main = 'Laplacian of Gaussians (Zoom in)' )
+par(mfrow=c(1,1))
+```
+
+Values that are less than 0 are those dimmer that their immediate surroundings. Spots are typically brighter than their surroundings, and so typically have LoG > 0.
+
+```{r improc-logandnorm}
+norm <- imLaplacianOfGaussian(im, smallBlur = 1, bigBlur = 5 )
+norm <- imNormalise(norm, 0, max(norm))
+par(mfrow=c(1,2))
+plot( imager::as.cimg(norm), main = 'Laplacian of Gaussians >0' )
+plot( imager::as.cimg(norm[1000:1500, 1000:1500]), main = 'Laplacian of Gaussians >0 (Zoom in)' )
+par(mfrow=c(1,1))
+```
+
+### `imHessianDeterminant` {-}
+
+The Hessian is a symmetric matrix containing second-order partial derivatives (i.e. gradient of gradients). In the context of images, it is a matrix of how intensity values are changing as we move along rows and columns of the image matrix. The determinant of the Hessian (detHess) is frequently used for blob detection -- we have thus created a function that calculates its value:
+
+```{r improc-hessdet}
+norm <- imHessianDeterminant(im, smallBlur = 1)
+par(mfrow=c(1,2))
+plot( imager::as.cimg(norm), main = 'detHess' )
+plot( imager::as.cimg(norm[1000:1500, 1000:1500]), main = 'detHess' )
+par(mfrow=c(1,1))
+```
+
+Thresholding detHess values are a quick way of detecting puncta:
+
+```{r improc-hessdetmask}
+norm <- imHessianDeterminant(im, smallBlur = 1)
+norm <- norm>quantile(norm, 0.99) ##99 percentile of values
+par(mfrow=c(1,2))
+plot( imager::as.cimg(norm), main = 'detHess thresholded' )
+plot( imager::as.cimg(norm[1000:1500, 1000:1500]), main = 'detHess thresholded (Zoom in)' )
+par(mfrow=c(1,1))
+```
+
+Attentive readers would have noticed that there is a `smallBlur` parameter (default = 1) in the `imHessianDeterminant` function. This blur serves to denoise the image, so that detHess values are meaningful. 
+
+```{r improc-hessdet-blurvnoblur}
+par(mfrow=c(1,3))
+plot( imager::as.cimg(im[1200:1300, 1200:1300]), main = 'Intensities (Zoom in): No blur' )
+plot( imager::as.cimg(imHessianDeterminant(im[1200:1300, 1200:1300], smallBlur = 0)), main = 'detHess (Zoom in): No blur' )
+plot( imager::as.cimg(imHessianDeterminant(im[1200:1300, 1200:1300], smallBlur = 1)), main = 'detHess (Zoom in): Slight blur' )
+par(mfrow=c(1,1))
+```
+
+## Combining building blocks
+
+Using the building blocks above, and any relevant functions from `imager` or `EBImage`, users can create complex image processing pipelines. Below is an example of a composite function `imLowPass` created using a combination of `imNormalise`, image blurring, and `imAutoBrighten`.
+
+```{r improc-exampleofimprocessingpipeline}
+masmr::imLowPass
+```
+
+**ALWAYS plot to check how your image processing has altered your image!**
+
+```{r improc-lowpass}
+norm <- imLowPass(im, floorVal = params$brightness_min[1], ceilVal = params$brightness_max[1] )
+par(mfrow=c(1,2))
+plot( imager::as.cimg(norm), main = 'Low pass' )
+hist( norm, breaks=1000, main = 'Low pass', xlab='Intensities', ylab='N pixels' )
+par(mfrow=c(1,1))
+```
+
+## Building your own function: an example
+
+Users are strongly encouraged to experiment with the provided image processing functions and create their own image processing pipelines if necessary. Below, we provide an example of how a custom function may be built.
+
+Say we are dissatisfied with the current default masking function (`imForMask`), whose purpose is to flag pixels where we suspect a spot to be, as being too restrictive (i.e. only flagging the strongest signals). 
+
+```{r improc-defaultmasking}
+## The original image is a bit too dim for visualisation: but will provide here for completeness
+plot(imager::as.cimg( imList[[1]][1000:1500, 1000:1500] ), main='Original')
+
+par(mfrow=c(1,2))
+plot(imager::as.cimg( imList[[1]][1000:1500, 1000:1500]^0.1 ), main='Original (brightened)')
+plot(imager::as.cimg( imForMask(imList[[1]])[1000:1500, 1000:1500] ), main='Default mask')
+par(mfrow=c(1,1))
+```
+
+First, let's have a look at what `imForMask` is doing. From below, we see that it takes in a single image `im` and...
+
+1. Low pass filtering of an image with the `imLowPass` function: returning `lowpass`
+2. Calculates the determinant of the Hessian (`imNormalise %>% imHessianDeterminant %>% isoblur`): returning `dethessb` 
+3. Calculates the Laplacian of the Gaussian (`imNormalise %>% imLaplacianOfGaussian`): returning `LoG`
+4. Masking of `LoG` and `dethessb` by identifying appropriate thresholds (`findThreshold`)
+5. Scoring of pixels between 0 and 1 using the product of `lowpass` and `LoG`, with saturated pixels (`norm==1` or `im==1`) being set to max score
+6. Flagging saturated pixels (`im==1`), pixels with superthreshold `LoG`, or pixels with superthreshold `dethessb`: returning `lab` (`1` if yes to any of the three criteria, otherwise `0`)
+7. Finding the threshold for scores calculated in step (5) that separate `1` and `0` from `lab` in step 6: returning `mask`
+8. Size filter of `mask` to remove masks smaller than `minBlobSize` pixels
+
+```{r improc-defaultmasking_func}
+masmr::imForMask
+```
+Next, let's create a new mask function that will be more permissive and flag more pixels. This `myCustomMask` function is created from copying and editing the default `imForMask` function above. Briefly, this new function replaces steps 5-7 in the default `imForMask` function with the union of multiple masks. 
+
+[Note: the use of ellipsis (`...`) is to allow the passing arguments in `myCustomMask` to functions **within** `myCustomMask`: e.g. `imLaplacianOfGaussian`, `imHessianDeterminant` etc.]
+
+```{r improc-defaultmaskingreplaced, fig.width=6, fig.height=16}
+myCustomMask <- function (im, smallBlur, minBlobSize, currentIteration, ...){
+    if (!missing(currentIteration)) {
+        message(currentIteration, appendLF = F)
+    }
+    if (missing(smallBlur)) {
+        smallBlur = 1
+    }
+    if (missing(minBlobSize)) {
+        minBlobSize = 9
+    }
+    
+    ## Old code: Calculate scores per pixel as per the default imForMask function
+    norm <- imNormalise(im, ...)
+    lowpass <- imLowPass(im, ...)
+    dethess <- imHessianDeterminant(norm, ...)
+    dethess <- imNormalise(dethess)
+    dethessb <- array(imager::isoblur(suppressWarnings(imager::as.cimg(dethess)), 
+        smallBlur), dim = dim(im))
+    vals <- dethessb[dethessb > quantile(dethessb, 0.95)]
+    dethessbFloor <- findThreshold(vals, method = thresh_Elbow, 
+        ...)
+    LoG <- imLaplacianOfGaussian(norm, ...)
+    LoGthresh <- findThreshold(LoG[LoG > 0], method = thresh_Elbow, 
+        ...)
+    
+    ## New code: also get LoG values for the lowpass image
+    LoGLowPass <- imLaplacianOfGaussian(norm * lowpass)
+    LoGthreshLowPass <- findThreshold(LoG[LoG > 0], method = thresh_Elbow, ...)
+    
+    ## New code: Union of masks
+    mask <- 
+      (LoG>LoGthresh) +               #LoG of original image above threshold
+      (LoGLowPass>LoGthreshLowPass) + #LoG of lowpass image above threshold
+      (dethessb>dethessbFloor) +      #detHess above threshold
+      (im==1)                         #Saturated pixels
+    mask <- mask > 0                  #Inclusive Or
+    allmask <- mask
+    
+    ## Old code: Filter out masks that are too small
+    labmask <- EBImage::bwlabel(mask)
+    toosmall <- which(tabulate(labmask) < minBlobSize)
+    mask[labmask %in% toosmall] <- F
+    final <- matrix(as.integer(mask), nrow = nrow(mask), ncol = ncol(mask))
+    
+    ## If function ready, just return final
+    # return(final)
+    
+    ## If troubleshooting, return all intermediate images
+    processedImages <- list(
+      'Norm' = norm,
+      'LowPass' = lowpass,
+      'detHess' = dethessb,
+      'detHess masked' = dethessb>dethessbFloor,
+      'LoG' = LoG,
+      'LoG masked' = LoG>LoGthresh,
+      'LowPass LoG' = LoGLowPass,
+      'LowPass LoG masked' = LoGLowPass>LoGthreshLowPass,
+      'All masks' = allmask,
+      'Masks after size filter' = mask
+    )
+    return( processedImages )
+}
+
+processedImages <- myCustomMask( imList[[1]] )
+
+par(mfrow=c(5,2))
+for( imMetricName in names(processedImages) ){
+  plot(imager::as.cimg( processedImages[[imMetricName]][1000:1500, 1000:1500] ), main = toupper(imMetricName) )
+}
+par(mfrow=c(1,1))
+```
+
+When satisfied with the custom function, returning intermediate images can be skipped:
+
+```{r improc-myCustomMaskShowcase}
+myCustomMask <- function (im, smallBlur, minBlobSize, currentIteration, ...){
+    if (!missing(currentIteration)) {
+        message(currentIteration, appendLF = F)
+    }
+    if (missing(smallBlur)) {
+        smallBlur = 1
+    }
+    if (missing(minBlobSize)) {
+        minBlobSize = 9
+    }
+    
+    ## Calculate scores per pixel as per the default imForMask function
+    norm <- imNormalise(im, ...)
+    lowpass <- imLowPass(im, ...)
+    dethess <- imHessianDeterminant(norm, ...)
+    dethess <- imNormalise(dethess)
+    dethessb <- array(imager::isoblur(suppressWarnings(imager::as.cimg(dethess)), 
+        smallBlur), dim = dim(im))
+    vals <- dethessb[dethessb > quantile(dethessb, 0.95)]
+    dethessbFloor <- findThreshold(vals, method = thresh_Elbow, 
+        ...)
+    LoG <- imLaplacianOfGaussian(norm, ...)
+    LoGthresh <- findThreshold(LoG[LoG > 0], method = thresh_Elbow, 
+        ...)
+    
+    ## New: also get LoG values for the lowpass image
+    LoGLowPass <- imLaplacianOfGaussian(norm * lowpass)
+    LoGthreshLowPass <- findThreshold(LoG[LoG > 0], method = thresh_Elbow, ...)
+    
+    ## Union of masks
+    mask <- 
+      (LoG>LoGthresh) +               #LoG of original image above threshold
+      (LoGLowPass>LoGthreshLowPass) + #LoG of lowpass image above threshold
+      (dethessb>dethessbFloor) +      #detHess above threshold
+      (im==1)                         #Saturated pixels
+    mask <- mask > 0                  #Inclusive Or
+    allmask <- mask
+    
+    ## Filter out masks that are too small
+    labmask <- EBImage::bwlabel(mask)
+    toosmall <- which(tabulate(labmask) < minBlobSize)
+    mask[labmask %in% toosmall] <- F
+    final <- matrix(as.integer(mask), nrow = nrow(mask), ncol = ncol(mask))
+    
+    ## If function ready, just return final
+    return(final)
+    
+    ## If troubleshooting, return all intermediate images
+    # processedImages <- list(
+    #   'Norm' = norm,
+    #   'LowPass' = lowpass,
+    #   'detHess' = dethessb,
+    #   'detHess masked' = dethessb>dethessbFloor,
+    #   'LoG' = LoG,
+    #   'LoG masked' = LoG>LoGthresh,
+    #   'LowPass LoG' = LoGLowPass,
+    #   'LowPass LoG masked' = LoGLowPass>LoGthreshLowPass,
+    #   'All masks' = allmask,
+    #   'Masks after size filter' = mask
+    # )
+    # return( processedImages )
+}
+par(mfrow=c(1,2))
+plot(imager::as.cimg( imList[[1]][1000:1500, 1000:1500]^0.1 ), main='Original (brightened)')
+plot(imager::as.cimg( myCustomMask(imList[[1]])[1000:1500, 1000:1500] ), main='Custom mask')
+par(mfrow=c(1,1))
+```
+
+Voila! A new custom masking function. 
+
+Having explained how to create a custom function, we will discuss how these custom functions can be looped through their image list.
+
+## Feeding image processing pipelines into `getImageMetrics`
+
+By listing looping functions in a named list `imageFunctions` (much like what is done for `getAnchorParams`), users can perform different types of image processing using our `getImageMetrics` function. The result is a new environment object (`imMetrics`) that houses image lists that have been processed in different ways. As default, the following image processing is performed:
+
+* `ORIG`: unprocessed images.
+* `NORM`: images that have been min-max normalised.
+* `COARSE`: low-pass images, optimised to separate foreground from background.
+* `DECODE`: images that have been optimised for decoding.
+* `MASK`: images where pixels worth bringing forward for decoding have been masked as `TRUE`.
+
+```{r improc-imagemetrics}
+getImageMetrics( 
+  imList,
+  imageFunctions = list(
+    'ORIG' = imReturn,
+    'NORM' = imWinsorIntensities,
+    'COARSE' = imLowPass,
+    'DECODE' = imForDecode,
+    'MASK' = imForMask
+  ))
+```
+
+**ALWAYS plot to check how your image processing has altered your image!**
+
+```{r improc-imagemetrics-zoomed}
+par(mfrow=c(2,3))
+for( imMetricName in ls(imMetrics) ){
+  plot(imager::as.cimg( imMetrics[[imMetricName]][[1]][1000:1500, 1000:1500] ), main = imMetricName)
+}
+par(mfrow=c(1,1))
+```
+
+Users can do the same, and visualise how their function performs on one FOV. When satisfied, that custom function can be looped through all images in the `imList` with `getImageMetrics`:
+
+```{r improc-makingACustomFunction, eval=FALSE}
+userCustomFunction <- function( im ){
+  ## User to decide on how they want the image to be processed
+  ...
+}
+
+## Loop the custom function across all images
+getImageMetrics( 
+  imList,
+  imageFunctions = list(
+    'ORIG' = imReturn,
+    'NORM' = imWinsorIntensities,
+    'COARSE' = imLowPass,
+    'DECODE' = imForDecode,
+    'MASK' = imForMask,
+    'CUSTOM' = userCustomFunction #New function  (or replace one of the above with your new function)
+  ))
+```
+
+It is important to note that `imMetrics$MASK` will determine which pixels are brought forwards for decoding during the later `consolidateImageMetrics` function; and that decoding will be performed on `imMetrics$DECODE`. The `DECODE` and `MASK` metrics should thus be the image processing pipelines that users should focus on when optimising.
+
+If users want to decode on the whole image (which may be memory intensive), removing `MASK` from `imMetrics` (an example below), or creating a `imMetrics$MASK` with `TRUE` for every pixel will work. In so doing, spotcalling will only depend on the `DECODE` images.
+
+```{r improc-anexampleofkeepingallspots, eval=FALSE}
+myCustomMask <- function(im){
+  return( im > -Inf ) #Return TRUE for every pixel
+}
+getImageMetrics( 
+  imList,
+  imageFunctions = list(
+    'ORIG' = imReturn,
+    'NORM' = imWinsorIntensities,
+    'COARSE' = imLowPass,
+    'DECODE' = imForDecode,
+    'MASK' = myCustomMask #User replacing the mask function
+  ))
+
+## Alternatively, users can remove the MASK
+imMetrics$MASK <- NULL
+```
+
+Experiment and find what works for your dataset. Don't forget to make use of functions like `filterDF` and `spotcall_troubleshootPlots` to help you troubleshoot (see Chapter \@ref(spotcalling)).
+
+**Users are encouraged to optimise their image processing pipelines on one FOV, before applying the same pipelines to all other FOVs.**
