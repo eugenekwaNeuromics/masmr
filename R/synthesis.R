@@ -16,7 +16,7 @@ synthesiseData <- function(
   if(!dir.exists(params$out_dir)){
     dir.create(params$out_dir)
   }
-  if(!is.null(subsetFOV)){
+  if(is.null(subsetFOV)){
     fileChecks <- c(
       'OUT_GLOBALCOORD.csv',
       'OUT_SPOTCALL_PIXELS.csv.gz',
