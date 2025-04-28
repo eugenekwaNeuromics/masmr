@@ -7,13 +7,14 @@ synthesiseData <- function(
     stitchChosenColumn = 1,
     nLeadingZeroes = 5,
     cellOverlapFraction = 0.25,
+    gZip = TRUE,
     removeRedundancy = TRUE,
     subsetFOV = NULL,
     customOutDirName = NULL,
     params = get('params', envir = globalenv())
 ){
   ## First, check that append=True is working for data.table
-  test_file <- paste0(params$parent_out_dir, 'DATATABLE_TEST_FILE.csv.gz')
+  test_file <- paste0(params$parent_out_dir, 'DATATABLE_TEST_FILE.csv', ifelse(gZip, '.gz', ''))
   data.table::fwrite(data.frame('x'=1), test_file, row.names = F)
   data.table::fwrite(data.frame('x'=1), test_file, append = T, row.names = F)
   test_df <- data.table::fread(test_file, data.table = F)
@@ -24,16 +25,21 @@ synthesiseData <- function(
     install.packages("data.table")
     newversion = utils::packageVersion('data.table')
     if(newversion==oldversion){
-      stop('Unsuccessful update: try updating manually, or using an older version of data.table (1.14.8)')
+      stop(paste0(
+        '\nUnsuccessful update: try updating manually, using an older version of data.table (1.14.8), or setting gZip = FALSE',
+        ifelse(newversion=='1.17.0', 
+        '\nVersion 1.17.0 detected: there is a known bug with this version (https://github.com/Rdatatable/data.table/issues/6863)', 
+        '')
+        ))
     }
     ## Check again 
     data.table::fwrite(data.frame('x'=1), test_file, row.names = F)
     data.table::fwrite(data.frame('x'=1), test_file, append = T, row.names = F)
     test_df <- data.table::fread(test_file, data.table = F)
     if(nrow(test_df)==2){
-      message( paste0('Successful update of data.table: ', oldversion ' --> ', newversion, '...') )
+      message( paste0('Successful update of data.table: ', oldversion, ' --> ', newversion, '...') )
     }else{
-      stop('Successful update but unable to correct problem: try using an older version of data.table (1.14.8)')
+      stop('Successful update but unable to correct problem: try using an older version of data.table (1.14.8), or setting gZip = FALSE')
     }
   }
   file.remove(test_file)
@@ -51,10 +57,11 @@ synthesiseData <- function(
   if(is.null(subsetFOV)){
     fileChecks <- c(
       'OUT_GLOBALCOORD.csv',
-      'OUT_SPOTCALL_PIXELS.csv.gz',
-      'OUT_CELLSEG_PIXELS.csv.gz',
-      'OUT_CELLEXPRESSION.csv.gz',
-      'OUT_CELLS.csv.gz')
+      paste0('OUT_SPOTCALL_PIXELS.csv', ifelse(gZip, '.gz', '')),
+      paste0('OUT_CELLSEG_PIXELS.csv', ifelse(gZip, '.gz', '')),
+      paste0('OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')),
+      paste0('OUT_CELLS.csv', ifelse(gZip, '.gz', ''))
+      )
     fileChecks <- fileChecks[fileChecks %in% list.files(params$out_dir)]
     if( length(fileChecks) > 0 ){
       warning('Overwriting existing files')
@@ -162,10 +169,11 @@ synthesiseData <- function(
     }
     fileChecks <- c(
       'OUT_GLOBALCOORD.csv',
-      'OUT_SPOTCALL_PIXELS.csv.gz',
-      'OUT_CELLSEG_PIXELS.csv.gz',
-      'OUT_CELLEXPRESSION.csv.gz',
-      'OUT_CELLS.csv.gz')
+      paste0('OUT_SPOTCALL_PIXELS.csv', ifelse(gZip, '.gz', '')),
+      paste0('OUT_CELLSEG_PIXELS.csv', ifelse(gZip, '.gz', '')),
+      paste0('OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')),
+      paste0('OUT_CELLS.csv', ifelse(gZip, '.gz', ''))
+    )
     fileChecks <- fileChecks[fileChecks %in% list.files(params$out_dir)]
     if( length(fileChecks) > 0 ){
       warning('Overwriting existing files')
@@ -470,8 +478,14 @@ synthesiseData <- function(
     }
 
     ## Append information with fwrite
-    data.table::fwrite(spotcalldf, paste0(params$out_dir, 'OUT_SPOTCALL_PIXELS.csv.gz'), row.names = F, append = T)
-    data.table::fwrite(cellsegdf, paste0(params$out_dir, 'OUT_CELLSEG_PIXELS.csv.gz'), row.names = F, append = T)
+    data.table::fwrite(
+      spotcalldf, 
+      paste0(params$out_dir, 'OUT_SPOTCALL_PIXELS.csv', ifelse(gZip, '.gz', '')), 
+      row.names = F, append = T)
+    data.table::fwrite(
+      cellsegdf, 
+      paste0(params$out_dir, 'OUT_CELLSEG_PIXELS.csv', ifelse(gZip, '.gz', '')), 
+      row.names = F, append = T)
 
     ## Summarise info per cell
     if(!all(is.na(spotcalldf$CELLNAME)) & nrow(cellsegdf) > 0){
@@ -491,8 +505,14 @@ synthesiseData <- function(
       nCounts <- rowSums(cellExp)
       cellMeta$nCounts <- as.numeric(nCounts)[match(cellMeta$CELLNAME, names(nCounts))]
       cellMeta$nCounts[is.na(cellMeta$nCounts)] <- 0
-      data.table::fwrite(cellExp, paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv.gz'), row.names = T, append = T)
-      data.table::fwrite(cellMeta, paste0(params$out_dir, 'OUT_CELLS.csv.gz'), row.names = F, append = T)
+      data.table::fwrite(
+        cellExp, 
+        paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')), 
+        row.names = T, append = T)
+      data.table::fwrite(
+        cellMeta, 
+        paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')), 
+        row.names = F, append = T)
     }
 
     message('Done!', appendLF = F)
@@ -500,7 +520,9 @@ synthesiseData <- function(
 
   ## Note that above tends to create duplicate entries in CELLEXPRESSION, have to load and edit
   message('\nCleaning up...')
-  cellMetaClean <- cellMeta <- data.table::fread(paste0(params$out_dir, 'OUT_CELLS.csv.gz'), data.table = F)
+  cellMetaClean <- cellMeta <- data.table::fread(
+    paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')), 
+    data.table = F)
   if( any(duplicated(cellMeta$CELLNAME)) ){
     duplicatedCells <- sort(unique( cellMeta[duplicated(cellMeta$CELLNAME), 'CELLNAME'] ))
     cellMetaClean <- cellMeta[!(cellMeta$CELLNAME %in% duplicatedCells), ]
@@ -520,10 +542,15 @@ synthesiseData <- function(
     }
   }
   cellMeta <- cellMetaClean
-  data.table::fwrite(cellMeta, paste0(params$out_dir, 'OUT_CELLS.csv.gz'), row.names = T, append = F)
+  data.table::fwrite(
+    cellMeta, 
+    paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
+    row.names = T, append = F)
   suppressWarnings(rm(list=c('cellMetaClean', 'npix', 'weightedX', 'weightedY', 'res', 'duplicatedCells')))
 
-  cellExp <- data.table::fread(paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv.gz'), data.table = F)
+  cellExp <- data.table::fread(
+    paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')), 
+    data.table = F)
   duplicatedCells <- sort(unique(cellExp[duplicated(cellExp[,1]),1]))
   dupCellExp <- cellExp[(cellExp[,1] %in% duplicatedCells),]
   cellExpClean <- cellExp[!(cellExp[,1] %in% duplicatedCells),]
@@ -540,7 +567,10 @@ synthesiseData <- function(
   cellExpClean <- cellExpClean[match(cellMeta$CELLNAME, rownames(cellExpClean)),]
   cellExpClean[is.na(cellExpClean)] <- 0
   rownames(cellExpClean) <- cellMeta$CELLNAME
-  data.table::fwrite(cellExpClean, paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv.gz'), row.names = T, append = F)
+  data.table::fwrite(
+    cellExpClean, 
+    paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')), 
+    row.names = T, append = F)
 
 }
 

@@ -10,13 +10,16 @@ plotQC <- function(
     params = get('params', envir = globalenv())
 ){
   if( is.null(synthesisDir) ){
-    if(!dir.exists(paste0( params$out_dir )) | !grepl('/OUT/|/OUT$', params$out_dir) ){
-      stop('This function requires synthesiseData() to have been run!')
+    if(!dir.exists(paste0( params$out_dir ))){
+      stop('synthesisDir unspecified and params$out_dir does not exist!')
     }
     synthesisDir <- params$out_dir
   }
 
   fs <- list.files( synthesisDir, full.names = T )
+  if(length(fs)==0){
+    stop('No files found! Ensure that synthesiseData() has been run!')
+  }
   names(fs) <- gsub('[.]csv|[.]gz|OUT_', '', basename(fs))
 
   ## Modify params
