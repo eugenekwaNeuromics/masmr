@@ -12,6 +12,7 @@ synthesiseData(
     cellOverlapFraction = 0.25,
     removeRedundancy = TRUE,
     subsetFOV = NULL,
+    customOutDirName = NULL,
     params = get('params', envir = globalenv())
 )
 }
@@ -22,6 +23,7 @@ synthesiseData(
 \item{ cellOverlapFraction }{ Numeric between 0 and 1. Fraction of cell overlap, above which one of the overlapping cells has to be dropped (as opposed to removing overlapping pixels). }
 \item{ removeRedundancy }{ Boolean. Determines if redundant cell segmentation and spotcalls are filtered out. See Details. }
 \item{ subsetFOV }{ Boolean or character vector. Specifies which subset of FOVs to consider. To be used when there are FOVs that are not connected to each other (e.g. multiple samples). }
+\item{ customOutDirName }{ Character. Indicates the folder within \code{params$parent_out_dir} to write output files to. If unspecified, defaults to the \code{OUT/} subdirectory, or \code{OUT/SUBSET_XXX/} subdirectory (when \code{subsetFOV} is specified). If specified, files are written to \code{paste0(params$parent_out_dir, '/', customOutDirName, '/')}. Indicating recursive directories for \code{customOutDirName} (i.e. in the format of \code{XXX/YYY/}) is permitted. }
 \item{ params }{ The parameters environment. }
 }
 \value{

@@ -9,12 +9,44 @@ synthesiseData <- function(
     cellOverlapFraction = 0.25,
     removeRedundancy = TRUE,
     subsetFOV = NULL,
+    customOutDirName = NULL,
     params = get('params', envir = globalenv())
 ){
+  ## First, check that append=True is working for data.table
+  test_file <- paste0(params$parent_out_dir, 'DATATABLE_TEST_FILE.csv.gz')
+  data.table::fwrite(data.frame('x'=1), test_file, row.names = F)
+  data.table::fwrite(data.frame('x'=1), test_file, append = T, row.names = F)
+  test_df <- data.table::fread(test_file, data.table = F)
+  if( nrow(test_df) != 2 ){
+    warning('Unable to append to .csv.gz with data.table! Attempting to update data.table package...')
+    oldversion = utils::packageVersion('data.table')
+    detach(package:data.table, unload = T)
+    install.packages("data.table")
+    newversion = utils::packageVersion('data.table')
+    if(newversion==oldversion){
+      stop('Unsuccessful update: try updating manually, or using an older version of data.table (1.14.8)')
+    }
+    ## Check again 
+    data.table::fwrite(data.frame('x'=1), test_file, row.names = F)
+    data.table::fwrite(data.frame('x'=1), test_file, append = T, row.names = F)
+    test_df <- data.table::fread(test_file, data.table = F)
+    if(nrow(test_df)==2){
+      message( paste0('Successful update of data.table: ', oldversion ' --> ', newversion, '...') )
+    }else{
+      stop('Successful update but unable to correct problem: try using an older version of data.table (1.14.8)')
+    }
+  }
+  file.remove(test_file)
+  rm(test_df, test_file)
+  
   ## Read information
-  params$out_dir <<- gsub('[/][/]', '/', paste0(params$parent_out_dir, '/OUT/'))
+  if(is.null(customOutDirName)){
+    params$out_dir <<- gsub('[/][/]', '/', paste0(params$parent_out_dir, '/OUT/'))
+  }else{
+    params$out_dir <<- gsub('[/][/]', '/', paste0(params$parent_out_dir, '/', customOutDirName, '/'))
+  }
   if(!dir.exists(params$out_dir)){
-    dir.create(params$out_dir)
+    dir.create(params$out_dir, recursive = T)
   }
   if(is.null(subsetFOV)){
     fileChecks <- c(
@@ -120,9 +152,13 @@ synthesiseData <- function(
 
   if( !is.null(subsetFOV) ){
     ## Update out_dir name
-    params$out_dir <<- gsub('[/][/]', '/', paste0(params$parent_out_dir, '/OUT/SUBSET_', referenceFOV, '/'))
+    if(is.null(customOutDirName)){
+      params$out_dir <<- gsub('[/][/]', '/', paste0(params$parent_out_dir, '/OUT/SUBSET_', referenceFOV, '/'))
+    }else{
+      params$out_dir <<- gsub('[/][/]', '/', paste0(params$parent_out_dir, '/', customOutDirName, '/'))
+    }
     if(!dir.exists(params$out_dir)){
-      dir.create(params$out_dir)
+      dir.create(params$out_dir, recursive = T)
     }
     fileChecks <- c(
       'OUT_GLOBALCOORD.csv',
