@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-04-15" />
+<meta name="date" content="2025-05-23" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -291,6 +291,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>For users working with 3D image stacks, kindly refer to Troubleshooting (Chapter <a href="troubleshooting.html#troubleshooting">8</a>) for potential solutions.</p>
 <div id="quick-start-spotcalling" class="section level3 hasAnchor" number="2.3.1">
 <h3><span class="header-section-number">2.3.1</span> Quick start: Spotcalling<a href="introduction.html#quick-start-spotcalling" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>In the Spotcalling script, we loop through FOVs, performing default image processing (with <code>getImageMetrics</code>). Processed images are registered to a reference image (with <code>registerImages</code>) so that pixels from the same spots are maximally overlapped. Information from the same FOV are then consolidated into a dataframe (with <code>consolidateImageMetrics</code>) that has pixels in rows and metrics (e.g. pixel intensity per image) in columns. Pixels are then assigned an identity on decoding (with <code>decode</code>). This dataframe is then successively filtered through a series of recommended filters; users may add / drop filters as needed.</p>
+<p>Per FOV, the final output is a dataframe containing spot locations as rows (a single pixel per spot), and accumulated meta data in columns.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="introduction.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(masmr)</span>
 <span id="cb1-2"><a href="introduction.html#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="introduction.html#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Preparation ahead of looping through FOVs</span></span>
@@ -407,6 +409,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="quick-start-cell-segmentation" class="section level3 hasAnchor" number="2.3.2">
 <h3><span class="header-section-number">2.3.2</span> Quick start: Cell segmentation<a href="introduction.html#quick-start-cell-segmentation" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Cell segmentation loops through DAPI images. The default model specified by <code>establishCellSegModel</code> is <code>cellpose</code> (<code>nuclei</code> model).</p>
+<p>Per FOV, the final output is a dataframe with pixels in rows and the cell mask that has been assigned to that pixel.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="introduction.html#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(masmr)</span>
 <span id="cb2-2"><a href="introduction.html#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="introduction.html#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Preparation ahead of looping through FOVs</span></span>
@@ -459,6 +463,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="quick-start-stitching" class="section level3 hasAnchor" number="2.3.3">
 <h3><span class="header-section-number">2.3.3</span> Quick start: Stitching<a href="introduction.html#quick-start-stitching" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The Stitching script identifies the necessary rigid transformation required so that adjacent FOVs overlap appropriately.</p>
+<p>Per FOV, the final output is a dataframe with neighbouring FOVs in rows, and the vectors needed for moving these FOVs to maximise overlap with the reference FOV. Two vectors are returned in the script below – one for stitching MERFISH images, and one for stitching DAPI images – but only one is required.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="introduction.html#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(masmr)</span>
 <span id="cb3-2"><a href="introduction.html#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="introduction.html#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Preparation ahead of looping through FOVs</span></span>
@@ -508,6 +514,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="quick-start-synthesis" class="section level3 hasAnchor" number="2.3.4">
 <h3><span class="header-section-number">2.3.4</span> Quick start: Synthesis<a href="introduction.html#quick-start-synthesis" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>This is the last script. Synthesis combines all the outputs from the previous three scripts into a series of dataframes, across every processed FOV. Additionally, users can <code>plotQC</code> to return some default QC plots to evaluate their pipeline’s performance.</p>
+<p>Hereafter, should users wish to save space, they can delete the intermediate results returned by the previous three scripts.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="introduction.html#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(masmr)</span>
 <span id="cb4-2"><a href="introduction.html#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="introduction.html#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Establish params</span></span>

@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-04-15" />
+<meta name="date" content="2025-05-22" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -283,9 +283,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-6"><a href="image-processing.html#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">codebookColumnNames =</span> <span class="fu">paste0</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">3</span>), <span class="dv">4</span>), <span class="st">&#39;_&#39;</span>, <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&#39;cy3&#39;</span>, <span class="st">&#39;alexa594&#39;</span>, <span class="st">&#39;cy5&#39;</span>, <span class="st">&#39;cy7&#39;</span>), <span class="at">each=</span><span class="dv">4</span>) ),</span>
 <span id="cb3-7"><a href="image-processing.html#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">outDir =</span> <span class="st">&#39;C:/Users/kwaje/Downloads/JYOUT/&#39;</span>,</span>
 <span id="cb3-8"><a href="image-processing.html#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">dapiDir =</span> <span class="fu">paste0</span>(data_dir, <span class="st">&#39;DAPI_1/&#39;</span>),</span>
-<span id="cb3-9"><a href="image-processing.html#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">pythonLocation =</span> <span class="st">&#39;C:/Users/kwaje/AppData/Local/anaconda3/envs/scipyenv/&#39;</span>,</span>
-<span id="cb3-10"><a href="image-processing.html#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">fpkmFileName =</span> <span class="fu">list.files</span>(<span class="fu">paste0</span>(data_dir, <span class="st">&#39;FPKM_data/&#39;</span>), <span class="at">pattern=</span><span class="st">&#39;FPKM&#39;</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb3-11"><a href="image-processing.html#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">nProbesFileName =</span> <span class="fu">list.files</span>(<span class="fu">paste0</span>(data_dir), <span class="at">pattern=</span><span class="st">&#39;ProbesPerGene.csv&#39;</span>, <span class="at">recursive =</span> T, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-9"><a href="image-processing.html#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">pythonLocation =</span> <span class="st">&#39;C:/Users/kwaje/AppData/Local/miniforge3/envs/scipyenv/&#39;</span>,</span>
+<span id="cb3-10"><a href="image-processing.html#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">fpkmFileName =</span> <span class="fu">paste0</span>(data_dir, <span class="st">&quot;FPKM_data/Jin_FPKMData_B.tsv&quot;</span>),</span>
+<span id="cb3-11"><a href="image-processing.html#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">nProbesFileName =</span> <span class="fu">paste0</span>(data_dir, <span class="st">&quot;ProbesPerGene.csv&quot;</span>)</span>
 <span id="cb3-12"><a href="image-processing.html#cb3-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## Assuming .ome.tif is extension for meta files...</code></pre>
 <pre><code>## resumeMode = TRUE...</code></pre>
@@ -431,7 +431,7 @@ x = \frac{\log{ \frac{\log{ceiling}}{\log{floor}}} }{ \log{\frac{floor}{ceiling}
 ##     norm &lt;- imNormalise(norm)
 ##     return(norm)
 ## }
-## &lt;bytecode: 0x00000140a03a0900&gt;
+## &lt;bytecode: 0x000001b32c5f7848&gt;
 ## &lt;environment: namespace:masmr&gt;</code></pre>
 <p><strong>ALWAYS plot to check how your image processing has altered your image!</strong></p>
 <div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="image-processing.html#cb39-1" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> <span class="fu">imLowPass</span>(im, <span class="at">floorVal =</span> params<span class="sc">$</span>brightness_min[<span class="dv">1</span>], <span class="at">ceilVal =</span> params<span class="sc">$</span>brightness_max[<span class="dv">1</span>] )</span>
@@ -502,7 +502,7 @@ x = \frac{\log{ \frac{\log{ceiling}}{\log{floor}}} }{ \log{\frac{floor}{ceiling}
 ##     final &lt;- matrix(as.integer(mask), nrow = nrow(mask), ncol = ncol(mask))
 ##     return(final)
 ## }
-## &lt;bytecode: 0x00000140a0d17ad8&gt;
+## &lt;bytecode: 0x000001b32cf64c08&gt;
 ## &lt;environment: namespace:masmr&gt;</code></pre>
 <p>Next, let’s create a new mask function that will be more permissive and flag more pixels. This <code>myCustomMask</code> function is created from copying and editing the default <code>imForMask</code> function above. Briefly, this new function replaces steps 5-7 in the default <code>imForMask</code> function with the union of multiple masks.</p>
 <p>[Note: the use of ellipsis (<code>...</code>) is to allow the passing arguments in <code>myCustomMask</code> to functions <strong>within</strong> <code>myCustomMask</code>: e.g. <code>imLaplacianOfGaussian</code>, <code>imHessianDeterminant</code> etc.]</p>
