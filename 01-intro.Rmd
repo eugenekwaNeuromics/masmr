@@ -30,6 +30,10 @@ For users working with 3D image stacks, kindly refer to Troubleshooting (Chapter
 
 ### Quick start: Spotcalling
 
+In the Spotcalling script, we loop through FOVs, performing default image processing (with `getImageMetrics`). Processed images are registered to a reference image (with `registerImages`) so that pixels from the same spots are maximally overlapped. Information from the same FOV are then consolidated into a dataframe (with `consolidateImageMetrics`) that has pixels in rows and metrics (e.g. pixel intensity per image) in columns. Pixels are then assigned an identity on decoding (with `decode`). This dataframe is then successively filtered through a series of recommended filters; users may add / drop filters as needed. 
+
+Per FOV, the final output is a dataframe containing spot locations as rows (a single pixel per spot), and accumulated meta data in columns. 
+
 ```{r intro-qs-spotcall, eval=FALSE}
 library(masmr)
 
@@ -148,6 +152,10 @@ for( fovName in params$fov_names ){
 
 ### Quick start: Cell segmentation
 
+Cell segmentation loops through DAPI images. The default model specified by `establishCellSegModel` is `cellpose` (`nuclei` model).
+
+Per FOV, the final output is a dataframe with pixels in rows and the cell mask that has been assigned to that pixel.
+
 ```{r intro-qs-cellseg, eval=FALSE}
 library(masmr)
 
@@ -202,6 +210,10 @@ for( fovName in params$fov_names ){
 
 ### Quick start: Stitching
 
+The Stitching script identifies the necessary rigid transformation required so that adjacent FOVs overlap appropriately.
+
+Per FOV, the final output is a dataframe with neighbouring FOVs in rows, and the vectors needed for moving these FOVs to maximise overlap with the reference FOV. Two vectors are returned in the script below -- one for stitching MERFISH images, and one for stitching DAPI images -- but only one is required.    
+
 ```{r intro-qs-stitch, eval=FALSE}
 library(masmr)
 
@@ -252,6 +264,10 @@ for( fovName in params$fov_names ){
 ```
 
 ### Quick start: Synthesis
+
+This is the last script. Synthesis combines all the outputs from the previous three scripts into a series of dataframes, across every processed FOV. Additionally, users can `plotQC` to return some default QC plots to evaluate their pipeline's performance.
+
+Hereafter, should users wish to save space, they can delete the intermediate results returned by the previous three scripts.
 
 ```{r intro-qs-synthesis, eval=FALSE}
 library(masmr)

@@ -28,9 +28,9 @@ establishParams(
   codebookColumnNames = paste0(rep(c(0:3), 4), '_', rep(c('cy3', 'alexa594', 'cy5', 'cy7'), each=4) ),
   outDir = 'C:/Users/kwaje/Downloads/JYOUT/',
   dapiDir = paste0(data_dir, 'DAPI_1/'),
-  pythonLocation = 'C:/Users/kwaje/AppData/Local/anaconda3/envs/scipyenv/',
-  fpkmFileName = list.files(paste0(data_dir, 'FPKM_data/'), pattern='FPKM', full.names = TRUE),
-  nProbesFileName = list.files(paste0(data_dir), pattern='ProbesPerGene.csv', recursive = T, full.names = TRUE)
+  pythonLocation = 'C:/Users/kwaje/AppData/Local/miniforge3/envs/scipyenv/',
+  fpkmFileName = paste0(data_dir, "FPKM_data/Jin_FPKMData_B.tsv"),
+  nProbesFileName = paste0(data_dir, "ProbesPerGene.csv")
 )
 ```
 

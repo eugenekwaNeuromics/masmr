@@ -24,26 +24,26 @@ establishParams(
   codebookColumnNames = paste0(rep(c(0:3), 4), '_', rep(c('cy3', 'alexa594', 'cy5', 'cy7'), each=4) ),
   outDir = 'C:/Users/kwaje/Downloads/JYOUT/',
   dapiDir = paste0(data_dir, 'DAPI_1/'),
-  pythonLocation = 'C:/Users/kwaje/AppData/Local/anaconda3/envs/scipyenv/',
-  fpkmFileName = list.files(paste0(data_dir, 'FPKM_data/'), pattern='FPKM', full.names = TRUE),
-  nProbesFileName = list.files(paste0(data_dir), pattern='ProbesPerGene.csv', recursive = T, full.names = TRUE)
+  pythonLocation = 'C:/Users/kwaje/AppData/Local/miniforge3/envs/scipyenv/',
+  fpkmFileName = paste0(data_dir, "FPKM_data/Jin_FPKMData_B.tsv"),
+  nProbesFileName = paste0(data_dir, "ProbesPerGene.csv")
 )
 ```
 
 Of relevance to cell segmentation specifically are the `pythonLocation` and `dapiDir` parameters:
 
 * `dapiDir`: location of DAPI images. [Technically, any cell-based imaging will likely work here -- not just DAPI -- as long as they are compatible with the cell segmentation models.]
-* `pythonLocation`: location of the user's Python environment. The Python environment should contain all the packages necessary to run the cell segmen tation model of choice. 
+* `pythonLocation`: location of the user's Python environment. The Python environment should contain all the packages necessary to run the cell segmentation model of choice. 
 
-Details on the setting up of the Python environment is beyond the scope of this book. Briefly, there exist various tools (e.g. `miniconda` and `anaconda`) that allow users to create a Python environment for installing necessary software. We will then interface with that environment through `reticulate`. Below are a series of commands (input into the `anaconda` command prompt) to set up a Python environment called `scipyenv` that is compatible with `stardist` and `cellpose`. Users should take note of where the environment is created, and provide the location of the folder in `pythonLocation`.
+Details on the setting up of the Python environment is beyond the scope of this book. Briefly, there exist various tools (e.g. `miniconda`, `anaconda`, `miniforge`) that allow users to create a Python environment for installing necessary software. We will then interface with that environment through `reticulate`. Below are a series of commands to set up a Python environment called `scipyenv` that is compatible with `stardist` and `cellpose`. Users should take note of where the environment is created, and provide the location of the folder in `pythonLocation`.
 
 ```
 conda create -n scipyenv python=3.9 notebook pandas numpy=1.26.4
 conda activate scipyenv
-conda install pytorch=1.8.2 cudatoolkit=10.2 -c pytorch-lts
+conda install pytorch=1.12.1 cudatoolkit=10.2 -c pytorch #1.12.1 is the earliest mps is supported
 pip install cellpose==3.0.11
-pip install tensorflow
-pip install stardist
+pip install tensorflow==2.17.0
+pip install stardist==0.9.1
 ```
 
 Additionally, similar to spotcalling, we also `readImageMetaData`, though this time for DAPI images specifically. Because there will be no decoding, warnings about codebook column names not matching can be safely ignored.
@@ -195,6 +195,8 @@ ggplot() +
 ### `stardist`
 
 An alternative for nuclei segmentation is to use `stardist`: a deep-learning segmentation model that relies on star-convex polygons. The model has been trained on DAPI images (`2D_versatile_fluo`), and H&E stains (`2D_versatile_he`). It is typically faster than `cellpose`, allowing for looping through multiple hyperparameters -- should users be interested.
+
+[Tip: Windows users have reported running into `[WinError 1314] A required privilege is not held by the client` error when attempting to load `stardist`. To get around the problem, manually unzip the downloaded model (file location reported in error message). For some reason, `2D_versatile_fluo.zip` is erroneously unzipped as `2D_versatile_fluo_extracted` instead of `2D_versatile_fluo` in some cases.]
 
 ```{r cellseg-stardist-default}
 establishCellSegModel( 'stardist' )
