@@ -21,6 +21,7 @@ establishParams(
 
     ## Automatically filled in
     seed = 12345,
+    verbose = T,
     resumeMode = T,
 
     ## Optional
