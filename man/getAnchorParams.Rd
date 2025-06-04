@@ -8,6 +8,7 @@ Obtains metrics across a subset of "anchor" images.
 getAnchorParams(
     anchors,
     out_dir,
+    returnTroubleShootPlots = FALSE,
     imageFunctions = list(
       'brightness_min' = imsBrightnessMin,
       'brightness_max' = imsBrightnessMax
@@ -27,6 +28,7 @@ getAnchorParams(
 \arguments{
 \item{ anchors }{ Character vector. Subset of \code{params$fov_names} to load. If unspecified, automatically determined: see Details below. }
 \item{ out_dir }{ Character. Output directory. If unspecified, read from \code{params$out_dir}. }
+\item{ returnTroubleShootPlots }{ Boolean. Determines if troubleshooting plots are to be returned. }
 \item{ imageFunctions }{ Named list of functions, with names also shared by \code{summaryFunctions}. Functions chosen must return a single numeric per image. Currently defaults to \code{imsBrightnessMin} and \code{imsBrightnessMax}. }
 \item{ summaryFunctions }{ Named list of functions, with names also shared by \code{imageFunctions}. Functions chosen to summarise one or more values. Currently defaults to \code{conservativeMean}. }
 \item{ anchorMode }{ Character. Determines if anchor FOVs are to be selected from regularly spaced FOVs (\code{'grid'}) or randomly sampled (\code{'sample', default}). }
@@ -37,7 +39,7 @@ getAnchorParams(
 \item{ ... }{  Other arguments passed to \code{readImageList}, \code{imageFunctions}, and \code{summaryFunctions}. }
 }
 \value{
-  New objects in the parameters environment, and new \code{.csv} files.
+  New objects in the parameters environment, and new \code{.csv} files. If \code{returnTroubleShootPlots}, a \code{troubleshootPlots} environment is also created.
 }
 \details{
   "Anchors" are a subset of FOVs for which global parameters are derived: for instance, background fluorescence intensity across images (\code{brightness_min}), or fluorescence intensity cap above which saturation is assumed (\code{brightness_max}).
@@ -54,6 +56,8 @@ getAnchorParams(
   }
 
   Functions in \code{imageFunctions} and \code{summaryFunctions} are user-selected and customisable. For more details on default functions, see their relevant documentations.
+  
+  If \code{returnTroubleShootPlots}, a \code{troubleshootPlots} environment created containing histograms of pixel intensities per FOV per bit, and thresholds (e.g. max or min brightnesses) as a vertical red dashed line. Plots are be specified in \code{troubleshootPlots} according to metric then bit: e.g. \code{troubleshootPlots[['brightness_max']][[12]]} specifies intensity histograms across all anchor FOVs for bit 12 with the max brightness threshold indicated in red. 
 
 }
 \seealso{

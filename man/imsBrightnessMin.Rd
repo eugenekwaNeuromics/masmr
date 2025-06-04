@@ -29,9 +29,12 @@ imsBrightnessMin(
   \item{ Calculation of Laplacian of Gaussians (LoG). }
   \item{ Quantile thresholding to separate blurred intensities between LoG>0 and LoG<0.}
   }
+  
+  For image stacks, use \code{imsBrightnessMin_MIP} instead.
 }
 \seealso{
 \link{getAnchorParams}
+\link{imsBrightnessMin_MIP}
 }
 \examples{
 }

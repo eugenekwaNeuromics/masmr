@@ -31,9 +31,12 @@ imsBrightnessMax(
   \item{ Masking of pixels with high detHess and intensity values.  }
   \item{ Quantile thresholding to separate blurred intensities between best spots and all other pixels.}
   }
+  
+  For image stacks, use \code{imsBrightnessMax_MIP} instead.
 }
 \seealso{
 \link{getAnchorParams}
+\link{imsBrightnessMax_MIP}
 }
 \examples{
 }

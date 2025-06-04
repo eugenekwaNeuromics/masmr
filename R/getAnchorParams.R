@@ -7,9 +7,10 @@ require(data.table)
 getAnchorParams <- function(
     anchors,
     out_dir,
+    returnTroubleShootPlots = FALSE,
     imageFunctions = list(
-      'brightness_min' = imsBrightnessMin,
-      'brightness_max' = imsBrightnessMax
+      'brightness_min' = imsBrightnessMin_MIP,
+      'brightness_max' = imsBrightnessMax_MIP
     ),
     summaryFunctions = list(
       'brightness_min' = conservativeMean,
@@ -152,6 +153,10 @@ getAnchorParams <- function(
   params$anchors_plot <<- p
   params$anchors_metrics <<- names(imageFunctions)
 
+  
+  if(returnTroubleShootPlots){
+    troubleshootPlots <<- new.env()
+  }
 
   ## Check if desired functions have been run
   for( i in 1:length(imageFunctions) ){
@@ -167,7 +172,7 @@ getAnchorParams <- function(
   skip <-  (names(imageFunctions)) %in% ls(params)
 
   ## If any functions left, perform
-  STACKWARNED = F
+  # STACKWARNED = F
   if( (length(imageFunctions) > 0) & (sum(skip) < length(imageFunctions)) ){
 
     imageFunctions <- imageFunctions[!skip]
@@ -195,29 +200,28 @@ getAnchorParams <- function(
       if( !(any(names(mc) %in% 'subset')) ){
         imList <- readImageList(
           fileNames = unique(gcx$image_file),
-          safeLoad = F,
-          subset = list( c = channel_index ),
+          channelIndex = channel_index,
           ...
         )
       }else{
         if( 'c' %in% names(mc$subset) ){
-          stop('Cannot specify a channel for getAnchorParams!')
+          stop('Do not specify a channel for getAnchorParams! This is handled under the hood!')
         }
         imList <- readImageList(
           fileNames = unique(gcx$image_file),
-          safeLoad = F,
+          channelIndex = channel_index
           ...
         )
-        nchannels <- length(params$resolutions$channel_order)
-        imList <- setNames( lapply(imList, function(im){
-          if(is.list(im)){ im <- im[[1]] }
-          im <- array(as.vector(im), dim = dim(im)[dim(im)>1])
-          if( (length(dim(im))==3) & (dim(im)[3]==nchannels) ){
-            im <- im[,,channel_index]
-          }
-          return(im)
-        }), names(imList))
       }
+      nchannels <- length(params$resolutions$channel_order)
+      imList <- setNames( lapply(imList, function(im){
+        if(is.list(im)){ im <- im[[1]] }
+        im <- array(as.vector(im), dim = dim(im)[dim(im)>1])
+        if( (length(dim(im))==3) & (dim(im)[3]==nchannels) ){
+          im <- im[,,channel_index]
+        }
+        return(im)
+      }), names(imList))
 
       ## Check images
       imCheck <- imList[[1]]
@@ -225,16 +229,21 @@ getAnchorParams <- function(
       if(!is.array(imCheck)){
         stop('Unable to parse image file!')
       }
-      if( length(dim(imCheck)) == 3 ){
-        if(!STACKWARNED){
-          STACKWARNED = T
-          warning(
-            'Image stack detected: will summarise values across entire stack!
-          If desiring per-slice anchor parameters, loop this function across Z slices:
-          Add "subset = list( z = {User chosen Z slice} )" to the parameters of this function!')
-        }
-
-      }
+      # if( length(dim(imCheck)) == 3 ){
+      #   if(!STACKWARNED){
+      #     STACKWARNED = T
+      #     warning(
+      #       'Image stack detected: will first perform a maximum intensity projection!
+      #       
+      #       If desiring e.g. min and max brightnesses to be obtained across the whole stack,
+      #       without MIP, use imsBrightnessMin and imsBrightnessMax instead (i.e. no _MIP suffix).
+      #       
+      #       If desiring per-slice anchor parameters, loop this function across Z slices:
+      #       Add "subset = list( z = {User chosen Z slice} )" to the parameters of this function!'
+      #       )
+      #   }
+      # 
+      # }
       rm(imCheck)
 
       for( fi in 1:length(imageFunctions) ){
@@ -248,7 +257,32 @@ getAnchorParams <- function(
         })
         intermediateResults <- as.vector(unlist(intermediateResults))
         intermediateResults <- intermediateResults[!is.na(intermediateResults)]
-        results[[current_func]][i] <- sumFunc(intermediateResults, ...)
+        identifiedThreshold <- sumFunc(intermediateResults, ...)
+        results[[current_func]][i] <- identifiedThreshold
+        
+        if(returnTroubleShootPlots){
+          dfp <- do.call(rbind, lapply( 1:length(imList), function(imidx){
+            imxi <- imList[[imidx]]
+            dfx <- data.frame(
+              'intensity' = as.vector(imxi),
+              'fov' = names(imList)[imidx])
+            return(dfx)
+          }) )
+          
+          plot_title <- paste0( current_func, ': Bit ', i )
+          
+          p <-
+            ggplot2::ggplot( data=dfp, ggplot2::aes(x=intensity) ) +
+            ggplot2::geom_histogram(fill='black', bins=100) +
+            ggplot2::facet_wrap( ~factor(fov), scales = 'free_y') +
+            ggplot2::theme_minimal(base_size=14) +
+            ggplot2::xlab('Intensity') + ggplot2::ylab('Count') +
+            ggplot2::geom_vline( xintercept = identifiedThreshold, colour='red', linetype='dashed') +
+            ggplot2::ggtitle( plot_title )
+          
+          troubleshootPlots[[ current_func ]][[ i ]] <- p
+        }
+        
       }
     }
 
@@ -270,6 +304,87 @@ getAnchorParams <- function(
 
 ##
 
+maxIntensityProject <- function(im, zDim = NULL){
+  
+  if(!is.null(zDim)){
+    zDim = as.integer(zDim)
+    if(zDim <1 | zDim>3){
+      stop('zDim needs to be between 1 and 3! When im has 4 dimensions / is a list of 3D arrays, the first dimension is ignored!')
+    }
+  }
+  
+  if(is.list(im)){
+    imageDimension <- c(length(im), dim(im[[1]]))
+  }else{
+    imageDimension <- dim(im)
+  }
+  
+  ## If zDim not specified, guess which is zDim
+  if(length(imageDimension) > 4){
+    stop('Can only except a max 4 dimensional object for im (a list of 3D arrays is considered 4D)!')
+  }
+  
+  if(length(imageDimension)==2){
+    warning('2D matrix provided...Skipping MIP...')
+    return(im)
+  }
+  
+  if(length(imageDimension)==4){
+    result <- list()
+    for( ci in 1:imageDimension[1] ){
+      if(is.list(im)){
+        imx <- im[[ci]]
+      }else{
+        imx <- im[ci,,,]
+      }
+      result[[ci]] <- maxIntensityProject(imx, zDim=zDim)
+    }
+  }
+  
+  if(length(imageDimension)==3){
+    
+    if(is.list(im) | imageDimension[1]==1){
+      result <- list()
+      for( ci in 1:imageDimension[1] ){
+        if(is.list(im)){
+          imx <- im[[ci]]
+        }else{
+          imx <- im[ci,,]
+        }
+        result[[ci]] <- maxIntensityProject(imx, zDim=zDim)
+      }
+    }else{
+      if(is.null(zDim)){
+        zDim = 3
+      }
+      newDim = imageDimension[-zDim]
+      if(length(newDim)!=2){
+        stop('zDim needs to be between 1 and 3! When im has 4 dimensions / is a list of 3D arrays, the first dimension is ignored!')
+      }
+      result <- array(0, dim = newDim)
+      for( i in 1:imageDimension[zDim] ){
+        if(zDim==1){
+          ref <- im[i,,]
+        }
+        if(zDim==2){
+          ref <- im[,i,]
+        }
+        if(zDim==3){
+          ref <- im[,,i]
+        }
+        bool <- (ref - result) > 0
+        result[bool] <- ref[bool]
+      }
+    }
+    
+  }
+  
+  return(result)
+}
+
+##
+
+
 imsBrightnessMin <- function(
     im,
     smallBlur,
@@ -287,6 +402,22 @@ imsBrightnessMin <- function(
     quantileTrue = 0.01)
   return(thresh)
 }
+
+imsBrightnessMin_MIP <- function(
+    im,
+    zDim = 3,
+    ...
+){
+  
+  ## Check if image is a stack
+  if( length(dim(im)) != 2  ){
+    im <- suppressWarnings( maxIntensityProject(im, zDim=zDim) )
+  }
+  
+  result <- imsBrightnessMin(im, ...)
+  return(result)
+}
+
 
 ##
 
@@ -311,6 +442,21 @@ imsBrightnessMax <- function(
     quantileFalse = 0.95,
     quantileTrue = 0.95)
   return(thresh)
+}
+
+imsBrightnessMax_MIP <- function(
+    im,
+    zDim=3,
+    ...
+){
+  
+  ## Check if image is a stack
+  if( length(dim(im)) != 2  ){
+    im <- suppressWarnings( maxIntensityProject(im, zDim=zDim) )
+  }
+  
+  result <- imsBrightnessMax(im, ...)
+  return(result)
 }
 
 ##

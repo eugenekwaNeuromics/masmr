@@ -172,8 +172,15 @@ filterDF <- function(
     params = get('params', envir = globalenv()),
     ...
 ){
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
+  
   filterExpression <- rlang::as_label(rlang::enquo( filterOut ))
-  message( paste0('\nApplying filter: ', filterExpression, '...') )
+  if(verbose){ message( paste0('\nApplying filter: ', filterExpression, '...') ) }
 
   if(length(filterOut) != nrow(spotcalldf)){
     stop('filterOut length does not match nrows of the dataframe!')
@@ -183,6 +190,42 @@ filterDF <- function(
     stop('filterOut is not a boolean vector!')
   }
   keep <- !filterOut
+  if(!verbose){
+    if( returnTroubleShootPlots ){
+      troubleshootPlots <<- new.env()
+      if(is.null(troubleShootCoordinates)){
+        refcx <- spotcalldf[keep,]
+        refcx <- refcx[which.min(refcx$COS),c('WX','WY')]
+        refcx <- refcx$WX + refcx$WY * 1i
+        plist <- spotcall_troubleshootPlots(
+          spotcalldf=spotcalldf,
+          params=params,
+          chosenCoordinate=refcx,
+          ...)
+        troubleshootPlots[['BEFORE']] <<- plist
+        plist <-  spotcall_troubleshootPlots(
+          spotcalldf=spotcalldf[keep,],
+          params=params,
+          chosenCoordinate=refcx,
+          ...)
+        troubleshootPlots[['AFTER']] <<- plist
+      }else{
+        plist <- spotcall_troubleshootPlots(
+          spotcalldf=spotcalldf,
+          params=params,
+          chosenCoordinate = troubleShootCoordinates,
+          ...)
+        troubleshootPlots[['BEFORE']] <<- plist
+        plist <-  spotcall_troubleshootPlots(
+          spotcalldf=spotcalldf[keep,],
+          params=params,
+          chosenCoordinate = troubleShootCoordinates,
+          ...)
+        troubleshootPlots[['AFTER']] <<- plist
+      }
+    }
+    return(spotcalldf[keep,])
+  }
 
   ## Report number of pixels filtered
   before <- length(keep)

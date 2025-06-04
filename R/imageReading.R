@@ -315,8 +315,16 @@ readImageMetaData <- function(
 
 readImage <- function(
     fileName,
+    
+    imageDimensions = NULL,
+    
+    nchannels = NULL,
     nrows = NULL,
     ncols = NULL,
+    nzs = NULL,
+    
+    channelIndex = NULL,
+
     endian = 'little',
     nbytes = 2,
     signed = T,
@@ -343,17 +351,9 @@ readImage <- function(
   if(is.na(file_size)){
     stop('File does not exist!')
   }
-  if(!is.null(nrows) & !is.null(ncols)){
-    nrows = as.numeric(nrows)
-    ncols = as.numeric(ncols)
-    file_size = nrows * ncols
-    if(is.na(file_size)){
-      stop('Invalid nrows and/or ncols!')
-    }
-  }
-
+  
   ## Check if compatible with RBioFormats (read only 1 pixel for speed)
-  t <- try(RBioFormats::read.image(fileName, subset = list(c=1, x=1, y=1), series=1), silent = T)
+  t <- try(RBioFormats::read.image(fileName, subset = list(c=1, x=1, y=1, z=1), series=1), silent = T)
   if(inherits(t, 'try-error')){
     warning('Unable to read with RBioFormats')
     if( !grepl('.dax$', fileName) ){
@@ -366,22 +366,65 @@ readImage <- function(
     if(normalise){
       rawim <- rawim / (2^(nbytes * 8))
     }
-    if(is.null(nrows)){
-      ncols = nrows = sqrt(length(rawim)) # Assume square image
-      if( nrows %% 1 != 0 ){
-        stop('Not a square image: please provide nrows!')
+    ## Assume that image is read as nrows, ncols, nzs
+    if(is.null(imageDimensions)){
+      warning('Image dimensions not specified, assuming: (nchannels, nrows, ncols, nzs)')
+      imageDimensions = c(nchannels, nrows, ncols, nzs)
+    }
+    
+    if(any(is.null(imageDimensions))){
+      warning('Unable to determine image dimensions, returning vector')
+      imcz <- rawim
+    }else{
+      im <- array(rawim, dim = imageDimensions )
+      if(!is.null(nchannels)){
+        imcz <- list()
+        for(ci in 1:nchannels){
+          imcz[[length(imcz) + 1]] <- im[ci,,,]
+        }
+      }else{
+        imcz <- im
       }
-      warning('Assuming a square 2D image with a single channel')
     }
-    if( nrows %% 1 != 0 ){
-      stop('nrows needs to be an integer!')
+    
+    if(!is.null(channelIndex)){
+      imcz <- im[[channelIndex]]
     }
-    im <- matrix(rawim, nrow=nrows, ncol=ncols)
+    
   }else{
-    im <- RBioFormats::read.image(fileName, normalize = normalise, ...)@.Data
-    unloadNamespace('RBioFormats') #Stupid but fastest way to clear Java cache
+    
+    if(is.null(nzs)){
+      nzs = 1
+    }
+    if(is.null(nchannels)){
+      nchannels = 1
+    }
+    
+    imcz <- list()
+    for( ci in 1:nchannels ){
+      
+      if(!is.null(channelIndex)){
+        if(!(ci %in% channelIndex)){
+          next
+        }
+      }
+      
+      imz <- list()
+      for( zi in 1:nzs ){
+        imx <- RBioFormats::read.image(
+          fileName, normalize = normalise,
+          subset = list(c = ci, z = zi),
+          ...)@.Data
+        unloadNamespace("RBioFormats")
+        imz[[zi]] <- imx
+      }
+      imz <- array(unlist(imz), dim=c(dim(imz[[1]]), length(imz)))
+      imcz[[ length(imcz) + 1 ]] <- imz
+    }
+
+    
   }
-  return(im)
+  return(imcz)
 }
 
 
@@ -390,8 +433,6 @@ readImage <- function(
 readImageList <- function(
     chosenFOV = NULL,
     fileNames = NULL,
-    safeLoad = T,
-    waitSeconds = 1,
     params = get('params', envir = globalenv()),
     ...
   ){
@@ -416,6 +457,15 @@ readImageList <- function(
     height <- as.numeric(params$resolutions$xydimensions_pixels)[2]
     if(is.na(width)){ width <- NULL }
     if(is.na(height)){ height <- NULL }
+  }
+  zslices <- NULL
+  if(!is.null(params$resolutions$zslices)){
+    zslices <- as.numeric(params$resolutions$zslices)[1]
+    if(is.na(zslices)){ zslices <- NULL }
+  }
+  n_channels <- NULL
+  if(!is.null(params$resolutions$channel_order)){
+    n_channels <- length(params$resolutions$channel_order)
   }
   ###
 
@@ -449,40 +499,27 @@ readImageList <- function(
 
       if( params$im_format == '.ome.tif' ){
         fov_index <- which(params$fov_names %in% gcx[gcx$image_file==fileNames[i],'fov'])
-        imListIntermediate <- list()
-        if(safeLoad){
-          for( j in bitindices ){
-            imi <- readImage(
-              fileNames[i],
-              nrows = width,
-              ncols = height,
-              series = fov_index, #IMPORTANT FOR OME.TIF, otherwise will load ALL images
-              subset = list(c = j), #Single channel
-              ... )
-            if( length(dim(imi)) != 2){
-              stop('Problem loading single channel')
-            }
-            imListIntermediate[[ bitnames[j] ]] <- imi
-          }
-          imList <- c(imList, imListIntermediate)
-        }else{
-          imi <- readImage(
-            fileNames[i],
-            nrows = width,
-            ncols = height,
-            series = fov_index, #IMPORTANT FOR OME.TIF, otherwise will load ALL images
-            ... )
-          imList[[ basename(fileNames[i]) ]] <- imi
-          Sys.sleep(waitSeconds)
-        }
+        imi <- readImage(
+          fileNames[i],
+          nchannels = n_channels,
+          nrows = width,
+          ncols = height,
+          nzs = zslices,
+          series = fov_index, #IMPORTANT FOR OME.TIF, otherwise will load ALL images
+          ... )
       }else{
         imi <- readImage(
           fileNames[i],
+          nchannels = n_channels,
           nrows = width,
           ncols = height,
+          nzs = zslices,
           ... )
-        imList[bitnames[i]] <- imi
       }
+      if(length(bitnames)==length(imi)){
+        names(imi) <- bitnames
+      }
+      imList <- c(imList, imi)
     }
     imLists <- imList
   }else{
@@ -494,9 +531,7 @@ readImageList <- function(
         readImageList(
           chosenFOV = NULL,
           fileNames = fileNameSub,
-          safeLoad = safeLoad,
           params = params,
-          waitSeconds = waitSeconds,
           ...
         )
     }
