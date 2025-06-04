@@ -25,7 +25,7 @@ getAnchorParams <- function(
 ){
   ## Get verbosity
   if(is.logical(params$verbose)){
-    verbose = params$verbose 
+    verbose = params$verbose
   }else{
     verbose = T
   }
@@ -153,7 +153,7 @@ getAnchorParams <- function(
   params$anchors_plot <<- p
   params$anchors_metrics <<- names(imageFunctions)
 
-  
+
   if(returnTroubleShootPlots){
     troubleshootPlots <<- new.env()
   }
@@ -209,7 +209,7 @@ getAnchorParams <- function(
         }
         imList <- readImageList(
           fileNames = unique(gcx$image_file),
-          channelIndex = channel_index
+          channelIndex = channel_index,
           ...
         )
       }
@@ -234,15 +234,15 @@ getAnchorParams <- function(
       #     STACKWARNED = T
       #     warning(
       #       'Image stack detected: will first perform a maximum intensity projection!
-      #       
+      #
       #       If desiring e.g. min and max brightnesses to be obtained across the whole stack,
       #       without MIP, use imsBrightnessMin and imsBrightnessMax instead (i.e. no _MIP suffix).
-      #       
+      #
       #       If desiring per-slice anchor parameters, loop this function across Z slices:
       #       Add "subset = list( z = {User chosen Z slice} )" to the parameters of this function!'
       #       )
       #   }
-      # 
+      #
       # }
       rm(imCheck)
 
@@ -259,7 +259,7 @@ getAnchorParams <- function(
         intermediateResults <- intermediateResults[!is.na(intermediateResults)]
         identifiedThreshold <- sumFunc(intermediateResults, ...)
         results[[current_func]][i] <- identifiedThreshold
-        
+
         if(returnTroubleShootPlots){
           dfp <- do.call(rbind, lapply( 1:length(imList), function(imidx){
             imxi <- imList[[imidx]]
@@ -268,9 +268,9 @@ getAnchorParams <- function(
               'fov' = names(imList)[imidx])
             return(dfx)
           }) )
-          
+
           plot_title <- paste0( current_func, ': Bit ', i )
-          
+
           p <-
             ggplot2::ggplot( data=dfp, ggplot2::aes(x=intensity) ) +
             ggplot2::geom_histogram(fill='black', bins=100) +
@@ -279,10 +279,10 @@ getAnchorParams <- function(
             ggplot2::xlab('Intensity') + ggplot2::ylab('Count') +
             ggplot2::geom_vline( xintercept = identifiedThreshold, colour='red', linetype='dashed') +
             ggplot2::ggtitle( plot_title )
-          
+
           troubleshootPlots[[ current_func ]][[ i ]] <- p
         }
-        
+
       }
     }
 
@@ -305,30 +305,30 @@ getAnchorParams <- function(
 ##
 
 maxIntensityProject <- function(im, zDim = NULL){
-  
+
   if(!is.null(zDim)){
     zDim = as.integer(zDim)
     if(zDim <1 | zDim>3){
       stop('zDim needs to be between 1 and 3! When im has 4 dimensions / is a list of 3D arrays, the first dimension is ignored!')
     }
   }
-  
+
   if(is.list(im)){
     imageDimension <- c(length(im), dim(im[[1]]))
   }else{
     imageDimension <- dim(im)
   }
-  
+
   ## If zDim not specified, guess which is zDim
   if(length(imageDimension) > 4){
     stop('Can only except a max 4 dimensional object for im (a list of 3D arrays is considered 4D)!')
   }
-  
+
   if(length(imageDimension)==2){
     warning('2D matrix provided...Skipping MIP...')
     return(im)
   }
-  
+
   if(length(imageDimension)==4){
     result <- list()
     for( ci in 1:imageDimension[1] ){
@@ -340,9 +340,9 @@ maxIntensityProject <- function(im, zDim = NULL){
       result[[ci]] <- maxIntensityProject(imx, zDim=zDim)
     }
   }
-  
+
   if(length(imageDimension)==3){
-    
+
     if(is.list(im) | imageDimension[1]==1){
       result <- list()
       for( ci in 1:imageDimension[1] ){
@@ -376,9 +376,9 @@ maxIntensityProject <- function(im, zDim = NULL){
         result[bool] <- ref[bool]
       }
     }
-    
+
   }
-  
+
   return(result)
 }
 
@@ -408,12 +408,12 @@ imsBrightnessMin_MIP <- function(
     zDim = 3,
     ...
 ){
-  
+
   ## Check if image is a stack
   if( length(dim(im)) != 2  ){
     im <- suppressWarnings( maxIntensityProject(im, zDim=zDim) )
   }
-  
+
   result <- imsBrightnessMin(im, ...)
   return(result)
 }
@@ -449,12 +449,12 @@ imsBrightnessMax_MIP <- function(
     zDim=3,
     ...
 ){
-  
+
   ## Check if image is a stack
   if( length(dim(im)) != 2  ){
     im <- suppressWarnings( maxIntensityProject(im, zDim=zDim) )
   }
-  
+
   result <- imsBrightnessMax(im, ...)
   return(result)
 }
