@@ -9,7 +9,7 @@ readImageMetaData <- function(
 ){
   ## Get verbosity
   if(is.logical(params$verbose)){
-    verbose = params$verbose 
+    verbose = params$verbose
   }else{
     verbose = T
   }
@@ -315,15 +315,16 @@ readImageMetaData <- function(
 
 readImage <- function(
     fileName,
-    
+
     imageDimensions = NULL,
-    
+
     nchannels = NULL,
     nrows = NULL,
     ncols = NULL,
     nzs = NULL,
-    
+
     channelIndex = NULL,
+    zIndex = NULL,
 
     endian = 'little',
     nbytes = 2,
@@ -351,7 +352,7 @@ readImage <- function(
   if(is.na(file_size)){
     stop('File does not exist!')
   }
-  
+
   ## Check if compatible with RBioFormats (read only 1 pixel for speed)
   t <- try(RBioFormats::read.image(fileName, subset = list(c=1, x=1, y=1, z=1), series=1), silent = T)
   if(inherits(t, 'try-error')){
@@ -371,7 +372,7 @@ readImage <- function(
       warning('Image dimensions not specified, assuming: (nchannels, nrows, ncols, nzs)')
       imageDimensions = c(nchannels, nrows, ncols, nzs)
     }
-    
+
     if(any(is.null(imageDimensions))){
       warning('Unable to determine image dimensions, returning vector')
       imcz <- rawim
@@ -380,49 +381,72 @@ readImage <- function(
       if(!is.null(nchannels)){
         imcz <- list()
         for(ci in 1:nchannels){
-          imcz[[length(imcz) + 1]] <- im[ci,,,]
+
+          if(!is.null(zIndex)){
+            zIndex <- as.integer(zIndex)
+            if( all(zIndex >= 1) & all(zIndex <= nzs) ){
+              imsub <- im[ci,,,zIndex]
+            }else{
+              stop('Invalid zIndex specified!')
+            }
+
+          }else{
+            imsub <- im[ci,,,]
+          }
+
+          imcz[[length(imcz) + 1]] <- imsub
         }
       }else{
         imcz <- im
       }
     }
-    
+
     if(!is.null(channelIndex)){
+      channelIndex <- as.integer(channelIndex)
       imcz <- im[[channelIndex]]
     }
-    
+
   }else{
-    
+
     if(is.null(nzs)){
       nzs = 1
     }
     if(is.null(nchannels)){
       nchannels = 1
     }
-    
+
     imcz <- list()
     for( ci in 1:nchannels ){
-      
+
       if(!is.null(channelIndex)){
+        channelIndex <- as.integer(channelIndex)
         if(!(ci %in% channelIndex)){
           next
         }
       }
-      
+
       imz <- list()
       for( zi in 1:nzs ){
+
+        if(!is.null(zIndex)){
+          zIndex <- as.integer(zIndex)
+          if(!(zi %in% zIndex)){
+            next
+          }
+        }
+
         imx <- RBioFormats::read.image(
           fileName, normalize = normalise,
           subset = list(c = ci, z = zi),
           ...)@.Data
         unloadNamespace("RBioFormats")
-        imz[[zi]] <- imx
+        imz[[ length(imz) + 1 ]] <- imx
       }
       imz <- array(unlist(imz), dim=c(dim(imz[[1]]), length(imz)))
       imcz[[ length(imcz) + 1 ]] <- imz
     }
 
-    
+
   }
   return(imcz)
 }
@@ -436,10 +460,10 @@ readImageList <- function(
     params = get('params', envir = globalenv()),
     ...
   ){
-  
+
   ## Get verbosity
   if(is.logical(params$verbose)){
-    verbose = params$verbose 
+    verbose = params$verbose
   }else{
     verbose = T
   }
