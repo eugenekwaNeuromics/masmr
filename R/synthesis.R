@@ -13,6 +13,14 @@ synthesiseData <- function(
     customOutDirName = NULL,
     params = get('params', envir = globalenv())
 ){
+  
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
+  
   ## First, check that append=True is working for data.table
   test_file <- paste0(params$parent_out_dir, 'DATATABLE_TEST_FILE.csv', ifelse(gZip, '.gz', ''))
   data.table::fwrite(data.frame('x'=1), test_file, row.names = F)
@@ -37,7 +45,7 @@ synthesiseData <- function(
     data.table::fwrite(data.frame('x'=1), test_file, append = T, row.names = F)
     test_df <- data.table::fread(test_file, data.table = F)
     if(nrow(test_df)==2){
-      message( paste0('Successful update of data.table: ', oldversion, ' --> ', newversion, '...') )
+      if(verbose){ message( paste0('Successful update of data.table: ', oldversion, ' --> ', newversion, '...') ) }
     }else{
       stop('Successful update but unable to correct problem: try using an older version of data.table (1.14.8), or setting gZip = FALSE')
     }
@@ -95,7 +103,7 @@ synthesiseData <- function(
 
   ## Subset FOVs...
   if( !is.null(subsetFOV) ){
-    message('Subsetting FOVs...')
+    if(verbose){ message('Subsetting FOVs...') }
     if( is.logical(subsetFOV) ){
       if( length(subsetFOV) != length(fov_names) ){
         stop("If providing a boolean vector for subsetFOV, it must be the same length as params$all_fovs!")
@@ -145,7 +153,7 @@ synthesiseData <- function(
 
   ## Pick a reference FOV
   if(missing(referenceFOV)){
-    message(paste0('\nReference FOV not specified...Choosing FOV with most spots...'))
+    if(verbose){ message(paste0('\nReference FOV not specified...Choosing FOV with most spots...')) }
     nspots <- lapply(spotcallfs, function(fx){
       nrow(data.table::fread(fx))
     })
@@ -155,7 +163,7 @@ synthesiseData <- function(
   if( !(referenceFOV %in% fov_names) ){
     stop( paste0('FOV chosen (', referenceFOV, ' ) not in fov_names! Please check params$fov_names!'))
   }
-  message( paste0('FOV chosen: ', referenceFOV, '...') )
+  if(verbose){ message( paste0('FOV chosen: ', referenceFOV, '...') ) }
 
   if( !is.null(subsetFOV) ){
     ## Update out_dir name
@@ -185,7 +193,7 @@ synthesiseData <- function(
   }
 
   ## Update global_coords
-  message('\nUpdating global coordinates...')
+  if(verbose){ message('\nUpdating global coordinates...') }
   if( length(stitchChosenColumn) > 1 ){
     warning('More than one stitch dataframe column specified: taking mean of vectors...')
   }
@@ -235,7 +243,7 @@ synthesiseData <- function(
   }), stitchfs)
 
   ## Propagate new coordinates wrt reference FOV
-  message('\nPropagating new coordinates...')
+  if(verbose){ message('\nPropagating new coordinates...') }
   fovs_processed <- unique(do.call(rbind, stitchResults)$fov)
   new_gcx <- list()
   new_gcx[[referenceFOV]] <- sum(gcx[gcx$fov==referenceFOV,c('x_microns', 'y_microns')] * c(1, 1i))
@@ -294,15 +302,17 @@ synthesiseData <- function(
   data.table::fwrite(gcx, paste0(params$out_dir, 'OUT_GLOBALCOORD.csv'), row.names = F)
 
   ## Begin looping through files to synthesise data
-  message('\nSynthesising data...')
+  if(verbose){ message('\nSynthesising data...') }
   finalcellseg <- finaldf <- data.frame()
   NCHAR_NAME = nLeadingZeroes #Assume a max of 99999 cells per FOV
   for( fovName in fov_names ){
-    message('')
-    message( paste0(which(fov_names == fovName), ' of ', length(fov_names), '...'), appendLF = F )
+    if(verbose){
+      message('')
+      message( paste0(which(fov_names == fovName), ' of ', length(fov_names), '...'), appendLF = F )
+    }
     spotcallfx <- spotcallfs[grepl( paste0(fovName, '.csv'), spotcallfs )]
     if(length(spotcallfx)==0){
-      message('No spotcall file found...Skipping...', appendLF = F)
+      if(verbose){ message('No spotcall file found...Skipping...', appendLF = F) }
       next
     }
     if(length(spotcallfx)>1){
@@ -325,7 +335,7 @@ synthesiseData <- function(
 
     ## Load neighbours
     if(removeRedundancy){
-      message('\nRemoving redundant spot calls...', appendLF = F)
+      if(verbose){ message('\nRemoving redundant spot calls...', appendLF = F) }
       fovNeighbours <- stitchResults[grepl(paste0('STITCH_', fovName, '.csv'), names(stitchResults))][[1]]
       for( i in 1:nrow(fovNeighbours) ){
 
@@ -359,14 +369,14 @@ synthesiseData <- function(
       }
     }
     if(nrow(spotcalldf)==0){
-      message(paste0('No spots left in this FOV...'), appendLF = F)
+      if(verbose){ message(paste0('No spots left in this FOV...'), appendLF = F) }
       next
     }
 
     ## Load cell segment information
     cellsegfx <- cellsegfs[grepl( paste0(fovName, '.csv'), cellsegfs )]
     if(length(cellsegfx)==0){
-      message('No cell segmentation file found...Skipping cell annotation...', appendLF = F)
+      if(verbose) { message('No cell segmentation file found...Skipping cell annotation...', appendLF = F) }
       spotcalldf$CELLNAME <- NA
     }
     if(length(cellsegfx)>1){
@@ -391,7 +401,7 @@ synthesiseData <- function(
 
       ## Load neighbours
       if(removeRedundancy){
-        message('\nRemoving redundant cell calls...', appendLF = F)
+        if(verbose){ message('\nRemoving redundant cell calls...', appendLF = F) }
         fovNeighbours <- stitchResults[grepl(paste0('STITCH_', fovName, '.csv'), names(stitchResults))][[1]]
         for( i in 1:nrow(fovNeighbours) ){
 
@@ -515,11 +525,11 @@ synthesiseData <- function(
         row.names = F, append = T)
     }
 
-    message('Done!', appendLF = F)
+    if(verbose){ message('Done!', appendLF = F) }
   }
 
   ## Note that above tends to create duplicate entries in CELLEXPRESSION, have to load and edit
-  message('\nCleaning up...')
+  if(verbose){ message('\nCleaning up...') }
   cellMetaClean <- cellMeta <- data.table::fread(
     paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')), 
     data.table = F)

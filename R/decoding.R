@@ -55,7 +55,13 @@ decode <- function(
   if(is.null(currentFovName)){
     stop('currentFovName NOT specified and params$current_fov does not exist!')
   }
-
+  
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
 
   if( !(decodeMetric %in% params$imageMetrics) ){
     stop('decodeMetric absent from params$imageMetrics!')
@@ -73,7 +79,7 @@ decode <- function(
   }
 
   ## Generate metrics for decoding
-  message('\nDecoding...')
+  if(verbose){ message('\nDecoding...') }
   l2norm <- (NORM / rowSums(NORM))
   tc <- t(apply(codebook, 2, as.numeric))
   nA <- sqrt(rowSums(NORM^2))
@@ -81,7 +87,7 @@ decode <- function(
   nextbestL <- nextbestE <- nextbestN <- bestL <- bestE <- bestN <- rep(Inf, nrow(spotcalldf))
   nlabL <- nlabE <- nlabN <- labL <- labE <- labN <- rep(0, nrow(spotcalldf))
   for(idx in 1:ncol(tc)){
-    message(paste0(idx, ' of ', ncol(tc), '...'), appendLF = F)
+    if(verbose){ message(paste0(idx, ' of ', ncol(tc), '...'), appendLF = F) }
     nscores <- eigenMapMatMult2(NORM, matrix(tc[,idx]), n_cores = nCores) #Dot product
     nscores <- 1 - (as.numeric(nscores) / (nA * B[idx])) #Cosine distance (arg min). This is half of the L2 Norm Euclidean described in Moffit.
     ndiff <- bestN - nscores
@@ -163,6 +169,13 @@ bitsFromDecode <- function(
     decodeMetric = 'DECODE',
     params = get('params', envir = globalenv())
 ){
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
+  
   ## Set up parameters
   if(!is.numeric(fBeta)){
     stop('Invalid fBeta value!')
@@ -199,13 +212,13 @@ bitsFromDecode <- function(
   }
 
   ## Initialise
-  message('Finding optimal intensity thresholds per bit...')
+  if(verbose){ message('Finding optimal intensity thresholds per bit...') }
 
 
   ## Recommend thresholds
   thresholds <- rep(0, ncol(codebook))
   for(i in 1:ncol(codebook)){
-    message( paste0(i, ' of ', ncol(codebook), '...'), appendLF = F )
+    if(verbose){ message( paste0(i, ' of ', ncol(codebook), '...'), appendLF = F ) }
     expectedBit <- codebook[g,i]
     intensityVals <- NORM[,i]
 

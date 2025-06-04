@@ -24,6 +24,13 @@ establishCellSegModel <- function(
       stop('cellposePreTrainedModel specified does not exist!')
     }
   }
+  
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
 
   ## Check that python is available
   t <- suppressWarnings( try( reticulate::use_python(params$python_location) ) )
@@ -83,7 +90,7 @@ establishCellSegModel <- function(
   }
 
   cellSeg <<- cell_seg_env
-  message(paste0('Cell segmentation with ', paste(ls(cell_seg_env), collapse=', '), '...'))
+  if(verbose){ message(paste0('Cell segmentation with ', paste(ls(cell_seg_env), collapse=', '), '...')) }
 }
 
 ##
@@ -99,10 +106,17 @@ runCellSegModel <- function(
 
   results <- list()
 
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
+  
   ## If im is a list of images
   if(is.list(im)){
     for(i in 1:length(im)){
-      message(paste0(i, ' of ', length(im), '...'))
+      if(verbose){ message(paste0(i, ' of ', length(im), '...')) }
       results[[i]] <-
         runCellSegModel(
           im[[i]],
@@ -120,7 +134,7 @@ runCellSegModel <- function(
     params$cell_seg_image <<- im
   }
   for( modelType in ls(cellSeg) ){
-    message(paste0('Running ', modelType, '...'))
+    if(verbose){ message(paste0('Running ', modelType, '...')) }
 
     model <- cellSeg[[modelType]]$model
     outputs <- cellSeg[[modelType]]$outputs
@@ -153,6 +167,12 @@ consolidateCellSegMasks <- function(
     cellSeg = get('cellSeg', envir = globalenv()),
     params = get('params', envir = globalenv())
 ){
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
   if(!is.list(maskList)){
     return(maskList)
   }
@@ -184,6 +204,12 @@ saveCellSegMasks <- function(
     cellSeg = get('cellSeg', envir = globalenv()),
     params = get('params', envir = globalenv())
 ){
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
   if(!is.matrix(masks)){
     stop('Expecting a matrix for masks!')
   }
@@ -209,7 +235,8 @@ saveCellSegMasks <- function(
   
   if(nrow(df)==0){
     #warning('No mask found...Will not save...')
-    return(message('No mask found...Will not save...'))
+    if(verbose){message('No mask found...Will not save...')}
+    return()
   }
 
   ## Prepare dataframe to be saved

@@ -8,6 +8,13 @@ spatialHNNDist <- function(
     seed = 12345,
     params = get('params', envir = globalenv())
 ){
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
+  
   codebook <- params$ordered_codebook
   g <- spotcalldf$g
   coords <- spotcalldf$WX + (1i * spotcalldf$WY)
@@ -16,11 +23,11 @@ spatialHNNDist <- function(
   }
   set.seed(seed)
 
-  message('\nCalculating homotypic nearest neighbour distances...')
+  if(verbose){ message('\nCalculating homotypic nearest neighbour distances...') }
 
   hnndist <- rep(NA, nrow(spotcalldf))
   for(i in 1:nrow(codebook)){
-    message(paste0(i, ' of ', nrow(codebook), '...'), appendLF = F)
+    if(verbose){ message(paste0(i, ' of ', nrow(codebook), '...'), appendLF = F) }
     subcoords <- coords[g==rownames(codebook)[i]]
     if(length(subcoords) <=1 ){ next }
     if(length(subcoords) <=9 ){
@@ -134,6 +141,13 @@ spatialClusterLeiden <- function(
     distanceMetric = 'COS',
     params = get('params', envir = globalenv())
 ){
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
+  
   if( !(distanceMetric %in% colnames(spotcalldf)) ){
     stop('Invalid distanceMetric specified!')
   }
@@ -145,13 +159,13 @@ spatialClusterLeiden <- function(
   rownames(spotcalldf) <- 1:nrow(spotcalldf)
 
 
-  message('\nClustering homotypic pixels and finding cluster centroids...')
+  if(verbose){ message('\nClustering homotypic pixels and finding cluster centroids...') }
 
 
   filtout_idx <- c() #Rownames to drop
   cluster_idx <- rep(0, nrow(spotcalldf)) #Cluster identity per pixel
   for(i in 1:nrow(codebook)){
-    message(paste0(i, ' of ', nrow(codebook), '...'), appendLF = F)
+    if(verbose){ message(paste0(i, ' of ', nrow(codebook), '...'), appendLF = F) }
 
     if( sum(spotcalldf$g==rownames(codebook)[i])<=1 ){
       filtout_idx <- c(filtout_idx, rownames(spotcalldf)[spotcalldf$g==rownames(codebook)[i]])

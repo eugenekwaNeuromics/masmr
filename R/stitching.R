@@ -12,6 +12,14 @@ readImagesForStitch <- function(
     params = get('params', envir=globalenv()),
     ...
 ){
+  
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
+  
   ## Prepare params
   if(!is.function(imageFunction)){
     stop('imageFunction needs to be a function!')
@@ -136,10 +144,11 @@ readImagesForStitch <- function(
   }
 
   tmp_param$processed_images_loaded <- loadProcessedImages
+  tmp_param$verbose <- verbose
   stitchParams <<- tmp_param
 
   ## Process each image
-  message('\nProcessing images...')
+  if(verbose){ message('\nProcessing images...') }
 
   imList <- setNames( lapply(imList, function(im){
     if( is.list(im) ){ im <- im[[1]] }
@@ -159,6 +168,14 @@ stitchImages <- function(
     registerTo = 1,
     stitchParams = get('stitchParams', envir=globalenv())
 ){
+  
+  ## Get verbosity
+  if(is.logical(stitchParams$verbose)){
+    verbose = stitchParams$verbose 
+  }else{
+    verbose = T
+  }
+  
   if(length(registerTo) != 1 | is.na(as.numeric(registerTo))){
     stop('Invalid registerTo parameter!')
   }
@@ -169,11 +186,11 @@ stitchImages <- function(
   refx <- imList[[registerTo]]
   nnlist <- imList[-registerTo]
   if(length(nnlist)==0){
-    message('No neighbours found...Returning empty dataframe...')
+    if(verbose){ message('No neighbours found...Returning empty dataframe...') }
     return(data.frame())
   }
   if( all(is.na(refx)) | all(is.null(refx)) ){
-    message('No reference image found...Returning empty dataframe...')
+    if(verbose){ message('No reference image found...Returning empty dataframe...') }
     return(data.frame())
   }
 
@@ -183,11 +200,11 @@ stitchImages <- function(
   }
   per_pixel_microns <- as.numeric(stitchParams$resolutions$per_pixel_microns)
 
-  message('\nAligning adjacent FOVs...')
+  if(verbose){ message('\nAligning adjacent FOVs...') }
   shifts <- c()
   # coord <- getRasterCoords(refx) - sum(dim(refx) * c(1, 1i)) + (1+1i)
   for(imidxi in 1:length(nnlist)){
-    message(paste0(imidxi, ' of ', length(nnlist), '...'), appendLF = F)
+    if(verbose){ message(paste0(imidxi, ' of ', length(nnlist), '...'), appendLF = F) }
     epcx <- gcxi[gcxi$fov==names(nnlist)[imidxi],c('x_microns', 'y_microns')] - gcxi[gcxi$ref,c('x_microns', 'y_microns')]
     epcx <- (epcx['x_microns']/per_pixel_microns[1]) + 1i * (epcx['y_microns']/per_pixel_microns[2])
     epcx <- as.complex(epcx)

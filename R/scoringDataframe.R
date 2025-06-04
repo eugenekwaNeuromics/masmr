@@ -17,6 +17,9 @@ scoreClassifier <- function(
   if(exists('params', envir = globalenv())){
     params <- get('params', envir = globalenv())
     if(exists('seed', envir = params)){ seed = params$seed }
+    verbose <- params$verbose
+  }else{
+    verbose = T
   }
   set.seed(seed)
 
@@ -65,7 +68,7 @@ scoreClassifier <- function(
 
   ## Check which covariates have missing, non.numeric, or Inf values
   if(missing(modelFormula)){
-    message('\nChecking which covariates to exclude...')
+    if(verbose){ message('\nChecking which covariates to exclude...') }
     drop_covar <- c(LHS, variablesExcluded)
     for(i in 1:ncol(spotcalldf)){
       if(colnames(spotcalldf)[i] %in% drop_covar){ next }
@@ -106,7 +109,7 @@ scoreClassifier <- function(
     }
     modelFormula <- paste0(LHS, ' ~ ', formsplit[,2])
   }
-  message( paste0('\nFormula: ', modelFormula ))
+  if(verbose){ message( paste0('\nFormula: ', modelFormula )) }
   t <- try( classifyFunction(as.formula(modelFormula), data = spotcalldf[trainIndex,], ...), silent = T )
   if( inherits(t, 'try-error') ){
     modelFormula <<- modelFormula
@@ -138,6 +141,14 @@ scoreDeltaF <- function(
     prefixes,
     params = get('params', envir = globalenv())
 ){
+  
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
+  
   ## Get required data
   if(missing(prefixes)){
     prefixes <- params$imageMetrics
@@ -157,10 +168,10 @@ scoreDeltaF <- function(
     stop('Unable to generate geneMatrix from spotcalldf$g!')
   }
 
-  message('\nCalculating delta F metrics...')
+  if(verbose){ message('\nCalculating delta F metrics...') }
   for(i in 1:length(prefixes)){
     prefixi <- prefixes[i]
-    message(paste0(prefixi, ' ( ', i, ' of ', length(prefixes), ' )...'), appendLF = F)
+    if(verbose){ message(paste0(prefixi, ' ( ', i, ' of ', length(prefixes), ' )...'), appendLF = F) }
     NORM <- subsetDF(spotcalldf, prefixi)
     if(ncol(NORM) != ncol(codebook)){
       warning( paste0('Incorrect number of columns subset for ', prefixi, '...Skipping...') )
@@ -209,6 +220,13 @@ scoreBlanks <- function(
     distanceMetrics = c('COS', 'EUC', 'L2E'),
     params = get('params', envir = globalenv())
 ){
+  
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
 
   ## Checks that required data to reference is there
   criteria <- toupper(criteria)
@@ -242,7 +260,7 @@ scoreBlanks <- function(
 
   # Check: that 'blank' is in the name of the gene
   if( toupper('gBlank') %in% criteria){
-    message('gBlank test...')
+    if(verbose){ message('gBlank test...') }
     # params$isblank from perpareCodebook
     x <- spotcalldf$g %in% rownames(params$ordered_codebook)[params$isblank]
     pixelIsBlank = pixelIsBlank + as.integer(x)
@@ -250,7 +268,7 @@ scoreBlanks <- function(
 
   # Check: that next closest entry is possible for all distance metrics in distanceMetrics
   if( toupper('bPossible') %in% criteria){
-    message('bPossible test...')
+    if(verbose){ message('bPossible test...') }
     labels <- spotcalldf[,paste0(distanceMetrics, 'LAB')]
     blabels <- spotcalldf[,paste0('B', distanceMetrics, 'LAB')]
 
@@ -269,7 +287,7 @@ scoreBlanks <- function(
     # Check if each gene has a cognate neighbour
     y <- rep(0, nrow(spotcalldf))
     for(i in 1:length(distanceMetrics)){
-      message(paste0('For ', distanceMetrics[i], '...' ), appendLF = F)
+      if(verbose){ message(paste0('For ', distanceMetrics[i], '...' ), appendLF = F) }
       labi <- labels[,i]
       blabi <- blabels[,i]
       for(j in 1:length(cognates)){
@@ -277,13 +295,13 @@ scoreBlanks <- function(
         y = y + as.integer(x)
       }
     }
-    message('')
+    if(verbose){ message('') }
     pixelIsBlank = pixelIsBlank + as.integer(y > 0)
   }
 
   # Check: similar to above, but for one distance metric only
   if( toupper('gbPossible') %in% criteria){
-    message('gbPossible test...')
+    if(verbose){ message('gbPossible test...') }
     labs <- spotcalldf[,grepl('LAB$', colnames(spotcalldf))]
     labs <- labs[,!grepl('^B', colnames(labs))]
     gvector <- match(spotcalldf$g, rownames(codebook))
@@ -299,8 +317,8 @@ scoreBlanks <- function(
       }
       domDM <- domDM[1]
 
-      message(paste0('Using ', domDM, '...'), appendLF = F)
-      message('')
+      if(verbose){ message(paste0('Using ', domDM, '...'), appendLF = F) }
+      if(verbose){ message('') }
       labi <- spotcalldf[,domDM]
       blabi <- spotcalldf[,paste0('B',domDM)]
 
@@ -331,7 +349,7 @@ scoreBlanks <- function(
     if(length(distanceMetrics) == 1){
       warning('Cannot perform consistentLabels test if only one distance metric specified!')
     }else{
-      message('consistentLabels test...')
+      if(verbose){ message('consistentLabels test...') }
       labels <- spotcalldf[,paste0(distanceMetrics, 'LAB')]
       x <- rowSums( apply(labels, 2, function(li){
         li!=labels[,1]

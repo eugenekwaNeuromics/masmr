@@ -16,6 +16,14 @@ registerImages <- function(
     standardiseShifts = F,
     saveShifts = T
 ){
+  
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
+  
   # Check that the current FOV is known
   if(is.null(currentFovName)){
     currentFovName = params$current_fov #Try to see if there exists current FOV in params
@@ -45,10 +53,10 @@ registerImages <- function(
   w <- gaussianWeightAmplitude * exp(-( (Re(coord)^2/(2*gaussianWeightSigmaX^2) + (Im(coord)^2/(2*gaussianWeightSigmaY^2) ))))
   acceptable_coords <- coord[Mod(coord) <= maxAcceptableShiftDistance]
 
-  message('\nRegistering...')
+  if(verbose){ message('\nRegistering...') }
   shifts <- rep(0+0i, length(imList))
   for(i in 1:length(imList)){
-    message(paste0(i, ' of ', length(imList), '...'), appendLF = F)
+    if(verbose){ message(paste0(i, ' of ', length(imList), '...'), appendLF = F) }
     if(i==registerTo){ next }
     quer_im <- imList[[i]]
 
@@ -87,10 +95,10 @@ registerImages <- function(
         best_matches <- best_matches[order(best_matches, decreasing = TRUE)]
         best_match_perc = round(100*(best_matches)[1], digits = 2)
         if(best_match_perc < tolerableBestAlignmentPercentage){
-          message('Match within search area <', tolerableBestAlignmentPercentage, '% of maximum...Will not shift...\n')
+          if(verbose){ message('Match within search area <', tolerableBestAlignmentPercentage, '% of maximum...Will not shift...\n') }
           shifta <- 0 + 0i
         }else{
-          message( paste0('Shift A: Picking ', names(best_matches[1]), ' with a value ', best_match_perc, '% of maximum...\n'))
+          if(verbose){ message( paste0('Shift A: Picking ', names(best_matches[1]), ' with a value ', best_match_perc, '% of maximum...\n')) }
           shifta <- as.complex(names(best_matches[1]))
         }
 
@@ -98,10 +106,10 @@ registerImages <- function(
         best_matches <- best_matches[order(best_matches, decreasing = TRUE)]
         best_match_perc = round(100*(best_matches)[1], digits = 2)
         if(best_match_perc < tolerableBestAlignmentPercentage){
-          message('Match within search area <', tolerableBestAlignmentPercentage, '% of maximum...Will not shift...\n')
+          if(verbose){ message('Match within search area <', tolerableBestAlignmentPercentage, '% of maximum...Will not shift...\n') }
           shiftb <- 0 + 0i
         }else{
-          message( paste0('Shift B: Picking ', names(best_matches[1]), ' with a value ', best_match_perc, '% of maximum...\n'))
+          if(verbose){ message( paste0('Shift B: Picking ', names(best_matches[1]), ' with a value ', best_match_perc, '% of maximum...\n')) }
           shiftb <- as.complex(names(best_matches[1]))
         }
 
@@ -115,7 +123,7 @@ registerImages <- function(
 
     shifts[i] <- shift
   }
-  message('')
+  if(verbose){ message('') }
   names(shifts) <- names(imList)
 
   # The end result is a vector of shifts, expressed as complex coordinates
@@ -141,7 +149,7 @@ registerImages <- function(
     }
   }
   if(standardiseShifts){
-    message('\nStandardising shift across channels and images...')
+    if(verbose){ message('\nStandardising shift across channels and images...') }
     shift_bychannel <- by(shifts, channels, function(x){
       val <- mean(x, na.rm=T)
       val <- round(Re(val)) + (1i * round(Im(val)))
@@ -178,7 +186,7 @@ registerImages <- function(
   }))
   window <- c(max(window[,1]), min(window[,2]), max(window[,3]), min(window[,4]))
   params$intersecting_window <<- window
-  message(paste0('\nIntersecting window is ', paste(window, collapse = ' x '), '...'))
+  if(verbose){ message(paste0('\nIntersecting window is ', paste(window, collapse = ' x '), '...')) }
 
   if(saveShifts){
     out_file <- paste0(params$out_dir, 'REGIM_', currentFovName, '.png')

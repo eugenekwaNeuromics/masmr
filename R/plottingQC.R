@@ -9,6 +9,14 @@ plotQC <- function(
     synthesisDir = NULL,
     params = get('params', envir = globalenv())
 ){
+  
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
+  
   if( is.null(synthesisDir) ){
     if(!dir.exists(paste0( params$out_dir ))){
       stop('synthesisDir unspecified and params$out_dir does not exist!')
@@ -139,7 +147,7 @@ plotQC <- function(
   if(!is.null(fpkm)){
 
     plotName <- 'FPKMCorrelation'
-    message( paste0(plotName, '...') )
+    if(verbose){ message( paste0(plotName, '...') ) }
 
     df <- data.frame( table( factor(spotcalldf$g, levels=rownames(codebook) ) ))
     df$fpkm <- as.numeric(fpkm[match(df$Var1, names(fpkm))])
@@ -186,7 +194,7 @@ plotQC <- function(
   if(!is.na(fx)){
 
     plotName <- 'CosineDistanceDistribution'
-    message( paste0(plotName, '...') )
+    if(verbose){ message( paste0(plotName, '...') ) }
 
     df <- spotcalldf
     gOrder <- by(spotcalldf$COS, spotcalldf$g, median)
@@ -222,7 +230,7 @@ plotQC <- function(
   if(!is.na(fx)){
 
     plotName <- 'SpotFOVDistribution'
-    message( paste0(plotName, '...') )
+    if(verbose){ message( paste0(plotName, '...') ) }
 
     df <- spotcalldf
     plotTitle <- paste0(
@@ -257,7 +265,7 @@ plotQC <- function(
   if(!is.na(fx)){
 
     plotName <- 'CosineSpatialDistribution'
-    message( paste0(plotName, '...') )
+    if(verbose){ message( paste0(plotName, '...') ) }
 
     df <- spotcalldf
     plotTitle <- paste0(
@@ -293,7 +301,7 @@ plotQC <- function(
   if(!is.na(fx)){
 
     plotName <- 'BitDetectionRateAll'
-    message( paste0(plotName, '...') )
+    if(verbose){ message( paste0(plotName, '...') ) }
 
     df <- data.frame( table( factor(spotcalldf$g, levels=rownames(codebook) ) ))
     df$spottype <- ifelse( !grepl('^blank', tolower(df$Var1)), 'Gene',
@@ -334,7 +342,7 @@ plotQC <- function(
   if(!is.na(fx)){
 
     plotName <- 'BitDetectionRateNonBlank'
-    message( paste0(plotName, '...') )
+    if(verbose){ message( paste0(plotName, '...') ) }
 
     df <- data.frame( table( factor(spotcalldf$g, levels=rownames(codebook) ) ))
     df$spottype <- ifelse( !grepl('^blank', tolower(df$Var1)), 'Gene',
@@ -376,7 +384,7 @@ plotQC <- function(
   if( !is.na(fx) & any(grepl('^BIT_\\d+$', toupper(colnames(spotcalldf)))) ){
 
     plotName <- 'BitwiseErrorRates'
-    message( paste0(plotName, '...') )
+    if(verbose){ message( paste0(plotName, '...') ) }
 
     df <- subsetDF(spotcalldf, 'BIT')
     if(ncol(df) != ncol(codebook)){
@@ -414,7 +422,7 @@ plotQC <- function(
   if( !is.na(fx) ){
 
     plotName <- 'FOVMetrics'
-    message( paste0(plotName, '...') )
+    if(verbose){ message( paste0(plotName, '...') ) }
 
     df <- data.frame(table(spotcalldf$fov))
     df$nblank <- as.numeric(table(factor(spotcalldf$fov[spotcalldf$blank], levels=df$Var1)))
@@ -469,7 +477,7 @@ plotQC <- function(
   if(!is.na(fx)){
 
     plotName <- 'CellMetrics'
-    message( paste0(plotName, '...') )
+    if(verbose){ message( paste0(plotName, '...') ) }
 
     cellMeta <- data.table::fread(fx, data.table = F)
     cellMeta$fov <- gsub('_\\d+$', '', cellMeta$CELLNAME)
@@ -512,5 +520,5 @@ plotQC <- function(
     ggplot2::ggsave(paste0(params$out_dir, plotName, '_nCounts.png'), plot = p, height = height, width = width, units = 'cm')
   }
 
-  message('Done!')
+  if(verbose){ message('Done!') }
 }

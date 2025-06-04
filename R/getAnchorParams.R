@@ -22,6 +22,12 @@ getAnchorParams <- function(
     params = get('params', envir = globalenv()),
     ...
 ){
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
 
   if( exists('seed', envir = params) ){
     if( is.numeric( params$seed ) ){
@@ -51,7 +57,7 @@ getAnchorParams <- function(
     if( length(f)!=1 ){
       stop('This function requires prepareCodebook() to have been run first!')
     }else{
-      message('Loading ORDEREDCODEBOOK.csv.gz...')
+      if(verbose){ message('Loading ORDEREDCODEBOOK.csv.gz...') }
     }
     codebook <- data.table::fread(f, data.table=FALSE)
     if(colnames(codebook)[1] == 'V1'){
@@ -61,7 +67,7 @@ getAnchorParams <- function(
     params$ordered_codebook <<- codebook
     params$capture_order <<- colnames(codebook)
     params$isblank <<- grepl('^blank-', tolower(rownames(codebook)))
-    message(paste0('Codebook has ', sum(params$isblank), ' blanks and ', sum(!params$isblank), ' genes...' ))
+    if(verbose){ message(paste0('Codebook has ', sum(params$isblank), ' blanks and ', sum(!params$isblank), ' genes...' )) }
   }
   codebook <- params$ordered_codebook
   if(missing(out_dir)){
@@ -128,7 +134,7 @@ getAnchorParams <- function(
     stop('Anchors are not present in params$fov_names!')
   }
   params$anchors <<- anchors
-  message(paste0('\nUsing ', length(anchors), ' anchor FOVs...'))
+  if(verbose){ message(paste0('\nUsing ', length(anchors), ' anchor FOVs...')) }
 
 
   ## Create anchors plot for visualisation
@@ -172,9 +178,9 @@ getAnchorParams <- function(
     }
 
     ## Loop through every bit and get metrics
-    message('\nObtaining anchor metrics per bit...')
+    if(verbose){ message('\nObtaining anchor metrics per bit...') }
     for( i in 1:ncol(codebook) ){
-      message(paste0('\nLoading bit ', i, ' of ', ncol(codebook), '...'))
+      if(verbose){ message(paste0('\nLoading bit ', i, ' of ', ncol(codebook), '...')) }
       current_bit <- colnames(codebook)[i]
       gcx <- global_coords[
         global_coords$fov %in% anchors
@@ -233,7 +239,7 @@ getAnchorParams <- function(
 
       for( fi in 1:length(imageFunctions) ){
         current_func <- names(imageFunctions)[fi]
-        message(paste0('Getting ', current_func, '...'))
+        if(verbose){ message(paste0('Getting ', current_func, '...')) }
         imFunc <- imageFunctions[[fi]]
         sumFunc <- summaryFunctions[[current_func]]
         intermediateResults <- lapply( imList, function(im){
@@ -255,9 +261,11 @@ getAnchorParams <- function(
     }
   }
 
+  if(verbose){
   message(paste0(
     '\nAnchor metrics obtained: ', paste(params$anchors_metrics, collapse=', ')
     ))
+  }
 }
 
 ##

@@ -13,6 +13,12 @@ spotcall_troubleshootPlots <- function(
     decodeMetric = 'DECODE',
     params = get('params', envir = globalenv())
 ){
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
   if(!('g' %in% colnames(spotcalldf)) ){
     stop('spotcalldf must have a g column: ensure decoding has been done!')
   }

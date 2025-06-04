@@ -7,6 +7,12 @@ readImageMetaData <- function(
     dir = 'im_dir',
     params = get('params', envir = globalenv())
 ){
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
 
   writeTemplate <- function(){
     resolutions <- list(
@@ -61,7 +67,7 @@ readImageMetaData <- function(
   # TO UPDATE WHEN EXPERIENCE MORE DATA FORMATS
   if(createFiles){
 
-    message('Creating GLOBALCOORD and META_RESOLUTION files...')
+    if(verbose){ message('Creating GLOBALCOORD and META_RESOLUTION files...') }
 
     # Getting params from first meta data in first image directory
     f <- sort(list.files( params[[dir]][1], pattern=params$meta_format, full.names = T ))[1]
@@ -389,6 +395,13 @@ readImageList <- function(
     params = get('params', envir = globalenv()),
     ...
   ){
+  
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
 
   ###
   if(is.factor(chosenFOV)){
@@ -426,10 +439,10 @@ readImageList <- function(
   ###
   imLists <- imList <- list()
   if(length(fovs)==1){
-    message('\nReading images...')
+    if(verbose){ message('\nReading images...') }
     for(i in 1:length(fileNames)){
 
-      message(paste0(i, ' of ', length(fileNames), '...'), appendLF = F)
+      if(verbose){ message(paste0(i, ' of ', length(fileNames), '...'), appendLF = F) }
       bitnames <- gcx[gcx$image_file==fileNames[i],'bit_name']
       bitindices <- params$global_coords[params$global_coords$image_file==fileNames[i], 'bit_name']
       bitindices <- which(bitindices %in% bitnames)
@@ -475,7 +488,7 @@ readImageList <- function(
   }else{
     for(j in 1:length(fovs)){
       # if(j > 1){ message('') } #Skip new line
-      message(paste0('\nProcessing FOV ', fovs[j], ' (', j, ' of ', length(fovs), ')...'))
+      if(verbose){ message(paste0('\nProcessing FOV ', fovs[j], ' (', j, ' of ', length(fovs), ')...')) }
       fileNameSub <- unique(gcx$image_file[gcx$fov==fovs[j]])
       imLists[[fovs[j]]] <-
         readImageList(

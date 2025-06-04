@@ -8,6 +8,13 @@ prepareCodebook <- function(
     exhaustiveBlanks = T,
     hammingDistanceThreshold = 2
 ){
+  
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
 
   if(!file.exists(paste0(params$out_dir, 'ORDEREDCODEBOOK.csv.gz')) | !params$resumeMode){
 
@@ -47,7 +54,7 @@ prepareCodebook <- function(
     }
 
     if(exhaustiveBlanks){
-      message('\nFinding more blanks...')
+      if(verbose){ message('\nFinding more blanks...') }
       universe <- expand.grid(lapply(1:ncol(codebook), function(x) return(c(0,1)) ))
       intcodes <- Reduce('+', lapply(1:ncol(codebook), function(x){
         val <- universe[,x] * 2^(x-1)
@@ -60,11 +67,11 @@ prepareCodebook <- function(
       newblanks <- universe[!(intcodes %in% donecodes),]
       newblanks <- newblanks[rowSums(newblanks)==params$nbits,]
 
-      message('\nCalculating hamming distances to existing codes...')
+      if(verbose){ message('\nCalculating hamming distances to existing codes...') }
       hdists <- rep(Inf, nrow(newblanks))
       closest <- rep(NA, nrow(newblanks))
       for(i in 1:nrow(codebook)){
-        message(paste0(i, ' of ', nrow(codebook), '...'), appendLF = F)
+        if(verbose){ message(paste0(i, ' of ', nrow(codebook), '...'), appendLF = F) }
         ref <- do.call(rbind, lapply(1:nrow(newblanks), function(x) return( codebook[i,] )))
         hdistx <- rowSums(abs(newblanks - ref))
         bool <- (hdists - hdistx) > 0
@@ -74,7 +81,7 @@ prepareCodebook <- function(
       valid <- (hdists > hammingDistanceThreshold)
       newblanks <- newblanks[valid,]
 
-      message(paste0('\nAdding ', sum(valid), ' new blanks...'))
+      if(verbose){ message(paste0('\nAdding ', sum(valid), ' new blanks...')) }
       if(sum(valid) > 0){
         rownames(newblanks) <- paste0('BLANK-NEW-', sprintf(paste0('%0', nchar(nrow(newblanks)), 'd'), 1:nrow(newblanks)))
         colnames(newblanks) <- colnames(codebook)
@@ -95,5 +102,5 @@ prepareCodebook <- function(
   params$isblank <<- grepl('^blank-', tolower(rownames(codebook)))
   genePalette <- setNames( viridis::turbo(nrow(codebook), alpha = 1), rownames(codebook) )
   params$genePalette <<- genePalette
-  message(paste0('\nCodebook has ', sum(params$isblank), ' blanks and ', sum(!params$isblank), ' genes...' ))
+  if(verbose){ message(paste0('\nCodebook has ', sum(params$isblank), ' blanks and ', sum(!params$isblank), ' genes...' )) }
 }

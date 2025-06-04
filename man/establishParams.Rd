@@ -42,6 +42,7 @@ establishParams(
 \item{ codebookColumnNames }{ Character vector. Column names (specifying channel and cycle) for codebook. If unspecified, a placeholder will be provided -- that should be corrected upon \code{readImageMetaData}. }
 
 \item{ seed }{ Integer. Seed for pseudo-random number generation. }
+\item{ verbose }{ Boolean (default \code{TRUE}). If \code{TRUE}, returns messages from each function. Otherwise, messages not returned (but warnings and stop messages still reported). }
 \item{ resumeMode }{ Boolean (default \code{TRUE}). If \code{TRUE}, resumes from last entry (should algorithm be interrupted). Otherwise, overwrites existing files. }
 
 \item{ fpkmFileName }{ (Optional) Character. File that contains FPKM data. }

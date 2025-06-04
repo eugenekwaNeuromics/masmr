@@ -13,14 +13,21 @@ getImageMetrics <- function(
       'MASK' = imForMask
     )
 ){
+  
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
 
   if(!exists('imMetrics', envir = globalenv())){
     imMetrics <<- new.env()
   }
 
-  message('\nPreparing imMetrics environment...')
+  if(verbose){ message('\nPreparing imMetrics environment...') }
   for(i in 1:length(imageFunctions)){
-    message(paste0('\nLooping ', names(imageFunctions)[i], ' function...'))
+    if(verbose){ message(paste0('\nLooping ', names(imageFunctions)[i], ' function...')) }
 
     if(exists( names(imageFunctions)[i], envir = imMetrics)){
       warning( paste0(names(imageFunctions)[i]), ' will be overridden' )
@@ -53,6 +60,13 @@ consolidateImageMetrics <- function(
     imMetrics = get('imMetrics', envir = globalenv()),
     params = get('params', envir = globalenv())
     ){
+  
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose 
+  }else{
+    verbose = T
+  }
 
   shifts <- params$shifts
   window <- params$intersecting_window
@@ -75,9 +89,9 @@ consolidateImageMetrics <- function(
 
   acceptable_idx <- 0:prod(as.numeric(as.numeric(params$resolutions$xydimensions_pixels)))
   if(maskFilt){
-    message('\nGetting acceptable pixel locations...')
+    if(verbose){ message('\nGetting acceptable pixel locations...') }
     acceptable_idx <- lapply(1:length(maskList), function(idx){
-      message(paste0(idx, ' of ', length(maskList), '...'), appendLF = F)
+      if(verbose){ message(paste0(idx, ' of ', length(maskList), '...'), appendLF = F) }
       imx <- matrix(as.numeric(maskList[[idx]]), nrow=nrow(maskList[[idx]]), ncol=ncol(maskList[[idx]]))
       df <- as.data.frame(imager::as.cimg(imx))
       df$WX <- df$x + Re(shifts[idx])
@@ -90,17 +104,19 @@ consolidateImageMetrics <- function(
     quant <- tabulate(unlist(acceptable_idx))
     acceptable_idx <- intersect( which( (quant >= bitFloor) ), which( (quant <= bitCeil) ) )
     acceptable_idx <- unique(acceptable_idx)
-    message(paste0(
-      round( 100 * length(acceptable_idx) / (window[2] * window[4]), digits=2), '% of pixels to keep...'
-    ))
+    if(verbose){
+      message(paste0(
+        round( 100 * length(acceptable_idx) / (window[2] * window[4]), digits=2), '% of pixels to keep...'
+      ))
+    }
   }
 
-  message('\nConsolidating metrics per pixel...')
+  if(verbose){ message('\nConsolidating metrics per pixel...') }
   available_metrics <- ls(envir=imMetrics)
   raw_images <- imMetrics[[available_metrics[1]]]
   spotcalldf <- list()
   for(idx in 1:length(shifts)){
-    message(paste0(idx, ' of ', length(shifts), '...'), appendLF = F)
+    if(verbose){ message(paste0(idx, ' of ', length(shifts), '...'), appendLF = F) }
     base <- as.data.frame(imager::as.cimg(raw_images[[idx]]))
     if(sum( (as.vector(raw_images[[idx]]) - base$value)^2 ) != 0 ){
       print("ERROR: WRONG INDEXING!")
@@ -138,7 +154,7 @@ consolidateImageMetrics <- function(
   spotcalldf <- data.frame(do.call(cbind, spotcalldf), check.names = F)
   spotcalldf <- data.frame(cbind(coorddf, spotcalldf), check.names = F)
 
-  message('\nRemoving pixels where we have incomplete information...')
+  if(verbose){ message('\nRemoving pixels where we have incomplete information...') }
   filtout <- rowSums(is.na(spotcalldf)) > 0
   spotcalldf <- spotcalldf[!filtout,]
 

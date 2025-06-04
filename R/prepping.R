@@ -35,6 +35,7 @@ establishParams <- function(
 
     ## Automatically filled in
     seed = 12345,
+    verbose = T,
     resumeMode = T,
 
     ## Optional
@@ -218,6 +219,13 @@ establishParams <- function(
   }else{
     params$resumeMode <<- F
   }
+  
+  ## Make sure that resumeMode is a boolean
+  if(is.logical(verbose[1])){
+    params$verbose <<- verbose[1]
+  }else{
+    params$verbose <<- T
+  }
 
 
   ## Create out directory
@@ -247,18 +255,20 @@ establishParams <- function(
     }
   }
 
+  if(params$verbose){
 
-  message(
-    paste0(
-      'resumeMode = ', params$resumeMode, '...'
+    message(
+      paste0(
+        'resumeMode = ', params$resumeMode, '...'
+      )
     )
-  )
-  message(
-    paste0(
-      length(params$fov_names), ' images across ', ncol(params$raw_codebook),
-      ' cycles ( ', paste(params$nbits, collapse=' & '), ' ON-bit codes )...'
+    message(
+      paste0(
+        length(params$fov_names), ' images across ', ncol(params$raw_codebook),
+        ' cycles ( ', paste(params$nbits, collapse=' & '), ' ON-bit codes )...'
+      )
     )
-  )
+  }
 }
 
 ##
