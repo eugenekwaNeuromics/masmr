@@ -34,6 +34,7 @@ register_troubleshootPlots <- function(
     chosen_cx <- getRasterCoords(imsub)[which.max(imsub)]
   }
 
+  plotList <- list()
   for(chosen_cxi in chosen_cx){
     dfp <- do.call(rbind, lapply(1:length(imList), function(ix){
       imi <- imList[[ix]]
