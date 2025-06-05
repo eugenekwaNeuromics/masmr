@@ -8,6 +8,7 @@ Registers images by maximising weighted cross-correlation.
 registerImages(
     imList,
     registerTo = 1,
+    chosenZslice = NULL,
     params = get('params', envir = globalenv()),
     currentFovName = NULL,
     maxAcceptableShiftDistance = Inf,
@@ -23,6 +24,7 @@ registerImages(
 \arguments{
 \item{ imList }{ Named list of 2D numeric image matrices to register. Names should be \code{bit_names}, that indicate image and channel. }
 \item{ registerTo }{ Integer. Specifies position of image in \code{imList} to be taken as reference image. As default, first image taken as reference. }
+\item{ chosenZslice }{ Integer. Specifies which z slice to perform registration with respect to (only applied when an image stack with more than 1 z slice is detected). If unspecified, the default behaviour is to perform a maximum intensity projection to collapse 3D array into a 2D matrix. }
 \item{ params }{  The parameters environment. }
 \item{ currentFovName }{ Character. Name of current FOV (used for writing files if \code{saveShifts} is \code{TRUE}). If not specified, will first attempt to read \code{params$current_fov} for same information. }
 \item{ maxAcceptableShiftDistance }{  Numeric. Maximum tolerable distance an image can be moved relative to the reference image. }
@@ -38,6 +40,8 @@ registerImages(
   Images registered by maximising cross-correlation in Fourier transformed space (see \code{crossCorrelate2D}. A Gaussian filter can be applied to prioritise shifts nearer to 0 pixels moved in x and y directions (i.e. \code{ 0 + 0i } when expressed as a complex number).
 
   If \code{standardiseShifts}, will assume that main sources of image shifting comes from (1) chromatic aberration across channels, and (2) microscope movement across image acquisition (assumed to be otherwise negligible for the same image, across channels). Thus, mean shift calculated across channels and across images, and summed accordingly to return a standardised shift vector.
+
+  When an image stack is detected, \code{maxIntensityProject} is first performed to collapse the Z slices into a single slice. To bypass this behaviour, registration can instead be performed with respect to a single chosen Z slice.
 }
 \value{
   A complex vector \code{params$shifts} that contains the calculated shifts, and a numeric vector \code{params$intersecting_window} that specifies the bounding box (min x, max x, min y, max y) of intersecting coordinate values post-transformation.

@@ -13,10 +13,10 @@ getImageMetrics <- function(
       'MASK' = imForMask
     )
 ){
-  
+
   ## Get verbosity
   if(is.logical(params$verbose)){
-    verbose = params$verbose 
+    verbose = params$verbose
   }else{
     verbose = T
   }
@@ -60,10 +60,10 @@ consolidateImageMetrics <- function(
     imMetrics = get('imMetrics', envir = globalenv()),
     params = get('params', envir = globalenv())
     ){
-  
+
   ## Get verbosity
   if(is.logical(params$verbose)){
-    verbose = params$verbose 
+    verbose = params$verbose
   }else{
     verbose = T
   }
@@ -92,8 +92,8 @@ consolidateImageMetrics <- function(
     if(verbose){ message('\nGetting acceptable pixel locations...') }
     acceptable_idx <- lapply(1:length(maskList), function(idx){
       if(verbose){ message(paste0(idx, ' of ', length(maskList), '...'), appendLF = F) }
-      imx <- matrix(as.numeric(maskList[[idx]]), nrow=nrow(maskList[[idx]]), ncol=ncol(maskList[[idx]]))
-      df <- as.data.frame(imager::as.cimg(imx))
+      imx <- maskList[[idx]]
+      df <- suppressWarnings( as.data.frame(imager::as.cimg(imx)) )
       df$WX <- df$x + Re(shifts[idx])
       df$WY <- df$y + Im(shifts[idx])
       df <- df[(df$WX >= window[1]) & (df$WX < window[2]) & (df$WY >= window[3]) & (df$WY < window[4]), ]
@@ -117,16 +117,22 @@ consolidateImageMetrics <- function(
   spotcalldf <- list()
   for(idx in 1:length(shifts)){
     if(verbose){ message(paste0(idx, ' of ', length(shifts), '...'), appendLF = F) }
-    base <- as.data.frame(imager::as.cimg(raw_images[[idx]]))
-    if(sum( (as.vector(raw_images[[idx]]) - base$value)^2 ) != 0 ){
-      print("ERROR: WRONG INDEXING!")
-      break
-    }
+    base <- suppressWarnings( as.data.frame(imager::as.cimg(raw_images[[idx]])) )
+    # if(sum( (as.vector(raw_images[[idx]]) - base$value)^2 ) != 0 ){
+    #   print("ERROR: WRONG INDEXING!")
+    #   break
+    # }
     base$value <- NULL
     base$WX <- base$x + Re(shifts[idx])
     base$WY <- base$y + Im(shifts[idx])
     base$IDX <- as.numeric(base$WX + (window[2] * (base$WY-1)))
-    base <- base[,c("WX", "WY", 'IDX')]
+    if('z' in colnames(base)){
+      base$WZ <- base$z
+    }else{
+      base$WZ <- 1
+    }
+    chosenCols <- c("WX", "WY", 'WZ', 'IDX')
+    base <- base[,chosenCols]
 
     bool <- (base$WX >= window[1]) & (base$WX < window[2]) & (base$WY >= window[3]) & (base$WY < window[4])
     df <- base[bool,]
@@ -136,9 +142,15 @@ consolidateImageMetrics <- function(
       df$new <- as.vector( val[bool] )
       colnames(df)[colnames(df)=='new'] <- available_metrics[mi]
     }
-    df <- df[,]
+    # df <- df[,]
 
-    df <- df[match(acceptable_idx, df$IDX),]
+    dfList <- list()
+    for( zi in 1:max(df$WZ)){
+      dfsub <- df[df$WZ==zi,]
+      dfList[[zi]] <- dfsub[match(acceptable_idx, dfsub$IDX),]
+    }
+    df <- data.frame( do.call(rbind, dfList), check.names = F, check.rows = F)
+
     if(idx==1){
       coorddf <- df[,which(colnames(df) %in% colnames(base))]
     }

@@ -21,6 +21,7 @@ getAnchorParams(
     nSamples = 10,
     anchorSpacing = 3,
     anchorOffset = 2,
+    freshAnchors = FALSE,
     params = get('params', envir = globalenv())
     ...
 )
@@ -35,6 +36,7 @@ getAnchorParams(
 \item{ nSamples }{ Integer. Number of FOVs to sample. Used when \code{anchors} is unspecified, and \code{anchorMode} is \code{sample}. }
 \item{ anchorSpacing }{ Integer. Number of FOVs between anchor FOVs in same row. Used when \code{anchors} is unspecified and \code{anchorMode} is \code{grid}. }
 \item{ anchorOffset }{ Integer. Number of FOVs to offset by for even numbered rows. Used when \code{anchors} is unspecified and \code{anchorMode} is \code{grid}. }
+\item{ freshAnchors }{ Boolean. Determines if values are to be re-obtained. Functionally equivalent to setting \code{params$resumeMode} to \code{FALSE}.}
 \item{ params }{ The parameters environment. }
 \item{ ... }{  Other arguments passed to \code{readImageList}, \code{imageFunctions}, and \code{summaryFunctions}. }
 }

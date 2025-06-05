@@ -20,6 +20,7 @@ getAnchorParams <- function(
     nSamples = 10,
     anchorSpacing = 3,
     anchorOffset = 2,
+    freshAnchors = FALSE,
     params = get('params', envir = globalenv()),
     ...
 ){
@@ -80,17 +81,18 @@ getAnchorParams <- function(
 
 
   ## If anchors not specified, create
-  freshAnchors = F
+  # freshAnchors = F
   if(missing(anchors)){
     anchors <- params$anchors
 
     ## If fresh anchors, then re-run
-    freshAnchors = T
+    # freshAnchors = T
     if(!params$resumeMode | freshAnchors ){
       anchors <- NULL
     }
 
     if(is.null(anchors)){
+      if(verbose){ cat('\nGetting new anchors...') }
       tileCx <- global_coords[!duplicated(global_coords$fov),]
       tileCx$X <- as.integer(factor(round(tileCx$x_microns)))
       tileCx$Y <- as.integer(factor(round(tileCx$y_microns)))

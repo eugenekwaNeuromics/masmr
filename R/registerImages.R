@@ -5,6 +5,7 @@ require(imager)
 registerImages <- function(
     imList,
     registerTo = 1,
+    chosenZslice = NULL,
     params = get('params', envir = globalenv()),
     currentFovName = NULL,
     maxAcceptableShiftDistance = Inf,
@@ -16,14 +17,22 @@ registerImages <- function(
     standardiseShifts = F,
     saveShifts = T
 ){
-  
+
   ## Get verbosity
   if(is.logical(params$verbose)){
-    verbose = params$verbose 
+    verbose = params$verbose
   }else{
     verbose = T
   }
-  
+
+  ## Check that chosenZslice is correctly specified
+  if(!is.null(chosenZslice)){
+    if(length(chosenZslice) > 1){
+      warning('Can only specify 1 chosenZslice...Defaulting to first element...')
+    }
+    chosenZslice <- as.integer(chosenZslice)[1]
+  }
+
   # Check that the current FOV is known
   if(is.null(currentFovName)){
     currentFovName = params$current_fov #Try to see if there exists current FOV in params
@@ -38,6 +47,22 @@ registerImages <- function(
     stop('Invalid registerTo value: needs to refer to an image in imList!')
   }
   ref_im <- imList[[registerTo]]
+  if( any(dim(ref_im)==1) ){
+    ref_im <- array(as.vector(ref_im), dim=dim(ref_im)[dim(ref_im)!=1] )
+  }
+  if( length(dim(ref_im)) > 2 ){
+
+    ## Image stack detected
+    if(is.null(chosenZslice)){
+      warning('Image stack detected but chosenZslice not specified...Performing maxIntensityProject...')
+      ref_im <- maxIntensityProject(ref_im)
+      ref_im <- array(as.vector(ref_im), dim=dim(quer_im)[dim(ref_im)!=1] )
+    }else{
+      warning('Image stack detected...Selecting im[,,chosenZslice]...')
+      ref_im <- ref_im[,,chosenZslice]
+      ref_im <- array(as.vector(ref_im), dim=dim(ref_im)[dim(ref_im)!=1] )
+    }
+  }
   coord <- getRasterCoords(ref_im) - sum(dim(ref_im) * c(1, 1i)) + (1+1i)
 
   # Prepare the Gaussian weight
@@ -59,6 +84,23 @@ registerImages <- function(
     if(verbose){ message(paste0(i, ' of ', length(imList), '...'), appendLF = F) }
     if(i==registerTo){ next }
     quer_im <- imList[[i]]
+
+    if( any(dim(quer_im)==1) ){
+      quer_im <- array(as.vector(quer_im), dim=dim(quer_im)[dim(quer_im)!=1] )
+    }
+
+    if( length(dim(quer_im)) > 2 ){
+
+      ## Image stack detected
+      if(is.null(chosenZslice)){
+        quer_im <- maxIntensityProject(quer_im)
+        quer_im <- array(as.vector(quer_im), dim=dim(quer_im)[dim(quer_im)!=1] )
+      }else{
+        quer_im <- quer_im[,,chosenZslice]
+        quer_im <- array(as.vector(quer_im), dim=dim(quer_im)[dim(quer_im)!=1] )
+      }
+
+    }
 
     ## FAST version: correlate images without padding
     corra <- crossCorrelate2D(ref_im, quer_im, normalized=FALSE, pad = F)

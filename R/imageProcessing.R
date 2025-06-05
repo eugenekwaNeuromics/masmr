@@ -131,18 +131,18 @@ imLowPass <- function(
   imblur <- array( imager::isoblur(suppressWarnings(imager::as.cimg(im)), smallBlur), dim=dim(im) )
   lowthresh <- median( imblur[background] )
   hithresh <- median( imblur[!background & (imblur > lowthresh)] )
-  
+
   if( ( (lowthresh>0) & (hithresh<1) & (lowthresh<hithresh) & !is.na(lowthresh) & !is.na(hithresh) ) ){
     norm <- imAutoBrighten( imblur, floorVal = lowthresh, ceilVal = hithresh )
   }else{
     warning( paste0(
-      'Skipping imAutoBrighten because of invalid floorVal (', lowthresh, 
+      'Skipping imAutoBrighten because of invalid floorVal (', lowthresh,
       ') and/or ceilVal (', hithresh, ')...'
     ))
     norm <- imblur
   }
   norm <- imNormalise(norm)
-  
+
   return(norm)
 }
 
@@ -264,8 +264,7 @@ imForMask <- function(
   toosmall <- which(tabulate(labmask) < minBlobSize)
   mask[labmask %in% toosmall] <- F
 
-  final <- matrix(as.integer(mask), nrow=nrow(mask), ncol=ncol(mask))
-  return(final)
+  return(mask)
 }
 
 
