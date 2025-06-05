@@ -126,7 +126,7 @@ consolidateImageMetrics <- function(
     base$WX <- base$x + Re(shifts[idx])
     base$WY <- base$y + Im(shifts[idx])
     base$IDX <- as.numeric(base$WX + (window[2] * (base$WY-1)))
-    if('z' in colnames(base)){
+    if('z' %in% colnames(base)){
       base$WZ <- base$z
     }else{
       base$WZ <- 1
