@@ -462,8 +462,8 @@ imsBrightnessMax <- function(
   thresh <- findThreshold(
     imBlur, thresh_Quantile,
     labels = bestSpots,
-    quantileFalse = 0.95,
-    quantileTrue = 0.95)
+    quantileFalse = 0.9,
+    quantileTrue = 0.99)
   return(thresh)
 }
 
