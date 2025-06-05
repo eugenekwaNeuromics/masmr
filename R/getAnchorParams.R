@@ -80,10 +80,11 @@ getAnchorParams <- function(
 
 
   ## If anchors not specified, create
+  freshAnchors = F
   if(missing(anchors)){
     anchors <- params$anchors
 
-    ## Deprecated check
+    ## If fresh anchors, then re-run
     freshAnchors = T
     if(!params$resumeMode | freshAnchors ){
       anchors <- NULL
@@ -157,19 +158,12 @@ getAnchorParams <- function(
   if(returnTroubleShootPlots){
     troubleshootPlots <<- new.env()
   }
-  anchorqc_file = paste0(params$out_dir, 'ANCHOR_QUANTILEQC.csv')
-  if(file.exists(anchorqc_file)){
-    file.remove(anchorqc_file)
-  }
-  # if(!file.exists(anchorqc_file)){
-  #   file.create(anchorqc_file)
-  # }
 
   ## Check if desired functions have been run
   for( i in 1:length(imageFunctions) ){
     current_name <- names(imageFunctions)[i]
     out_file <- paste0(out_dir, toupper(current_name), '.csv')
-    if( file.exists(out_file) & params$resumeMode ){
+    if( file.exists(out_file) & params$resumeMode & !freshAnchors ){
       info <- data.table::fread(out_file, data.table = F)[,1]
       if(length(info) == ncol(codebook)){
         params[[current_name]] <- info
@@ -191,6 +185,15 @@ getAnchorParams <- function(
 
     ## Loop through every bit and get metrics
     if(verbose){ message('\nObtaining anchor metrics per bit...') }
+
+    anchorqc_file = paste0(params$out_dir, 'ANCHOR_QUANTILEQC.csv')
+    if(file.exists(anchorqc_file)){
+      file.remove(anchorqc_file)
+    }
+    # if(!file.exists(anchorqc_file)){
+    #   file.create(anchorqc_file)
+    # }
+
     for( i in 1:ncol(codebook) ){
       if(verbose){ message(paste0('\nLoading bit ', i, ' of ', ncol(codebook), '...')) }
       current_bit <- colnames(codebook)[i]
