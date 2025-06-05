@@ -284,25 +284,54 @@ getAnchorParams <- function(
         data.table::fwrite(summary_report, file = anchorqc_file, append = T)
 
         if(returnTroubleShootPlots){
+
+          ## SLOW
+          # dfp <- do.call(rbind, lapply( 1:length(imList), function(imidx){
+          #   imxi <- imList[[imidx]]
+          #   dfx <- data.frame(
+          #     'intensity' = as.vector(imxi),
+          #     'fov' = names(imList)[imidx])
+          #   return(dfx)
+          # }) )
+          #
+          # plot_title <- paste0( current_func, ': Bit ', i )
+          # p <-
+          #   ggplot2::ggplot( data=dfp, ggplot2::aes(x=intensity) ) +
+          #   ggplot2::geom_histogram(fill='black', bins=100) +
+          #   ggplot2::facet_wrap( ~factor(fov), scales = 'free_y') +
+          #   ggplot2::theme_minimal(base_size=14) +
+          #   ggplot2::xlab('Intensity') + ggplot2::ylab('Count') +
+          #   ggplot2::geom_vline( xintercept = identifiedThreshold, colour='red', linetype='dashed') +
+          #   ggplot2::ggtitle( plot_title )
+
+          ## Default geom_histogram is too slow, so swap out with this:
+          ## From https://stackoverflow.com/questions/56607124/plotting-histogram-of-a-big-matrix-in-ggplot2-is-20x-slower-than-base-hist
           dfp <- do.call(rbind, lapply( 1:length(imList), function(imidx){
             imxi <- imList[[imidx]]
+            nbreaks = 50
+            imName <- names(imList)[imidx]
+            if(is.null(imName)){
+              imName <- sprintf(paste0('%0', nchar(length(imList)), 'd'), imidx)
+            }
+            his <- hist(as.vector(imxi), plot=F, breaks=nbreaks)
             dfx <- data.frame(
-              'intensity' = as.vector(imxi),
-              'fov' = names(imList)[imidx])
+              'fov' = imName,
+              'xmin' = his$breaks[-length(his$breaks)],
+              'xmax' = his$breaks[-1],
+              'ymin' = 0,
+              'ymax' = his$counts
+              )
             return(dfx)
           }) )
-
           plot_title <- paste0( current_func, ': Bit ', i )
-
           p <-
-            ggplot2::ggplot( data=dfp, ggplot2::aes(x=intensity) ) +
-            ggplot2::geom_histogram(fill='black', bins=100) +
+            ggplot2::ggplot( data=dfp, ggplot2::aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax) ) +
+            ggplot2::geom_rect(fill='black', colour='black', size=0.5) +
             ggplot2::facet_wrap( ~factor(fov), scales = 'free_y') +
             ggplot2::theme_minimal(base_size=14) +
             ggplot2::xlab('Intensity') + ggplot2::ylab('Count') +
             ggplot2::geom_vline( xintercept = identifiedThreshold, colour='red', linetype='dashed') +
             ggplot2::ggtitle( plot_title )
-
           troubleshootPlots[[ current_func ]][[ i ]] <- p
         }
 
