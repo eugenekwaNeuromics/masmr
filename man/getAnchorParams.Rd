@@ -56,8 +56,10 @@ getAnchorParams(
   }
 
   Functions in \code{imageFunctions} and \code{summaryFunctions} are user-selected and customisable. For more details on default functions, see their relevant documentations.
-  
-  If \code{returnTroubleShootPlots}, a \code{troubleshootPlots} environment created containing histograms of pixel intensities per FOV per bit, and thresholds (e.g. max or min brightnesses) as a vertical red dashed line. Plots are be specified in \code{troubleshootPlots} according to metric then bit: e.g. \code{troubleshootPlots[['brightness_max']][[12]]} specifies intensity histograms across all anchor FOVs for bit 12 with the max brightness threshold indicated in red. 
+
+  For each \code{imageFunction}, we also report the proportion of pixels below the obtained threshold per bit per anchor FOV. These can be found in the \code{ANCHOR_QUANTILEQC.csv}.
+
+  If \code{returnTroubleShootPlots}, a \code{troubleshootPlots} environment created containing histograms of pixel intensities per FOV per bit, and thresholds (e.g. max or min brightnesses) as a vertical red dashed line. Plots are be specified in \code{troubleshootPlots} according to metric then bit: e.g. \code{troubleshootPlots[['brightness_max']][[12]]} specifies intensity histograms across all anchor FOVs for bit 12 with the max brightness threshold indicated in red.
 
 }
 \seealso{

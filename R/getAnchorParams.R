@@ -157,6 +157,13 @@ getAnchorParams <- function(
   if(returnTroubleShootPlots){
     troubleshootPlots <<- new.env()
   }
+  anchorqc_file = paste0(params$out_dir, 'ANCHOR_QUANTILEQC.csv')
+  if(file.exists(anchorqc_file)){
+    file.remove(anchorqc_file)
+  }
+  # if(!file.exists(anchorqc_file)){
+  #   file.create(anchorqc_file)
+  # }
 
   ## Check if desired functions have been run
   for( i in 1:length(imageFunctions) ){
@@ -259,6 +266,13 @@ getAnchorParams <- function(
         intermediateResults <- intermediateResults[!is.na(intermediateResults)]
         identifiedThreshold <- sumFunc(intermediateResults, ...)
         results[[current_func]][i] <- identifiedThreshold
+
+        ## Summary table
+        summary_report <- lapply(imList, function(imx){
+          sum(imx < identifiedThreshold) / length(imx)
+        })
+        summary_report <- c( 'metric' = current_func, 'bit' = i, summary_report )
+        data.table::fwrite(summary_report, file = anchorqc_file, append = T)
 
         if(returnTroubleShootPlots){
           dfp <- do.call(rbind, lapply( 1:length(imList), function(imidx){
