@@ -15,7 +15,7 @@ spotcall_troubleshootPlots <- function(
 ){
   ## Get verbosity
   if(is.logical(params$verbose)){
-    verbose = params$verbose 
+    verbose = params$verbose
   }else{
     verbose = T
   }
@@ -58,6 +58,7 @@ spotcall_troubleshootPlots <- function(
       decodeMetric <- replaceName
     }
   }
+  imList <- suppressWarnings( setNames( lapply(imList, maxIntensityProject), names(imList) ) )
   shifts <- params$shifts
   if(is.null(shifts)){
     warning('Unable to find params$shifts: will not adjust coordinates')
@@ -174,11 +175,11 @@ filterDF <- function(
 ){
   ## Get verbosity
   if(is.logical(params$verbose)){
-    verbose = params$verbose 
+    verbose = params$verbose
   }else{
     verbose = T
   }
-  
+
   filterExpression <- rlang::as_label(rlang::enquo( filterOut ))
   if(verbose){ message( paste0('\nApplying filter: ', filterExpression, '...') ) }
 

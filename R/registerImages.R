@@ -1,6 +1,101 @@
 # This script contains the function for image registration.
 
+require(ggplot2)
 require(imager)
+
+register_troubleshootPlots <- function(
+    imList,
+    chosenCoordinate,
+    plotWindowRadius = 50,
+    params = get('params', envir = globalenv())
+){
+  ## Get verbosity
+  if(is.logical(params$verbose)){
+    verbose = params$verbose
+  }else{
+    verbose = T
+  }
+  if(!missing(chosenCoordinate)){
+    if(!is.complex(chosenCoordinate)){
+      stop('Please specify chosenCoordinate as a complex number: with real being X and imaginary being Y!')
+    }
+  }
+  shifts <- params$shifts
+  if(is.null(shifts)){
+    warning('Unable to find params$shifts: will not adjust coordinates')
+    shifts <- rep(0+0i, length(imList))
+  }
+
+  if(!missing(chosenCoordinate)){
+    chosen_cx <- chosenCoordinate
+  }else{
+    imsub <- imList[[ which(shifts==0+0i)[1] ]]
+    imsub <- maxIntensityProject(imsub)
+    chosen_cx <- getRasterCoords(imsub)[which.max(imsub)]
+  }
+  
+  for(chosen_cxi in chosen_cx){
+    dfp <- do.call(rbind, lapply(1:length(imList), function(ix){
+      imi <- imList[[ix]]
+      imName <- names(imList)[ix]
+      if(length(dim(imi))>2){
+        imi <- maxIntensityProject(imi)
+      }
+      if(is.null(imName)){
+        imName <- sprintf( paste0('%0', nchar(length(imList)), 'd'), ix)
+      }
+      dfx <- as.data.frame(imager::as.cimg(imi))
+      dfx[,c('orig_x', 'orig_y')] <- dfx[,c('x', 'y')]
+      dfx$x <- dfx$x + Re(shifts[ix])
+      dfx$y <- dfx$y + Im(shifts[ix])
+      
+      dfx <- dfx[dfx$x > (Re(chosen_cxi) - plotWindowRadius),]
+      dfx <- dfx[dfx$x <= (Re(chosen_cxi) + plotWindowRadius),]
+      dfx <- dfx[dfx$y > (Im(chosen_cxi) - plotWindowRadius),]
+      dfx <- dfx[dfx$y <= (Im(chosen_cxi) + plotWindowRadius),]
+      dfx$imName <- imName
+      
+      dfx$norm <- dfx$value - min(dfx$value)
+      dfx$norm <- dfx$norm / max(dfx$norm)
+      
+      return(dfx)
+    }) )
+    refdfp <- names( which(shifts==0+0i)[1] )
+    if(is.null(refdfp)){
+      refdfp <- sprintf( paste0('%0', nchar(length(imList)), 'd'), which(shifts==0+0i)[1] )
+    }
+    refdfp <- dfp[dfp$imName==refdfp,]
+    refdfp$imName <- NULL
+    
+    p_before <-
+      ggplot2::ggplot() +
+      ggplot2::geom_raster(data=refdfp, ggplot2::aes(x=x, y=y, alpha=norm), fill='blue') +
+      ggplot2::geom_raster(data=dfp, ggplot2::aes(x=orig_x, y=orig_y, alpha=norm), fill='red') +
+      ggplot2::facet_wrap(~imName) +
+      ggplot2::scale_alpha(range=c(0, 0.75)) +
+      ggplot2::theme_minimal(base_size=12) +
+      ggplot2::theme(legend.position = 'none') +
+      ggplot2::scale_y_reverse() +
+      ggplot2::xlab('') + ggplot2::ylab('') +
+      ggplot2::coord_fixed()
+    
+    p_after <-
+      ggplot2::ggplot() +
+      ggplot2::geom_raster(data=refdfp, ggplot2::aes(x=x, y=y, alpha=norm), fill='blue') +
+      ggplot2::geom_raster(data=dfp, ggplot2::aes(x=x, y=y, alpha=norm), fill='red') +
+      ggplot2::facet_wrap(~imName) +
+      ggplot2::scale_alpha(range=c(0, 0.75)) +
+      ggplot2::theme_minimal(base_size=12) +
+      ggplot2::theme(legend.position = 'none') +
+      ggplot2::scale_y_reverse() +
+      ggplot2::xlab('') + ggplot2::ylab('') +
+      ggplot2::coord_fixed()
+    
+    plotList[[as.character(chosen_cxi)]] <- list('PRE_REGISTER' = p_before, 'POST_REGISTER' = p_after)
+  }
+  
+  return(plotList)
+}
 
 registerImages <- function(
     imList,
@@ -15,7 +110,9 @@ registerImages <- function(
     gaussianWeightSigmaY = NULL,
     tolerableBestAlignmentPercentage = 50,
     standardiseShifts = F,
-    saveShifts = T
+    saveShifts = T,
+    returnTroubleShootPlots = F,
+    ...
 ){
 
   ## Get verbosity
@@ -220,7 +317,7 @@ registerImages <- function(
   ## Calculate intersecting window
   window <- do.call(rbind, lapply(1:length(shifts), function(idx){
     # cat(paste0(idx, ' of ', length(shifts), '...'))
-    df <- as.data.frame(imager::as.cimg(imList[[idx]]))
+    df <- suppressWarnings( as.data.frame(imager::as.cimg(imList[[idx]])) )
     df$x <- df$x + Re(shifts[idx])
     df$y <- df$y + Im(shifts[idx])
     val <- c(min(df$x), max(df$x), min(df$y), max(df$y))
@@ -233,5 +330,19 @@ registerImages <- function(
   if(saveShifts){
     out_file <- paste0(params$out_dir, 'REGIM_', currentFovName, '.png')
     imager::save.image(imager::as.cimg(ref_im), out_file, quality = 1)
+  }
+
+  if( returnTroubleShootPlots ){
+    new_imList <- setNames( lapply(imList, function(x){
+      if(!is.null(chosenZslice)){
+        y <- x[,,chosenZslice]
+      }else{
+        y <- maxIntensityProject(y)
+      }
+      return(y)
+    }), names = names(imList) )
+    troubleshootPlots <<- new.env()
+    pList <- register_troubleshootPlots(imList = new_imList, ...)
+    troubleshootPlots[['REGISTRATION_EVAL']] <<- pList
   }
 }

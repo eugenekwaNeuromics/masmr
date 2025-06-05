@@ -16,8 +16,8 @@ spotcall_troubleshootPlots(
 }
 \arguments{
 \item{ spotcalldf }{ Dataframe containing per-pixel metrics. }
-\item{ imList }{ Named list of 2D numeric image matrices to register. Names should be \code{bit_names}, that indicate image and channel. }
-\item{ chosenCoordinate }{ Complex or complex vector. Indicates coordinate central pixel(s) of window to plot:   }
+\item{ imList }{ Named list of 2D numeric image matrices. Names should be \code{bit_names}, that indicate image and channel. }
+\item{ chosenCoordinate }{ Complex or complex vector. Indicates coordinate central pixel(s) of window to plot around.}
 \item{ plotWindowRadius }{ Integer. Number of pixels from central pixel to window boundary. }
 \item{ decodeMetric }{ Character. References an object in the \code{imMetrics} environment (if \code{imMetrics} still exists). }
 \item{ params }{ The parameters environment. }

@@ -12,13 +12,15 @@ registerImages(
     params = get('params', envir = globalenv()),
     currentFovName = NULL,
     maxAcceptableShiftDistance = Inf,
-    gaussianWeightedAlignment = T,
+    gaussianWeightedAlignment = TRUE,
     gaussianWeightAmplitude = NULL,
     gaussianWeightSigmaX = NULL,
     gaussianWeightSigmaY = NULL,
     tolerableBestAlignmentPercentage = 50,
-    standardiseShifts = F,
-    saveShifts = T
+    standardiseShifts = FALSE,
+    saveShifts = TRUE,
+    returnTroubleShootPlots = FALSE,
+    ...
 )
 }
 \arguments{
@@ -35,6 +37,8 @@ registerImages(
 \item{ tolerableBestAlignmentPercentage }{ Numeric between 0 and 100. If shift exceeds \code{maxAcceptableShiftDistance}, highest shift within \code{maxAcceptableShiftDistance} returned instead, provided cross-correlation of new shift is at least \code{tolerableBestAlignmentPercentage}\% of highest cross-correlation value.}
 \item{standardiseShifts}{ Boolean. If \code{TRUE}, will attempt to standardise shifts (see Details below). }
 \item{saveShifts}{ Boolean. If \code{TRUE}, will save shift vector in a \code{SHIFTS_XXX.csv.gz} file. If \code{standardiseShifts} too, unstandardised values saved in corresponding \code{RAWSHIFTS_XXX.csv.gz}. \code{XXX} indicates  \code{currentFovName}.  }
+\item{ returnTroubleShootPlots }{ Boolean. Determines if troubleshooting plots are to be returned (see \code{register_troubleshootPlots}). }
+\item{ ... }{ Other parameters passed to \code{register_troubleshootPlots}. }
 }
 \details{
   Images registered by maximising cross-correlation in Fourier transformed space (see \code{crossCorrelate2D}. A Gaussian filter can be applied to prioritise shifts nearer to 0 pixels moved in x and y directions (i.e. \code{ 0 + 0i } when expressed as a complex number).
@@ -50,5 +54,6 @@ registerImages(
 }
 \seealso{
 \link{crossCorrelate2D}
+\link{register_troubleshootPlots}
 }
 \examples{}
