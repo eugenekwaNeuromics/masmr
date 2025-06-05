@@ -33,7 +33,7 @@ register_troubleshootPlots <- function(
     imsub <- maxIntensityProject(imsub)
     chosen_cx <- getRasterCoords(imsub)[which.max(imsub)]
   }
-  
+
   for(chosen_cxi in chosen_cx){
     dfp <- do.call(rbind, lapply(1:length(imList), function(ix){
       imi <- imList[[ix]]
@@ -48,16 +48,16 @@ register_troubleshootPlots <- function(
       dfx[,c('orig_x', 'orig_y')] <- dfx[,c('x', 'y')]
       dfx$x <- dfx$x + Re(shifts[ix])
       dfx$y <- dfx$y + Im(shifts[ix])
-      
+
       dfx <- dfx[dfx$x > (Re(chosen_cxi) - plotWindowRadius),]
       dfx <- dfx[dfx$x <= (Re(chosen_cxi) + plotWindowRadius),]
       dfx <- dfx[dfx$y > (Im(chosen_cxi) - plotWindowRadius),]
       dfx <- dfx[dfx$y <= (Im(chosen_cxi) + plotWindowRadius),]
       dfx$imName <- imName
-      
+
       dfx$norm <- dfx$value - min(dfx$value)
       dfx$norm <- dfx$norm / max(dfx$norm)
-      
+
       return(dfx)
     }) )
     refdfp <- names( which(shifts==0+0i)[1] )
@@ -66,7 +66,7 @@ register_troubleshootPlots <- function(
     }
     refdfp <- dfp[dfp$imName==refdfp,]
     refdfp$imName <- NULL
-    
+
     p_before <-
       ggplot2::ggplot() +
       ggplot2::geom_raster(data=refdfp, ggplot2::aes(x=x, y=y, alpha=norm), fill='blue') +
@@ -78,7 +78,7 @@ register_troubleshootPlots <- function(
       ggplot2::scale_y_reverse() +
       ggplot2::xlab('') + ggplot2::ylab('') +
       ggplot2::coord_fixed()
-    
+
     p_after <-
       ggplot2::ggplot() +
       ggplot2::geom_raster(data=refdfp, ggplot2::aes(x=x, y=y, alpha=norm), fill='blue') +
@@ -90,10 +90,10 @@ register_troubleshootPlots <- function(
       ggplot2::scale_y_reverse() +
       ggplot2::xlab('') + ggplot2::ylab('') +
       ggplot2::coord_fixed()
-    
+
     plotList[[as.character(chosen_cxi)]] <- list('PRE_REGISTER' = p_before, 'POST_REGISTER' = p_after)
   }
-  
+
   return(plotList)
 }
 
@@ -340,7 +340,7 @@ registerImages <- function(
         y <- maxIntensityProject(y)
       }
       return(y)
-    }), names = names(imList) )
+    }), names(imList) )
     troubleshootPlots <<- new.env()
     pList <- register_troubleshootPlots(imList = new_imList, ...)
     troubleshootPlots[['REGISTRATION_EVAL']] <<- pList
