@@ -172,7 +172,11 @@ getAnchorParams <- function(
       }
     }
   }
-  skip <-  (names(imageFunctions)) %in% ls(params)
+  if(freshAnchors){
+    skip <- rep(F, length(imageFunctions))
+  }else{
+    skip <-  (names(imageFunctions)) %in% ls(params)
+  }
 
   ## If any functions left, perform
   # STACKWARNED = F
