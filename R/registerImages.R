@@ -337,7 +337,7 @@ registerImages <- function(
       if(!is.null(chosenZslice)){
         y <- x[,,chosenZslice]
       }else{
-        y <- maxIntensityProject(y)
+        y <- maxIntensityProject(x)
       }
       return(y)
     }), names(imList) )
