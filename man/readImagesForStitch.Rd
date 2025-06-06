@@ -10,7 +10,7 @@ readImagesForStitch(
     subDirectory = 'IM',
     loadProcessedImages = T,
     registerTo = 1,
-    zSlice = 1,
+    zSlice = NULL,
     imageFunction = function(im){ return(im) },
     params = get('params', envir=globalenv()),
     ...
@@ -21,7 +21,7 @@ readImagesForStitch(
 \item{ subDirectory }{ Character. Name of subdirectory containing required \code{GLOBALCOORD} and \code{META_RESOLUTION} files, generated from \code{readImageMetaData}. This directory should be in \code{params$parent_out_dir}. Typically \code{IM} or \code{DAPI}. }
 \item{ loadProcessedImages }{ Boolean. Determines if processed images -- \code{.png} image files prefixed with \code{REGIM_} in \code{subDirectory} --- are loaded. Processed images are saved optionally as part of \code{registerImages} and \code{saveCellSegMasks} functions. If \code{TRUE}, attempts to find processed images first. If processed images do not exist, automatically switched to \code{FALSE} and raw images are loaded. }
 \item{ registerTo }{ Integer. Specifies bit position of image to be taken as reference image (for MERFISH images) -- should be the same as \code{registerImages}. As default, first image taken as reference. }
-\item{ zSlice }{ Integer. Specifies z slice of image to be taken as reference image, if more than one z slice exists in loaded image. As default, first z slice taken as reference. }
+\item{ zSlice }{ Integer. Specifies z slice of image to be taken as reference image, if more than one z slice exists in loaded image. If unspecified, defaults to maximum intensity projection. }
 \item{ imageFunction }{ Function. Image processing to be performed on each loaded image. }
 \item{ params }{ The parameters environment. }
 \code{ ... }{ Other parameters passed to \code{readImage}, \code{readImageList}, or \code{imFunction}. }
@@ -45,5 +45,6 @@ readImagesForStitch(
 \link{readImage}
 \link{readImageList}
 \link{stitchImages}
+\link{maxIntensityProject}
 }
 \examples{}

@@ -7,19 +7,19 @@ readImagesForStitch <- function(
     subDirectory = 'IM',
     loadProcessedImages = F,
     registerTo = 1,
-    zSlice = 1,
+    zSlice = NULL,
     imageFunction = function(im){ return(im) },
     params = get('params', envir=globalenv()),
     ...
 ){
-  
+
   ## Get verbosity
   if(is.logical(params$verbose)){
-    verbose = params$verbose 
+    verbose = params$verbose
   }else{
     verbose = T
   }
-  
+
   ## Prepare params
   if(!is.function(imageFunction)){
     stop('imageFunction needs to be a function!')
@@ -111,6 +111,7 @@ readImagesForStitch <- function(
             readImage( regims[i],
                        nrows = as.numeric(resolutions$xydimensions_pixels)[1],
                        ncols = as.numeric(resolutions$xydimensions_pixels)[2],
+                       # nzs = 1, nchannels = 1 #Shouldn't need to specify
                        ...)
         }
       }
@@ -121,22 +122,34 @@ readImagesForStitch <- function(
   }
 
   if(!loadProcessedImages){
-    
+
     if(as.numeric(resolutions$zslices)>1){
-      warning( paste0("Detected multiple z-slices...Defaulting to zSlice = ", zSlice, '...'))
-      imList <- readImageList(
-        fileNames = fs,
-        safeLoad = F,
-        params = tmp_param,
-        subset = list( c = channel_index, z = zSlice ),
-        ...
-      )
+
+      if(!is.null(zSlice)){
+        warning( paste0("Detected multiple z-slices...Defaulting to zSlice = ", zSlice, '...'))
+        imList <- readImageList(
+          fileNames = fs,
+          params = tmp_param,
+          channelIndex = channel_index,
+          zIndex = zSlice,
+          ...
+        )
+      }else{
+        warning("Detected multiple z-slices...Defaulting to MIP...")
+        imList <- readImageList(
+          fileNames = fs,
+          params = tmp_param,
+          channelIndex = channel_index,
+          ...
+        )
+        imList <- maxIntensityProject(imList)
+      }
+
     }else{
       imList <- readImageList(
         fileNames = fs,
-        safeLoad = F,
         params = tmp_param,
-        subset = list( c = channel_index ),
+        channelIndex = channel_index,
         ...
       )
     }
@@ -168,14 +181,14 @@ stitchImages <- function(
     registerTo = 1,
     stitchParams = get('stitchParams', envir=globalenv())
 ){
-  
+
   ## Get verbosity
   if(is.logical(stitchParams$verbose)){
-    verbose = stitchParams$verbose 
+    verbose = stitchParams$verbose
   }else{
     verbose = T
   }
-  
+
   if(length(registerTo) != 1 | is.na(as.numeric(registerTo))){
     stop('Invalid registerTo parameter!')
   }
@@ -184,7 +197,16 @@ stitchImages <- function(
     stop( paste0('registerTo needs to between 1 and ', length(imList), '!'))
   }
   refx <- imList[[registerTo]]
+  if(length(dim(refx))>2){
+    ZDETECTED = T
+  }
   nnlist <- imList[-registerTo]
+  if(ZDETECTED){
+    warning('Z stack detected...Defaulting to MIP...')
+    refx <- maxIntensityProject(refx)
+    nnlist <- setNames( maxIntensityProject(nnlist), names(nnlist) )
+  }
+
   if(length(nnlist)==0){
     if(verbose){ message('No neighbours found...Returning empty dataframe...') }
     return(data.frame())
