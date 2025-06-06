@@ -176,11 +176,13 @@ consolidateCellSegMasks <- function(
   if(!is.list(maskList)){
     return(maskList)
   }
+  maskListOld <- maskList
   while(is.list(maskList)){
     maskListOld <- maskList
     maskList <- unlist(maskList, recursive = F, use.names = T)
   }
   maskList <- Reduce('+', lapply(maskListOld, function(im){
+    im <- array(as.vector(im), dim=dim(im)[dim(im)!=1])
     hasMask <- im>0
     grad <- imager::imgradient(imager::as.cimg(im))
     gradmag <- as.matrix( sqrt(grad$x^2+grad$y^2) )
@@ -214,8 +216,10 @@ saveCellSegMasks <- function(
     stop('Expecting a matrix for masks!')
   }
   if(!is.null(im)){
+    im <- array(as.vector(im), dim=dim(im)[dim(im)!=1])
     if(!is.matrix(im)){
-      stop('Expecting a matrix for im!')
+      warning('Expecting a matrix for im: performing MIP')
+      im <- maxIntensityProject(im)
     }
   }else{
     if( is.matrix(params$cell_seg_image) ){
