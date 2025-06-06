@@ -92,7 +92,7 @@ getAnchorParams <- function(
     }
 
     if(is.null(anchors)){
-      if(verbose){ cat('\nGetting new anchors...') }
+      if(verbose){ message('\nGetting new anchors...') }
       tileCx <- global_coords[!duplicated(global_coords$fov),]
       tileCx$X <- as.integer(factor(round(tileCx$x_microns)))
       tileCx$Y <- as.integer(factor(round(tileCx$y_microns)))
