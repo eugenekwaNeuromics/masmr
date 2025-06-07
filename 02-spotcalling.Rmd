@@ -30,7 +30,8 @@ establishParams(
   dapiDir = paste0(data_dir, 'DAPI_1/'),
   pythonLocation = 'C:/Users/kwaje/AppData/Local/miniforge3/envs/scipyenv/',
   fpkmFileName = paste0(data_dir, "FPKM_data/Jin_FPKMData_B.tsv"),
-  nProbesFileName = paste0(data_dir, "ProbesPerGene.csv")
+  nProbesFileName = paste0(data_dir, "ProbesPerGene.csv"),
+  verbose = FALSE #It is generally a good idea to keep verbose as True, but will turn it off for this showcase
 )
 ```
 
@@ -157,40 +158,54 @@ Below, I provide an example of a `.dax` file:
 
 ```{r spotcall-imageread-dax}
 file <- 'C:/Users/kwaje/Downloads/LIU_CONNECT_CORTICALORGANOID_240902/DATA/20240902/cont/Alexa594_0_10.dax'
-im <- readImage( file )
-plot(imager::as.cimg(im), main = paste0('Image dimensions: ', paste(dim(im), collapse = ' x ') ))
+im <- readImage( 
+  file,
+  imageDimensions = c(1,2048,2048,1),
+  nchannels = 1, #The image only has 1 channel
+  nzs = 1
+  )
+print(length(im))
+imsub <- im[[1]]
+plot(imager::as.cimg(imsub), main = paste0('Image dimensions: ', paste(dim(imsub), collapse = ' x ') ))
 ```
 
-For `.ome.tif` files, the same function can be used. However, we need to specify an additional `series` parameter: otherwise, all FOVs will be loaded. For more details, we recommend reading the documentation for `RBioformats::read.image`. Below, I provide an example of reading the second channel for the current FOV (specified above).
+From above, note that the default \code{imageDimensions} is assumed to be: Number of Channels, Number of rows, Number of Columns, Number of Z slices. In the above case, since \code{nchannels} and \code{nzs} are both 1, users could technically specify image dimensions using width an height alone. However, it is generally good practice to keep to a consistent format.
+
+For `.ome.tif` files, the same function can be used. However, we need to specify an additional `series` parameter: otherwise, all FOVs will be loaded. For more details, we recommend reading the documentation for `RBioformats::read.image`. Below, I provide an example of reading the second channel for the current FOV (specified above). 
 
 ```{r spotcall-imageread-ometif}
 file <- unique( params$global_coords[params$global_coords$fov==params$fov_names, 'image_file'] )[1]
 series <- which( params$fov_names == params$current_fov )
-im <- readImage( file, series = series )
-plot(imager::as.cimg(im[,,2]), main = paste0('Image dimensions: ', paste(dim(im), collapse = ' x ') ) )
+im <- readImage( 
+  file, 
+  nchannels = 4, # The image has 4 channels total
+  nzs = 1,
+  series = series )
+print( length(im) ) #4 channels
+imsub <- im[[2]]
+plot(imager::as.cimg( imsub ), main = paste0('Image dimensions: ', paste(dim(imsub), collapse = ' x ') ) )
 ```
 
-Note that `readImage` as written above reads all four channels into memory, and we subset the second channel using `im[,,2]`. An alternative is to just load the second channel directly using the `subset` parameter in `RBioformats::read.image`. This is useful for memory management.
+Note that `readImage` as written above reads all four channels into memory, and we subset the second channel using `im[,,2]`. An alternative is to just load the second channel directly using the `subset` parameter in `RBioformats::read.image`, or the `channelIndex` parameter in `readImage`. This is useful for memory management.
 
 ```{r spotcall-imageread-onechannel}
-im <- readImage( file, series = series, subset = list(c = 2) )
-plot(imager::as.cimg(im), main = paste0('Image dimensions: ', paste(dim(im), collapse = ' x ') ) )
+im <- readImage( 
+  file,
+  nchannels = 4,
+  nzs = 1,
+  series = series, 
+  channelIndex = 2 )
+print(length(im)) #Only 1 channel loaded
+imsub <- im[[1]]
+plot(imager::as.cimg(imsub), main = paste0('Image dimensions: ', paste(dim(imsub), collapse = ' x ') ) )
 ```
 
-For MERFISH, we typically have to handle multiple images at once. We have thus created an additional image reading function called `readImageList` that loads all images for a given FOV, by cross-referencing `params$global_coords` to find all relevant files.
+For MERFISH, we typically have to handle multiple images at once. We have thus created an additional image reading function called `readImageList` that loads all images for a given FOV, by cross-referencing `params$global_coords` to find all relevant files. And because `readImageList` does this cross-referencing, parameters such as `nchannels`, `nzs` etc do not have to be specified. 
 
 ```{r spotcall-readimagelist}
 imList <- readImageList( params$current_fov )
 names(imList)
 ```
-
-:::: {.blackbox data-latex=""}
-::: {.center data-latex=""}
-**On working with image stacks**
-:::
-
-The current implementation of `readImage` and `readImageList` assume 2D images, and are not yet designed to work on image stacks with different z-depths. A quick work around is to include `subset = list(z = 1)` among the parameters for `readImage` or `readImageList`, which will load the first z-slice; this can then be iterated to obtain the other z-slices. Multiple z-slices can then be merged using e.g. a maximum intensity projection. Do note that this option only works for images that can be read with `RBioFormats`. For an example of how to do this, kindly refer to Chapter \@ref(troubleshooting).
-::::
 
 ### Establishing global image parameters
 
@@ -198,8 +213,8 @@ As a first step, it is recommended that we determine the dynamic range of intens
 
 We have created a function `getAnchorParams` that loads multiple FOVs and attempts to get global image parameters. As default, `brightness_max` and `brightness_min` are returned. For details, see the documentation for `getAnchorParams`.
 
-```{r spotcall-anchors-default}
-getAnchorParams( nSamples = 5 )
+```{r spotcall-anchors-default, message=FALSE}
+getAnchorParams( nSamples = 6 )
 ```
 
 These values are appended to `params`:
@@ -215,10 +230,10 @@ print(params$anchors)
 print(params$anchors_plot)
 ```
 
-Random sampling should work for most cases. For more regular FOVs, users may instead opt for grid-based selection of FOVs: evenly spaced FOVs internal to the outermost ring of FOVs are selected.
+Random sampling should work for most cases. For more regular FOVs, users may instead opt for grid-based selection of FOVs: evenly spaced FOVs internal to the outermost ring of FOVs are selected. [Since we are re-obtaining anchor metrics, set `freshAnchors` to true.]
 
 ```{r spotcall-showanchors_random, message=FALSE}
-getAnchorParams( anchorMode = 'grid' )
+getAnchorParams( anchorMode = 'grid', returnTroubleShootPlots = T, freshAnchors = T )
 ```
 
 And so this returns a different subset of anchors.
@@ -234,14 +249,14 @@ Additionally, should users wish to obtain other global parameters, this can be a
 
 For instance, say we wish to also obtain the mean brightness per image (`brightness_mean`). We first write a function to perform this (`custom_getMeanBrightness`), which will then be looped over every anchor FOV. We include this function among the named list `users_imageFunctions`, which we then input to `imageFunctions`. This returns a vector of mean brightness values for every anchor image, which are then summarised by the corresponding function in `summaryFunctions` (as default, we recommend `conservativeMean` -- explained later -- or some summary function robust to outliers).
 
-```{r spotcall-custombrightness, message=FALSE}
+```{r spotcall-custombrightness, message=FALSE, eval=FALSE}
 custom_getMeanBrightness <- function( im, ... ){
   meanBrightness <- mean( im )
   return( meanBrightness )
 }
 users_imageFunctions = list(
-  'brightness_min' = imsBrightnessMin,
-  'brightness_max' = imsBrightnessMax,
+  'brightness_min' = imsBrightnessMin_MIP, #MIP for Z-stacks
+  'brightness_max' = imsBrightnessMax_MIP,
   'brightness_mean' = custom_getMeanBrightness
 )
 users_summaryFunctions = list(
@@ -265,6 +280,46 @@ hist( test, breaks=100, main='Histogram of values with mean (red) and conservati
 abline(v=mean(test), col='red'); 
 abline(v=conservativeMean(test, nSDs = 0.9), col='blue')
 ```
+
+To evaluate the suitability of chosen thresholds, users can refer to the `troubleshootPlots` environment returned when `returnTroubleShootPlots` is true.
+
+```{r spotcall-anchor-tsplots, fig.width=10, fig.height=10}
+metric = 'brightness_min'
+bit_number = 1
+print( troubleshootPlots[[ metric ]][[ bit_number ]] )
+```
+
+For each metric, we also report the observed thresholds as a quantile of each anchor image's pixel intensity. These can be found in the `ANCHOR_QUANTILEQC.csv` file. We expect brightness floors to have a low quantile across FOVs (unless there are some empty FOVs included), and brightness ceilings to have high quantiles.
+
+```{r spotcall-anchor-qctable}
+head(read.csv( paste0(params$out_dir, 'ANCHOR_QUANTILEQC.csv')))
+```
+
+## Maximum intensity projection
+
+For Z stacks, we default to maximum intensity projection (MIP) to collapse a 3D array into a 2D matrix. [If there are no other slices, then the 2D matrix is returned unchanged.]
+
+```{r spotcall-mip}
+toy_example <- array( c(
+  matrix(0:11 / 12, nrow = 3, ncol = 4, byrow = T),
+  matrix(11:0 / 12, nrow = 3, ncol = 4, byrow = T)
+), dim = c(3, 4, 2)
+)
+mip <- maxIntensityProject(toy_example)
+par(mfrow=c(1,3))
+plot( imager::as.cimg(toy_example[,,1]), main = 'Z slice 1', interpolate = F, rescale = F)
+plot( imager::as.cimg(toy_example[,,2]), main = 'Z slice 2', interpolate = F, rescale = F)
+plot( imager::as.cimg(mip), main = 'MIP', interpolate = F, rescale = F)
+par(mfrow=c(1,1))
+```
+
+Also note that \code{getAnchorParams} similarly performs MIP (where possible) prior to finding minimum / maximum brightnesses.
+
+```{r spotcall-mip_anchor}
+masmr::imsBrightnessMin_MIP
+```
+
+Users wishing to process Z slices individually are encouraged refer to Troubleshooting (Chapter \@ref(troubleshooting)) for details.
 
 ## Looping through images
 
@@ -290,6 +345,12 @@ for( fovName in params$fov_names ){
   ## Save the current_fov
   params$current_fov <- fovName
   
+  ## Load image
+  imList <- readImageList( params$current_fov )
+  
+  ## If needed, MIP for each channel
+  imList <- maxIntensityProject( imList )
+  
   ## Image processing functions etc...
 }
 ```
@@ -307,7 +368,8 @@ The processed images are stored in a new `imMetrics` environment, and can be vis
 ```{r spotcall-imagemetrics-zoomed}
 par(mfrow=c(2,3))
 for( imMetricName in ls(imMetrics) ){
-  plot(imager::as.cimg( imMetrics[[imMetricName]][[1]][1000:1500, 1000:1500] ), main = imMetricName)
+  imsub <- imMetrics[[imMetricName]][[1]]
+  plot(imager::as.cimg(imsub[1000:1500, 1000:1500, 1] ), main = imMetricName)
 }
 par(mfrow=c(1,1))
 ```
@@ -327,14 +389,14 @@ names(forReg) <- names(imList)
 norm <- forReg[[1]]
 par(mfrow=c(1,2))
 plot( imager::as.cimg(norm), main = 'Band pass' )
-plot( imager::as.cimg(norm[1000:1500, 1000:1500]), main = 'Band pass (Zoom in)' )
+plot( imager::as.cimg(norm[1000:1500, 1000:1500, 1]), main = 'Band pass (Zoom in)' )
 par(mfrow=c(1,1))
 ```
 
-Registration is accomplished with our `registerImages` function. The function works by maximising cross-correlation between two images (in Fourier transformed space). [Strictly, cross-correlation is first passed through a Gaussian filter centred around the origin, to upweight small shifts. Gaussian filter parameters can be tweaked using relevant parameters -- see documentation for `registerImages`.]
+Registration is accomplished with our `registerImages` function. The function works by maximising cross-correlation between two images (in Fourier transformed space). [Strictly, cross-correlation is first passed through a Gaussian filter centred around the origin, to upweight small shifts. Gaussian filter parameters can be tweaked using relevant parameters -- see documentation for `registerImages`. Additionally, when an image stack is detected, maximum intensity projection is performed before registration.]
 
 ```{r spotcall-register}
-registerImages(forReg)
+registerImages(forReg, returnTroubleShootPlots = T)
 ```
 
 This function adds the necessary coordinate offsets to the `params` environment object. Shift vectors (and coordinates in general) are typically handled as complex numbers in `masmr`; with the real component reflecting the x-coordinate and the imaginary, y.
@@ -343,44 +405,22 @@ This function adds the necessary coordinate offsets to the `params` environment 
 print( params$shifts )
 ```
 
-These offsets are added to existing coordinates so as to better align images:
+These offsets are added to existing coordinates so as to better align images. To evaluate the registration, users can set `returnTroubleShootPlots` in `registerImages` to true (which returns a `troubleshootPlots` object), or use `register_troubleshootPlots` directly (see documentation).
 
-```{r spotcall-checkshifts}
-df <- do.call(rbind, lapply(1:length(imList), function(i){
-  imi <- imList[[i]]
-  dfi <- as.data.frame(imager::as.cimg(imi))
-  dfi <- dfi[
-    dfi$x > 1000 &
-    dfi$x <= 1500 &
-    dfi$y > 1000 &
-    dfi$y <= 1500,
-  ]
-  dfi$norm <- (dfi$value - min(dfi$value)) / (max(dfi$value) - min(dfi$value)) 
-  dfi$cx <- dfi$x + 1i*dfi$y
-  dfi$shift <- params$shifts[i]
-  dfi$FOV <- i
-  return(dfi)
-}))
+```{r spotcall-checkshifts-before, fig.width=10, fig.height=10}
+p <- troubleshootPlots[['REGISTRATION_EVAL']][[1]][['PRE_REGISTER']]
+print(
+  p + ggtitle('Before registration')
+)
+```
 
-cowplot::plot_grid( plotlist = list(
-  ggplot(df[df$norm>0.5,]) +
-    geom_point(aes(x=x, y=y, colour=factor(FOV), group=factor(FOV) ), shape=16, size=3, alpha=0.25) +
-    scale_colour_viridis_d(name='Bit', option='turbo') +
-    scale_y_reverse() +
-    theme_minimal(base_size=10) +
-    coord_fixed() +
-    guides(colour=guide_legend(override.aes = list('alpha' = 1))) +
-    ggtitle('Unaligned'),
-  
-  ggplot(df[df$norm>0.5,]) +
-    geom_point(aes(x=x+Re(shift), y=y+Im(shift), colour=factor(FOV), group=factor(FOV) ), shape=16, size=3, alpha=0.25) +
-    scale_colour_viridis_d(name='Bit', option='turbo') +
-    scale_y_reverse() +
-    theme_minimal(base_size=10) +
-    coord_fixed() +
-    guides(colour=guide_legend(override.aes = list('alpha' = 1))) +
-    ggtitle('Registered')
-), nrow=1 )
+The default is to plot registrations with respect to the reference FOV (blue). A window centred on the brightest pixel in the reference FOV is selected as default.
+
+```{r spotcall-checkshifts-after, fig.width=10, fig.height=10}
+p <- troubleshootPlots[['REGISTRATION_EVAL']][[1]][['POST_REGISTER']]
+print(
+  p + ggtitle('After registration')
+)
 ```
 
 Additionally, the `registerImages` function also saves the reference bit image as a `REGIM_{ FOV Name }.png` file as part of its default behaviour. This can be called on for subsequent stitching.
@@ -535,6 +575,7 @@ cowplot::plot_grid( plotlist = list(
 Another option is to consider how filtering changes quality control metrics: e.g. a good filter should generally increase correlation between count profiles and previously obtained FPKM data, should decrease the percentage of blanks relative to true genes, etc. We provide a `filterDF` function that reports how a given filter changes these QC metrics (should relevant files be specified in `establishParams`).
 
 ```{r spotcall-filter1}
+params$verbose <- TRUE ## To see output of filterDF, verbose is changed to True
 spotcalldf <- filterDF(spotcalldf, filtout>0, returnTroubleShootPlots = T, plotWindowRadius = 5)
 ```
 
@@ -550,9 +591,10 @@ print( troubleshootPlots[['BEFORE']][[1]] )
 print( troubleshootPlots[['AFTER']][[1]] )
 ```
 
-Under the hood, `filterDF` makes use of the `spotcall_troubleshootPlots` function to return plots, and parameters for `spotcall_troubleshootPlots` can be input into `filterDF` to modify the plots returned. Alternatively, users may simply use `spotcall_troubleshootPlots` directly.
+Under the hood, `filterDF` makes use of the `spotcall_troubleshootPlots` function to return plots, and parameters for `spotcall_troubleshootPlots` can be input into `filterDF` to modify the plots returned. Alternatively, users may simply use `spotcall_troubleshootPlots` directly (see documentation).
 
-```{r spotcall-troubleshootplots, fig.width=9, fig.height=9}
+```{r spotcall-troubleshootplots, eval=FALSE}
+## An example
 plotList <- spotcall_troubleshootPlots( 
   spotcalldf, 
   plotWindowRadius = 5, 

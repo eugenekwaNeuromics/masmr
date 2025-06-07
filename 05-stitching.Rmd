@@ -24,7 +24,8 @@ establishParams(
   dapiDir = paste0(data_dir, 'DAPI_1/'),
   pythonLocation = 'C:/Users/kwaje/AppData/Local/miniforge3/envs/scipyenv/',
   fpkmFileName = paste0(data_dir, "FPKM_data/Jin_FPKMData_B.tsv"),
-  nProbesFileName = paste0(data_dir, "ProbesPerGene.csv")
+  nProbesFileName = paste0(data_dir, "ProbesPerGene.csv"),
+  verbose = FALSE
 )
 ```
 

@@ -32,7 +32,7 @@ Below, we provide some suggestions for users seeking to improve their pipelines.
 
 ## Weak correlation to FPKM / high blank % {-}
 
-* Suggests high false positive rate. Do the opposite of recommendations for "Too few spots": i.e. increase strictness of filtering criteria. If possible, users may attempt manual decoding on a small region of one or two FOVs, and ensure that their pipeline returns similar results.
+* Suggests high false positive rate. Do the opposite of recommendations for "Too few spots": i.e. increase strictness of filtering criteria. If possible, users may attempt manual decoding on a small region of one or two FOVs, and ensure that their pipeline returns similar results: make use of the troubleshoot plots returned by `filterDF`.
 
 * **Bit-specific differences in detection rate.** This can be evaluated from `BitwiseErrorRates` and `BitDetectionRate` plots after synthesis. [This may also cause too few spots to be returned -- but in general, there tends to be variation across genes: where some genes are too few, and some too abundant.]
   + **Potential solution**: Ensure that `getAnchorParams` is returning reasonable intensity ceilings and floors for each bit. Users should _not_ use empty FOVs as anchor FOVs.
@@ -48,181 +48,38 @@ Below, we provide some suggestions for users seeking to improve their pipelines.
 * **Images look like noise when loaded.** We expect this to be more likely for `.dax` images and may be due to incorrect image size input, or incorrect endian-ness (default: `little`). Alternatively, user has attempted to load a 3D image stack as 2D image -- which will cause problems regardless of image file format.
   + **Potential solution**: Hard code image sizes by specifying `nrows` and `ncols` in `readImage`/`readImageList`. Similarly, set `endian` to `big` if needed (depends on instrument, and should be recorded in image metadata files).
   + **Potential solution**: A less likely alternative reason is that the wrong number of bytes has been assigned to each element in the `.dax` file. This is default `2` (for 16 bit integers); but should be reduced to `1` if data was saved as an integer value between 0 and 255 (i.e. 8 bit integer). [Most microscopes no longer use 8 bit integers.]
-  + **Potential solution**: If reason is because of loading a 3D image stack -- which default `masmr` is currently under-equipped to handle -- users will need to modify image reading on their own. One quick fix is to perform a maximum intensity projection (MIP), to collapse a 3D image stack per channel into a single 2D image per channel. [An alternative is to treat each slice as a separate image (but this can get complicated).] 
   
-Some example code for performing a MIP -- assuming images are `ome.tif` files that can be read by `RBioFormats` -- is provided below. The idea is to load an image Z-slice by Z-slice, compare intensities between Z-slices, and selecting the brightest pixels. This idea carries over to other image file formats, with some variation in execution: e.g. the convenient `subset = list( z=zSlice )` function is unlikely to work for non-`ome.tif` file formats.
+* **Wanting to work with individual Z slices.** For various reasons (e.g. Z slice distances are large, desiring high resolution spot localisation etc), users may wish to process individual Z slices rather than relying on the default maximum intensity projection (MIP). 
+  + **Potential solution**: Z slices can be loaded one at a time by specifying the `zIndex` in `readImage`/`readImageList`. `getAnchorParams` -- which aims to find reasonable thresholds across multiple FOVs -- should have its `imageFunctions` modified to avoid MIP as a pre-processing step, and instead have a specific Z slice loaded (example code provided below). `registerImages` has a `chosenZslice` parameter that allows users to specify a specific Z slice to perform registration against (that said, MIP should still be optimal here because position shifts affect the whole Z stack, and not just a single Z slice). Downstream functions (e.g. `getImageMetrics`,  `consolidateImageMetrics`, and functions that work on `spotcalldf` rather than images) should not be affected and can remain unaltered.
   
-```{r troubleshooting-3D-MIP-ome, eval=FALSE}
-nZslices = ... # The number of z slices
-
-## Start the loop
-for( fovName in params$fov_names ){
+Below is an example of how to create a function that returns the brightness floor for a single Z slice, for input into `imageFunctions` of `getAnchorParams`:
   
-  ## Keep track of FOV
-  params$current_fov <- fovName
+```{r troubleshooting-anchormin-onezslice, eval=FALSE}
+## This function is looped across FOVs
+## Its input is an image / image stack called im
+## The ellipsis is used in R to allow your function to take in more unnamed parameters
+imsBrightnessMin_OneZSlice <- function( im, userChosenZSlice = 1, ... ){
   
-  ## Image reading: to replace default readImageList()
-  for( zSlice in 1:nZslices){
-    
-    ## Read image list one z slice at a time
-    imList <- readImageList(
-      
-      ## Should automatically detect params$current_fov, but will make explicit here:
-      chosenFOV = params$current_fov,
-      ## Turn off safe loading 
-      safeLoad = F, 
-      ## Add an additional subset parameter to load image by z-slice
-      subset = list( z=zSlice )
-      
-      )
-    
-    ## Now split image list by channel to obtain nBit images
-    channel_imList <- list()
-    current_image_idx = 1
-    current_channel_idx = 1
-    for( i in 1:ncol(params$ordered_codebook) ){
-      bit_name <- colnames(params$ordered_codebook)[i]
-      current_im <- imList[[ current_image_idx ]]
-      channel_imList[[ bit_name ]] <- current_im[,,current_channel_idx]
-      current_channel_idx = current_channel_idx + 1
-      if(current_channel_idx > length(params$resolutions$channel_order)){
-        current_channel_idx <- 1
-        current_image_idx <- current_image_idx + 1
-      }
-    }
-    imList <- channel_imList
-    
-    if( zSlice==1 ){
-      maximumIntensityProjection <- imList
-    }else{
-      maximumIntensityProjection <- setNames( lapply(1:length(maximumIntensityProjection), function(i){
-        
-        ## Grab your data
-        current_bit_name <- names(maximumIntensityProjection)[i]
-        current_mip_image <- maximumIntensityProjection[[i]]
-        image_to_compare <- imList[[current_bit_name]]
-        
-        ## Figure out which image is brighter, and replace with the higher intensity
-        difference_between_images <- current_mip_image - image_to_compare
-        current_mip_image[difference_between_images < 0] <- image_to_compare[difference_between_images < 0]
-        
-        return( current_mip_image )
-        
-      }), names(maximumIntensityProjection) )
-    }
+  ## Check that image is indeed a stack
+  if( length(dim(im)) > 2 ){
+    ## If yes, subset the chosen zSlice
+    im <- im[,,userChosenZSlice]
   }
   
-  ## If rest of the pipeline uses `imlist` object:
-  imList <- maximumIntensityProjection
-  
-  ## Proceed with rest of pipeline
-  ...
+  ## Make use of the default way of getting minimum brightness
+  ## Note that parameters specified by ellipsis are fed forwards into this function
+  result <- imsBrightnessMin(im, ...)
+  return(result)
 }
+
+## Do the same for max brightness, and input your new functions into getAnchorParams
+zi = 1 # The first z Slice = 1, second = 2 etc
+getAnchorParams(
+  out_dir = paste0(params$out_dir, 'ZSlice', zi, '/') #Save results in its own folder
+  imageFunctions = list(
+    'brightness_min' = imsBrightnessMin_OneZSlice,
+    'brightness_max' = imsBrightnessMax_OneZSlice
+  ),
+  userChosenZSlice = zi #Parameters for your image function can be fed from getAnchorParams itself
+)
 ```
-
-Below is a theoretical example of MIP -- assuming images are `.dax` files (i.e. _cannot_ be read by `RBioFormats`), and assuming that each `.dax` file is unique to an image and a channel (and so no channel splitting -- see above -- is necessary), while containing the complete stack of Z-slices.
-
-```{r troubleshooting-3D-MIP-dax, eval=FALSE}
-nZslices = ... # The number of z slices
-nImageRows = ... # The number of image rows: width
-nImageCols = ... # The number of image columns: height
-
-## Start the loop
-for( fovName in params$fov_names ){
-  
-  ## Keep track of FOV
-  params$current_fov <- fovName
-  
-  ## Read all z-slices simultaneously
-  ## WARNING: may run into memory management problems
-  imList <- readImageList(
-    
-    ## Should automatically detect params$current_fov, but will make explicit here:
-    chosenFOV = params$current_fov,
-    ## Turn off safe loading (does not matter for .dax, but will stay consistent) 
-    safeLoad = F, 
-    ## The trick here is to load every image as a long column, with each zslice as a row
-    ## Better to input nZslices, nImageRows, and nImageCols yourself -- reading image meta data might run into issues
-    nrows = nZslices,
-    ncols = nImageRows * nImageCols
-    
-    )
-  
-  ## imList should now be a list of matrices, each matrix containing ALL z-stacks as rows
-  imList <- setNames(lapply(1:length(imList), function(i){
-    
-    current_z_stack <- imList[[i]]
-    maximum_intensity_projection <- apply(current_z_stack, 1, max)
-    maximum_intensity_projection <- matrix(maximum_intensity_projection, nrow=nImageRows, ncol=nImageCols)
-    return(maximum_intensity_projection)
-    
-  }), names(imList))
-  
-  ## Presumably, getAnchorParams also has not worked, so users will have to manually decide
-  minBrightness = ...
-  maxBrightness = ...
-  params$brightness_max <- rep(maxBrightness, ncol(params$ordered_codebook))
-  params$brightness_min <- rep(minBrightness, ncol(params$ordered_codebook))
-  
-  ## Proceed with rest of pipeline
-  ...
-}
-```
-
-If users insist on treating each z-slice separately, users may loop through the entire pipeline n z-slice times.
-
-```{r troubleshooting-3D-loopZ, eval=FALSE}
-nZslices = ... # The number of z slices
-nImageRows = ... # The number of image rows: width
-nImageCols = ... # The number of image columns: height
-
-for( zSlice in nZslices ){
-  
-  for( fovName in params$fov_names ){
-  
-  ## Keep track of FOV
-  params$current_fov <- fovName
-  
-  ## Change the output directory: so that each z-slice is given its own folder
-  params$out_dir <- paste0(params$parent_out_dir, '/IM/Z', zSlice)
-  if(!dir.exists(params$out_dir)){
-    dir.create(params$out_dir)
-  }
-  
-  ## Read current z slice
-  if( params$im_format == '.dax' ){
-    
-    ## Read .dax as written above
-    imList <- readImageList(
-      chosenFOV = params$current_fov,
-      safeLoad = F, 
-      nrows = nZslices,
-      ncols = nImageRows * nImageCols
-    )
-    
-    ## Get the current zslice only
-    imList <- setNames(lapply(1:length(imList), function(i){
-      current_z_stack <- imList[[i]]
-      current_z_slice <- current_z_stack[zSlice,]
-      current_z_slice <- matrix(current_z_slice, nrow=nImageRows, ncol=nImageCols)
-      return(current_z_slice)
-      }), names(imList))
-    
-  }else{
-    
-    ## Read image as above
-    imList <- readImageList(
-      chosenFOV = params$current_fov,
-      safeLoad = F, 
-      subset = list( z=zSlice )
-      )
-    
-  }
-  
-  ## Proceed with rest of pipeline
-  ...
-  }
-  
-}
-```
-

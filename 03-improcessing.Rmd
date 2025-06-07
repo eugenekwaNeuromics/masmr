@@ -22,7 +22,8 @@ establishParams(
   dapiDir = paste0(data_dir, 'DAPI_1/'),
   pythonLocation = 'C:/Users/kwaje/AppData/Local/miniforge3/envs/scipyenv/',
   fpkmFileName = paste0(data_dir, "FPKM_data/Jin_FPKMData_B.tsv"),
-  nProbesFileName = paste0(data_dir, "ProbesPerGene.csv")
+  nProbesFileName = paste0(data_dir, "ProbesPerGene.csv"),
+  verbose = FALSE
 )
 ```
 
@@ -48,7 +49,7 @@ The backbone of MERFISH pipelines is image processing. We provide several option
 
 **ALWAYS plot to check how your image processing has altered your image!**
 
-```{r improc-unaltered}
+```{r improc-unaltered, message=FALSE}
 im <- imList[[1]]
 par(mfrow=c(1,2))
 plot( imager::as.cimg(im), main = 'Unaltered image' )
@@ -60,7 +61,7 @@ par(mfrow=c(1,1))
 
 Note the range of raw intensities. We can use `imNormalise` to perform a quick min-max normalisation so that values span 0 to 1.
 
-```{r improc-minmax}
+```{r improc-minmax, message=FALSE}
 norm <- imNormalise(im)
 par(mfrow=c(1,2))
 plot( imager::as.cimg(norm), main = 'Min-max image' )
@@ -70,7 +71,7 @@ par(mfrow=c(1,1))
 
 Since we previously calculated min and max brightnesses, we may wish to winsorise intensity values (i.e. values trimmed to lie between min and max brightness). As before, we can use `imNormalise` but this time specifying the desired floor and ceiling values. [When these are unspecified, floor and ceiling values are defaulted to minimum and maximum intensities observed in the image, thereby performing a min-max normalisation.]
 
-```{r improc-winsored}
+```{r improc-winsored, message=FALSE}
 norm <- imNormalise(im, floorVal = params$brightness_min[1], ceilVal = params$brightness_max[1] )
 par(mfrow=c(1,2))
 plot( imager::as.cimg(norm), main = 'Winsorised image' )
@@ -92,7 +93,7 @@ Note that `imAutoBrighten` will only be valid if `floor` is more than 0 and `cei
 
 This is the basis of the `imAutoBrighten` function. 
 
-```{r improc-autobright}
+```{r improc-autobright, message=FALSE}
 norm <- imAutoBrighten(im, floorVal = params$brightness_min[1], ceilVal = params$brightness_max[1] )
 par(mfrow=c(1,2))
 plot( imager::as.cimg(norm), main = 'Autobrightened image' )
@@ -104,22 +105,22 @@ par(mfrow=c(1,1))
 
 The difference of Gaussian blurs (i.e. Laplacian of Gaussians, LoG) is useful for correcting for uneven lighting or blob detection. This is accomplished by subtracting an image that has been slightly blurred (determined by the `smallBlur` parameter) from an image that is blurrier (`bigBlur`).
 
-```{r improc-log}
+```{r improc-log, message=FALSE}
 norm <- imLaplacianOfGaussian(im, smallBlur = 1, bigBlur = 5 )
 par(mfrow=c(1,2))
 plot( imager::as.cimg(norm), main = 'Laplacian of Gaussians' )
-plot( imager::as.cimg(norm[1000:1500, 1000:1500]), main = 'Laplacian of Gaussians (Zoom in)' )
+plot( imager::as.cimg(norm[1000:1500, 1000:1500, 1]), main = 'Laplacian of Gaussians (Zoom in)' )
 par(mfrow=c(1,1))
 ```
 
 Values that are less than 0 are those dimmer that their immediate surroundings. Spots are typically brighter than their surroundings, and so typically have LoG > 0.
 
-```{r improc-logandnorm}
+```{r improc-logandnorm, message=FALSE}
 norm <- imLaplacianOfGaussian(im, smallBlur = 1, bigBlur = 5 )
 norm <- imNormalise(norm, 0, max(norm))
 par(mfrow=c(1,2))
 plot( imager::as.cimg(norm), main = 'Laplacian of Gaussians >0' )
-plot( imager::as.cimg(norm[1000:1500, 1000:1500]), main = 'Laplacian of Gaussians >0 (Zoom in)' )
+plot( imager::as.cimg(norm[1000:1500, 1000:1500, 1]), main = 'Laplacian of Gaussians >0 (Zoom in)' )
 par(mfrow=c(1,1))
 ```
 
@@ -127,32 +128,32 @@ par(mfrow=c(1,1))
 
 The Hessian is a symmetric matrix containing second-order partial derivatives (i.e. gradient of gradients). In the context of images, it is a matrix of how intensity values are changing as we move along rows and columns of the image matrix. The determinant of the Hessian (detHess) is frequently used for blob detection -- we have thus created a function that calculates its value:
 
-```{r improc-hessdet}
+```{r improc-hessdet, message=FALSE}
 norm <- imHessianDeterminant(im, smallBlur = 1)
 par(mfrow=c(1,2))
 plot( imager::as.cimg(norm), main = 'detHess' )
-plot( imager::as.cimg(norm[1000:1500, 1000:1500]), main = 'detHess' )
+plot( imager::as.cimg(norm[1000:1500, 1000:1500, 1]), main = 'detHess' )
 par(mfrow=c(1,1))
 ```
 
 Thresholding detHess values are a quick way of detecting puncta:
 
-```{r improc-hessdetmask}
+```{r improc-hessdetmask, message=FALSE}
 norm <- imHessianDeterminant(im, smallBlur = 1)
 norm <- norm>quantile(norm, 0.99) ##99 percentile of values
 par(mfrow=c(1,2))
 plot( imager::as.cimg(norm), main = 'detHess thresholded' )
-plot( imager::as.cimg(norm[1000:1500, 1000:1500]), main = 'detHess thresholded (Zoom in)' )
+plot( imager::as.cimg(norm[1000:1500, 1000:1500, 1]), main = 'detHess thresholded (Zoom in)' )
 par(mfrow=c(1,1))
 ```
 
 Attentive readers would have noticed that there is a `smallBlur` parameter (default = 1) in the `imHessianDeterminant` function. This blur serves to denoise the image, so that detHess values are meaningful. 
 
-```{r improc-hessdet-blurvnoblur}
+```{r improc-hessdet-blurvnoblur, message=FALSE}
 par(mfrow=c(1,3))
-plot( imager::as.cimg(im[1200:1300, 1200:1300]), main = 'Intensities (Zoom in): No blur' )
-plot( imager::as.cimg(imHessianDeterminant(im[1200:1300, 1200:1300], smallBlur = 0)), main = 'detHess (Zoom in): No blur' )
-plot( imager::as.cimg(imHessianDeterminant(im[1200:1300, 1200:1300], smallBlur = 1)), main = 'detHess (Zoom in): Slight blur' )
+plot( imager::as.cimg(im[1200:1300, 1200:1300, 1]), main = 'Intensities (Zoom in): No blur' )
+plot( imager::as.cimg(imHessianDeterminant(im[1200:1300, 1200:1300, 1], smallBlur = 0)), main = 'detHess (Zoom in): No blur' )
+plot( imager::as.cimg(imHessianDeterminant(im[1200:1300, 1200:1300, 1], smallBlur = 1)), main = 'detHess (Zoom in): Slight blur' )
 par(mfrow=c(1,1))
 ```
 
@@ -166,7 +167,7 @@ masmr::imLowPass
 
 **ALWAYS plot to check how your image processing has altered your image!**
 
-```{r improc-lowpass}
+```{r improc-lowpass, message=FALSE}
 norm <- imLowPass(im, floorVal = params$brightness_min[1], ceilVal = params$brightness_max[1] )
 par(mfrow=c(1,2))
 plot( imager::as.cimg(norm), main = 'Low pass' )
@@ -180,13 +181,13 @@ Users are strongly encouraged to experiment with the provided image processing f
 
 Say we are dissatisfied with the current default masking function (`imForMask`), whose purpose is to flag pixels where we suspect a spot to be, as being too restrictive (i.e. only flagging the strongest signals). 
 
-```{r improc-defaultmasking}
+```{r improc-defaultmasking, message=FALSE}
 ## The original image is a bit too dim for visualisation: but will provide here for completeness
-plot(imager::as.cimg( imList[[1]][1000:1500, 1000:1500] ), main='Original')
+plot(imager::as.cimg( imList[[1]][1000:1500, 1000:1500, 1] ), main='Original')
 
 par(mfrow=c(1,2))
-plot(imager::as.cimg( imList[[1]][1000:1500, 1000:1500]^0.1 ), main='Original (brightened)')
-plot(imager::as.cimg( imForMask(imList[[1]])[1000:1500, 1000:1500] ), main='Default mask')
+plot(imager::as.cimg( imList[[1]][1000:1500, 1000:1500, 1]^0.1 ), main='Original (brightened)')
+plot(imager::as.cimg( imForMask(imList[[1]])[1000:1500, 1000:1500, 1] ), main='Default mask')
 par(mfrow=c(1,1))
 ```
 
@@ -208,7 +209,7 @@ Next, let's create a new mask function that will be more permissive and flag mor
 
 [Note: the use of ellipsis (`...`) is to allow the passing arguments in `myCustomMask` to functions **within** `myCustomMask`: e.g. `imLaplacianOfGaussian`, `imHessianDeterminant` etc.]
 
-```{r improc-defaultmaskingreplaced, fig.width=6, fig.height=16}
+```{r improc-defaultmaskingreplaced, fig.width=6, fig.height=16, message=FALSE}
 myCustomMask <- function (im, smallBlur, minBlobSize, currentIteration, ...){
     if (!missing(currentIteration)) {
         message(currentIteration, appendLF = F)
@@ -251,7 +252,7 @@ myCustomMask <- function (im, smallBlur, minBlobSize, currentIteration, ...){
     labmask <- EBImage::bwlabel(mask)
     toosmall <- which(tabulate(labmask) < minBlobSize)
     mask[labmask %in% toosmall] <- F
-    final <- matrix(as.integer(mask), nrow = nrow(mask), ncol = ncol(mask))
+    final <- mask
     
     ## If function ready, just return final
     # return(final)
@@ -276,7 +277,7 @@ processedImages <- myCustomMask( imList[[1]] )
 
 par(mfrow=c(5,2))
 for( imMetricName in names(processedImages) ){
-  plot(imager::as.cimg( processedImages[[imMetricName]][1000:1500, 1000:1500] ), main = toupper(imMetricName) )
+  plot(imager::as.cimg( processedImages[[imMetricName]][1000:1500, 1000:1500, 1] ), main = toupper(imMetricName) )
 }
 par(mfrow=c(1,1))
 ```
@@ -326,7 +327,7 @@ myCustomMask <- function (im, smallBlur, minBlobSize, currentIteration, ...){
     labmask <- EBImage::bwlabel(mask)
     toosmall <- which(tabulate(labmask) < minBlobSize)
     mask[labmask %in% toosmall] <- F
-    final <- matrix(as.integer(mask), nrow = nrow(mask), ncol = ncol(mask))
+    final <- mask
     
     ## If function ready, just return final
     return(final)
@@ -347,8 +348,8 @@ myCustomMask <- function (im, smallBlur, minBlobSize, currentIteration, ...){
     # return( processedImages )
 }
 par(mfrow=c(1,2))
-plot(imager::as.cimg( imList[[1]][1000:1500, 1000:1500]^0.1 ), main='Original (brightened)')
-plot(imager::as.cimg( myCustomMask(imList[[1]])[1000:1500, 1000:1500] ), main='Custom mask')
+plot(imager::as.cimg( imList[[1]][1000:1500, 1000:1500, 1]^0.1 ), main='Original (brightened)')
+plot(imager::as.cimg( myCustomMask(imList[[1]])[1000:1500, 1000:1500, 1] ), main='Custom mask')
 par(mfrow=c(1,1))
 ```
 
@@ -366,7 +367,7 @@ By listing looping functions in a named list `imageFunctions` (much like what is
 * `DECODE`: images that have been optimised for decoding.
 * `MASK`: images where pixels worth bringing forward for decoding have been masked as `TRUE`.
 
-```{r improc-imagemetrics}
+```{r improc-imagemetrics, message=FALSE}
 getImageMetrics( 
   imList,
   imageFunctions = list(
@@ -380,10 +381,10 @@ getImageMetrics(
 
 **ALWAYS plot to check how your image processing has altered your image!**
 
-```{r improc-imagemetrics-zoomed}
+```{r improc-imagemetrics-zoomed, message=FALSE}
 par(mfrow=c(2,3))
 for( imMetricName in ls(imMetrics) ){
-  plot(imager::as.cimg( imMetrics[[imMetricName]][[1]][1000:1500, 1000:1500] ), main = imMetricName)
+  plot(imager::as.cimg( imMetrics[[imMetricName]][[1]][1000:1500, 1000:1500, 1] ), main = imMetricName)
 }
 par(mfrow=c(1,1))
 ```

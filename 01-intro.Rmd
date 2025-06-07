@@ -26,7 +26,7 @@ Below, we provide several quick start scripts for users who wish to immediately 
 
 Spotcalling and Cell segmentation scripts can be run in parallel to save time. Stitching can also be run alongside Spotcalling and Cell segmentation, or after the previous two scripts. Finally, the Synthesis script is run to consolidate outputs of the previous three scripts.
 
-For users working with 3D image stacks, kindly refer to Troubleshooting (Chapter \@ref(troubleshooting)) for potential solutions.
+For 3D image stacks, our default processing is to perform a maximum intensity projection. But users may simply loop through each Z plane if they so wish. Kindly refer to Troubleshooting (Chapter \@ref(troubleshooting)) for details.
 
 ### Quick start: Spotcalling
 
@@ -38,19 +38,19 @@ Per FOV, the final output is a dataframe containing spot locations as rows (a si
 library(masmr)
 
 ## Preparation ahead of looping through FOVs
-establishParams( ... ) #User to input
+establishParams( ... , verbose = T ) #User to input. Verbose = T returns messages keeping track of progress.
 readImageMetaData()
 prepareCodebook()
 getAnchorParams()
 establishCleanSlate()
 
-## Decide on verboseness: below is code to push messages into a file called messages.Rout
-notVerbose = F
-if( notVerbose ){
-  outMessageFile <- file( paste0(params$out_dir, 'messages.Rout'), open = 'wt' )
-  sink(outMessageFile, type = 'message')
-  message("\nRedirecting messages to messages.Rout...\n\n")
-}
+## Alternatively, users can keep verbose = T but send output to messages.Rout
+# notVerbose = F
+# if( notVerbose ){
+#   outMessageFile <- file( paste0(params$out_dir, 'messages.Rout'), open = 'wt' )
+#   sink(outMessageFile, type = 'message')
+#   message("\nRedirecting messages to messages.Rout...\n\n")
+# }
 
 ## Start loop
 for( fovName in params$fov_names ){
@@ -75,6 +75,9 @@ for( fovName in params$fov_names ){
   
   ## Load current FOV images
   imList <- readImageList( params$current_fov )
+  
+  ## If a Z-stack, maximum intensity projection
+  imList <- maxIntensityProject( imList )
   
   ## Check if image is largely empty, if so, skip
   percBlank <- mean( sapply(1:length(imList), function(i){
@@ -160,18 +163,10 @@ Per FOV, the final output is a dataframe with pixels in rows and the cell mask t
 library(masmr)
 
 ## Preparation ahead of looping through FOVs
-establishParams( ... ) #User to input
+establishParams( ... , verbose = T ) #User to input
 readImageMetaData( 'dapi_dir' ) #Switch to DAPI images and prepare meta data
 establishCellSegModel()
 establishCleanSlate()
-
-## Decide on verboseness: below is code to push messages into a file called messages.Rout
-notVerbose = F
-if( notVerbose ){
-  outMessageFile <- file( paste0(params$out_dir, 'messages.Rout'), open = 'wt' )
-  sink(outMessageFile, type = 'message')
-  message("\nRedirecting messages to messages.Rout...\n\n")
-}
 
 ## Start loop
 for( fovName in params$fov_names ){
@@ -218,7 +213,7 @@ Per FOV, the final output is a dataframe with neighbouring FOVs in rows, and the
 library(masmr)
 
 ## Preparation ahead of looping through FOVs
-establishParams( ... ) #User to input
+establishParams( ... , verbose = T ) #User to input
 establishCleanSlate()
 
 ## Start loop
@@ -273,15 +268,7 @@ Hereafter, should users wish to save space, they can delete the intermediate res
 library(masmr)
 
 ## Establish params
-establishParams( ... ) #User to input
-
-## Decide on verboseness: below is code to push messages into a file called messages.Rout
-notVerbose = F
-if( notVerbose ){
-  outMessageFile <- file( paste0(params$out_dir, 'messages.Rout'), open = 'wt' )
-  sink(outMessageFile, type = 'message')
-  message("\nRedirecting messages to messages.Rout...\n\n")
-}
+establishParams( ... , verbose = T ) #User to input
 
 ## Function to synthesise data
 synthesizeData()
