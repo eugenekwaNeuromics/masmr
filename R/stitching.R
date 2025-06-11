@@ -88,12 +88,11 @@ readImagesForStitch <- function(
   tmp_param$out_dir <- paste0(params$parent_out_dir, '/STITCH/')
   tmp_param$sub_directory <- subDirectory
   tmp_param$current_fov <- currentFOVName
-  tmp_param$fovs_loaded <- setNames(fs, chosen_fovs)
   tmp_param$verbose <- verbose
 
   ## Read images
   if(loadProcessedImages){
-    regims <- list.files( paste0(params$parent_out_dir, '/', subDirectory), pattern='^REGIM_', full.names = T)
+    fs <- regims <- list.files( paste0(params$parent_out_dir, '/', subDirectory), pattern='^REGIM_', full.names = T)
     if(length(regims) > 0){
       names(regims) <- gsub('^REGIM_|[.]png', '', basename(regims))
       regims <- regims[match(chosen_fovs, names(regims))]
@@ -158,8 +157,8 @@ readImagesForStitch <- function(
 
   }
 
+  tmp_param$fovs_loaded <- setNames(fs, chosen_fovs)
   tmp_param$processed_images_loaded <- loadProcessedImages
-  tmp_param$verbose <- verbose
   stitchParams <<- tmp_param
 
   ## Process each image
