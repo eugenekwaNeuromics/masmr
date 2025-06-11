@@ -92,11 +92,12 @@ readImagesForStitch <- function(
 
   ## Read images
   if(loadProcessedImages){
-    fs <- regims <- list.files( paste0(params$parent_out_dir, '/', subDirectory), pattern='^REGIM_', full.names = T)
+    regims <- list.files( paste0(params$parent_out_dir, '/', subDirectory), pattern='^REGIM_', full.names = T)
     if(length(regims) > 0){
       names(regims) <- gsub('^REGIM_|[.]png', '', basename(regims))
       regims <- regims[match(chosen_fovs, names(regims))]
       names(regims) <- chosen_fovs
+      fs <- regims
       if( all(is.na(regims)) ){
         warning('Unable to find any processed images: loaded raw images instead...')
         loadProcessedImages = F
