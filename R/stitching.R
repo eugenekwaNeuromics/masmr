@@ -97,12 +97,12 @@ readImagesForStitch <- function(
       names(regims) <- gsub('^REGIM_|[.]png', '', basename(regims))
       regims <- regims[match(chosen_fovs, names(regims))]
       names(regims) <- chosen_fovs
-      fs <- regims
       if( all(is.na(regims)) ){
         warning('Unable to find any processed images: loaded raw images instead...')
         loadProcessedImages = F
       }
       if(loadProcessedImages){
+        fs <- regims
         imList <- list()
         for( i  in 1:length(regims) ){
           if(is.na(regims[i])){
