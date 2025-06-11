@@ -76,7 +76,7 @@ readImagesForStitch <- function(
     }))
   gcxi <- gcxi[!duplicated(gcxi$fov),] #To account for scenarios with multiple Z depths
   chosen_fovs <- c( gcxi[gcxi$ref, 'fov'], gcxi[gcxi$nn, 'fov']  )
-  fov_idx <- match(chosen_fovs, resolutions$fov_names)
+  # fov_idx <- match(chosen_fovs, resolutions$fov_names)
   fs <- c(gcxi[gcxi$ref, 'image_file'], gcxi[gcxi$nn, 'image_file'] )
 
   ## Create a temporary environment
@@ -88,6 +88,8 @@ readImagesForStitch <- function(
   tmp_param$out_dir <- paste0(params$parent_out_dir, '/STITCH/')
   tmp_param$sub_directory <- subDirectory
   tmp_param$current_fov <- currentFOVName
+  tmp_param$fovs_loaded <- setNames(fs, chosen_fovs)
+  tmp_param$verbose <- verbose
 
   ## Read images
   if(loadProcessedImages){
