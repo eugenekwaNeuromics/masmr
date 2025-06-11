@@ -41,7 +41,7 @@ getImageMetrics <- function(
           imList[[j]],
           floorVal = params$brightness_min[j],
           ceilVal = params$brightness_max[j],
-          currentIteration = paste0(j, ' of ', length(imList), '...')
+          currentIteration = ifelse(verbose, paste0(j, ' of ', length(imList), '...'), NULL)
           )
       })
     names(processedList) <- names(imList)
