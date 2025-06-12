@@ -16,12 +16,12 @@ register_troubleshootPlots(
 \arguments{
 \item{ imList }{ Named list of numeric image matrices / arrays to register. Names should be \code{bit_names}, that indicate image and channel. }
 \item{ chosenCoordinate }{ Complex or complex vector. Indicates coordinate central pixel(s) of window to plot around.}
-\item{ alphaRange }{ A vector of two numbers. First number is the transparency (alpha) when pixel intensity is minimum, second for maximum. }
+\item{ alphaRange }{ A vector of two numbers between 0 and 1. First number is the transparency (alpha) when pixel intensity is minimum, second for maximum. }
 \item{ plotWindowRadius }{ Integer. Number of pixels from central pixel to window boundary. }
 \item{ params }{ The parameters environment. }
 }
 \value{
-  A list of plots, showing the reference FOV in blue and the registered FOVs in red.
+  A list of plots, showing the reference FOV in red and the registered FOVs in blue.
 }
 \details{
   If \code{chosenCoordinate} is not specified, defaults to brightest pixel in reference FOV.

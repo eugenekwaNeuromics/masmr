@@ -71,8 +71,8 @@ register_troubleshootPlots <- function(
 
     p_before <-
       ggplot2::ggplot() +
-      ggplot2::geom_raster(data=refdfp, ggplot2::aes(x=x, y=y, alpha=norm), fill='blue') +
-      ggplot2::geom_raster(data=dfp, ggplot2::aes(x=orig_x, y=orig_y, alpha=norm), fill='red') +
+      ggplot2::geom_raster(data=refdfp, ggplot2::aes(x=x, y=y, alpha=norm), fill='red') +
+      ggplot2::geom_raster(data=dfp, ggplot2::aes(x=orig_x, y=orig_y, alpha=norm), fill='blue') +
       ggplot2::facet_wrap(~imName) +
       ggplot2::scale_alpha(range=alphaRange) +
       ggplot2::theme_minimal(base_size=12) +
@@ -83,8 +83,8 @@ register_troubleshootPlots <- function(
 
     p_after <-
       ggplot2::ggplot() +
-      ggplot2::geom_raster(data=refdfp, ggplot2::aes(x=x, y=y, alpha=norm), fill='blue') +
-      ggplot2::geom_raster(data=dfp, ggplot2::aes(x=x, y=y, alpha=norm), fill='red') +
+      ggplot2::geom_raster(data=refdfp, ggplot2::aes(x=x, y=y, alpha=norm), fill='red') +
+      ggplot2::geom_raster(data=dfp, ggplot2::aes(x=x, y=y, alpha=norm), fill='blue') +
       ggplot2::facet_wrap(~imName) +
       ggplot2::scale_alpha(range=c(0, 0.75)) +
       ggplot2::theme_minimal(base_size=12) +
