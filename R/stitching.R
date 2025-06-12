@@ -190,6 +190,150 @@ readImagesForStitch <- function(
 
 ###
 
+stitch_troubleshootPlots <- function(
+    imList,
+    stitchResults,
+    alphaRange = c(0, 0.75),
+    shiftColumn = NULL,
+    marginToPlot = NULL,
+    stitchParams = get('stitchParams', envir = globalenv())
+){
+  if (is.logical(stitchParams$verbose)) {
+    verbose = stitchParams$verbose
+  }else{
+    verbose = T
+  }
+
+  if(is.data.frame(stitchResults) | is.matrix(stitchResults)){
+
+    if(!is.null(shiftColumn)){
+      stitchResults <- as.complex(stitchResults[,shiftColumn])
+    }else{
+      ## Attempt to infer which column is the shift column
+      is_complex <- rep(F, ncol(stitchResults))
+      for(i in 1:ncol(stitchResults)){
+        is_complex[i] <- suppressWarnings( !all(is.na( as.complex(stitchResults[,i])) ))
+      }
+      if(sum(is_complex)<1){
+        stop('Unable to parse stitchResults to find the column housing the shift vector: kindly specify shiftColumn!')
+      }
+      if(sum(is_complex)>1){
+        warning('More than one possible shiftColumn...Picking the first...')
+        stitchResults <- as.complex( stitchResults[,which(is_complex)[1]] )
+      }
+      if(sum(is_complex)==1){
+        stitchResults <- as.complex( stitchResults[,is_complex] )
+      }
+    }
+  }
+
+  if(!is.complex(stitchResults)){
+    stop('Provide stitchResults as a dataframe (with shifts in one column) or a complex vector!')
+  }
+  shiftVector <- stitchResults
+
+  ## ImList is always assumed to have the reference FOV first, followed by neighbours
+  if( length(shiftVector) != (length(imList) - 1) ){
+    stop('Expecting a list of images, where first image is the reference, followed by neighbours (in order)')
+  }
+  refim <- imList[[1]]
+  nnList <- imList[-1]
+
+  if(verbose){ message('\nGenerating QC plots for each neighbour in stitching...')}
+  plotList <- list()
+  for( i in 1:length(shiftVector) ){
+    if(verbose){ message( paste0(i, ' of ', length(shiftVector), '...') )}
+    shiftvi <- shiftVector[i]
+    nnim <- nnList[[i]]
+    imName <- names(imList)[i]
+    imDirection <- which.max(abs(c(Re(shiftvi), Im(shiftvi))))
+    imSize <- dim(refim)[imDirection]
+    if(is.null(marginToPlot)){
+      marginToPlot <- pmin( round( 2 * abs( abs( c(Re(shiftvi), Im(shiftvi))[imDirection] ) - imSize ) ), imSize )
+    }
+    imDirection <- sign( c(Re(shiftvi), Im(shiftvi))[imDirection] ) * imDirection
+    imDirection <- which(c(-2,-1,1,2)==imDirection)
+
+    imDirectionName <- switch(imDirection, 'NORTH', 'WEST', 'EAST', 'SOUTH')
+    if(is.null(imName)){
+      imName <- imDirectionName
+    }else{
+      imName <- as.character(imName)
+    }
+
+    refImage <- suppressWarnings( as.data.frame(imager::as.cimg(refim)) )
+    querImage <- suppressWarnings( as.data.frame(imager::as.cimg(nnim)) )
+
+    refImage <- switch(
+      imDirection,
+      refImage[refImage$y<(marginToPlot),],
+      refImage[refImage$x<(marginToPlot),],
+      refImage[refImage$x>(imSize-marginToPlot),],
+      refImage[refImage$y>(imSize-marginToPlot),]
+      )
+
+    querImage <- switch(
+      imDirection,
+      querImage[querImage$y>(imSize-marginToPlot),],
+      querImage[querImage$x>(imSize-marginToPlot),],
+      querImage[querImage$x<(marginToPlot),],
+      querImage[querImage$y<(marginToPlot),]
+    )
+
+    refImage$image <- 'Reference'
+    querImage$image <- 'Query'
+
+    refImage$value <- refImage$value - min(refImage$value)
+    refImage$value <- refImage$value / max(refImage$value)
+    querImage$value <- querImage$value - min(querImage$value)
+    querImage$value <- querImage$value / max(querImage$value)
+
+    p_unstitched <-
+      ggplot2::ggplot() +
+      ggplot2::geom_raster(
+        data=refImage,
+        ggplot2::aes(x=x, y=y, alpha=value, fill = image),
+      ) +
+      ggplot2::geom_raster(
+        data=querImage,
+        ggplot2::aes(
+          x=x + switch(imDirection, 0, -imSize, imSize, 0),
+          y=y + switch(imDirection, -imSize, 0, 0, imSize),
+          alpha=value, fill = image)) +
+      ggplot2::scale_fill_manual(name='', values=c('Reference' = 'red', 'Query' = 'blue')) +
+      ggplot2::scale_alpha_continuous( range = alphaRange ) +
+      ggplot2::guides( alpha = 'none', fill = ggplot2::guide_legend(ncol=1) ) +
+      ggplot2::scale_y_reverse() +
+      ggplot2::theme_void( base_size= 14 ) +
+      ggplot2::theme(legend.position = 'none') +
+      ggplot2::coord_fixed()
+
+    p_stitched <-
+      ggplot2::ggplot() +
+      ggplot2::geom_raster(
+        data=refImage,
+        ggplot2::aes(x=x, y=y, alpha=value, fill = image),
+      ) +
+      ggplot2::geom_raster(
+        data=querImage,
+        ggplot2::aes(
+          x=x + Re(shiftvi), y=y + Im(shiftvi),
+          alpha=value, fill = image)) +
+      ggplot2::scale_fill_manual(name='', values=c('Reference' = 'red', 'Query' = 'blue')) +
+      ggplot2::scale_alpha_continuous( range = alphaRange ) +
+      ggplot2::guides( alpha = 'none', fill = ggplot2::guide_legend(ncol=1) ) +
+      ggplot2::scale_y_reverse() +
+      ggplot2::theme_void( base_size= 14 ) +
+      ggplot2::theme(legend.position = 'none') +
+      ggplot2::coord_fixed()
+
+    plotList[[ imName ]] <- list('UNSTITCHED' = p_unstitched, 'STITCHED' = p_stitched)
+  }
+  return(plotList)
+}
+
+###
+
 stitchImages <- function(
     imList,
     registerTo = 1,
@@ -286,11 +430,21 @@ stitchImages <- function(
   final <-
     data.frame(
       'fov' = names(shifts),
-      'shift_pixel' = shifts
+      'shift_pixel' = as.complex(shifts)
     )
 
   if(returnTroubleShootPlots){
+    if(verbose){ message('Generating QC plots for evaluating stitching...') }
     troubleshootPlots <<- new.env()
+    troubleshootPlots[['STITCH_EVAL']] <-
+      stitch_troubleshootPlots(
+        imList = imList,
+        stitchResults=final,
+        alphaRange = c(0, 0.75),
+        shiftColumn = 'shift_pixel',
+        marginToPlot = NULL,
+        stitchParams = get('stitchParams', envir = globalenv())
+      )
   }
 
   return(final)
