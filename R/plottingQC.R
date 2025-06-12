@@ -1,5 +1,7 @@
 ## This script contains functions for plotting QC
 
+require(RcppML)
+require(tripack)
 require(ggplot2)
 require(scales)
 require(reshape2)
@@ -9,14 +11,14 @@ plotQC <- function(
     synthesisDir = NULL,
     params = get('params', envir = globalenv())
 ){
-  
+
   ## Get verbosity
   if(is.logical(params$verbose)){
-    verbose = params$verbose 
+    verbose = params$verbose
   }else{
     verbose = T
   }
-  
+
   if( is.null(synthesisDir) ){
     if(!dir.exists(paste0( params$out_dir ))){
       stop('synthesisDir unspecified and params$out_dir does not exist!')

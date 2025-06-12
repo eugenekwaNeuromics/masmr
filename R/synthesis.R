@@ -13,14 +13,14 @@ synthesiseData <- function(
     customOutDirName = NULL,
     params = get('params', envir = globalenv())
 ){
-  
+
   ## Get verbosity
   if(is.logical(params$verbose)){
-    verbose = params$verbose 
+    verbose = params$verbose
   }else{
     verbose = T
   }
-  
+
   ## First, check that append=True is working for data.table
   test_file <- paste0(params$parent_out_dir, 'DATATABLE_TEST_FILE.csv', ifelse(gZip, '.gz', ''))
   data.table::fwrite(data.frame('x'=1), test_file, row.names = F)
@@ -35,12 +35,12 @@ synthesiseData <- function(
     if(newversion==oldversion){
       stop(paste0(
         '\nUnsuccessful update: try updating manually, using an older version of data.table (1.14.8), or setting gZip = FALSE',
-        ifelse(newversion=='1.17.0', 
-        '\nVersion 1.17.0 detected: there is a known bug with this version (https://github.com/Rdatatable/data.table/issues/6863)', 
+        ifelse(newversion=='1.17.0',
+        '\nVersion 1.17.0 detected: there is a known bug with this version (https://github.com/Rdatatable/data.table/issues/6863)',
         '')
         ))
     }
-    ## Check again 
+    ## Check again
     data.table::fwrite(data.frame('x'=1), test_file, row.names = F)
     data.table::fwrite(data.frame('x'=1), test_file, append = T, row.names = F)
     test_df <- data.table::fread(test_file, data.table = F)
@@ -52,7 +52,7 @@ synthesiseData <- function(
   }
   file.remove(test_file)
   rm(test_df, test_file)
-  
+
   ## Read information
   if(is.null(customOutDirName)){
     params$out_dir <<- gsub('[/][/]', '/', paste0(params$parent_out_dir, '/OUT/'))
@@ -306,6 +306,7 @@ synthesiseData <- function(
   finalcellseg <- finaldf <- data.frame()
   NCHAR_NAME = nLeadingZeroes #Assume a max of 99999 cells per FOV
   for( fovName in fov_names ){
+
     if(verbose){
       message('')
       message( paste0(which(fov_names == fovName), ' of ', length(fov_names), '...'), appendLF = F )
@@ -317,6 +318,11 @@ synthesiseData <- function(
     }
     if(length(spotcallfx)>1){
       stop('More than one spotcall file specified!')
+    }
+    isThereStitch <- any(grepl(paste0('STITCH_', fovName, '.csv'), names(stitchResults)))
+    if( !isThereStitch ){
+      if(verbose){ message('No stitch file found...Skipping...', appendLF = T) }
+      next
     }
 
     ## Update coordinates
@@ -489,12 +495,12 @@ synthesiseData <- function(
 
     ## Append information with fwrite
     data.table::fwrite(
-      spotcalldf, 
-      paste0(params$out_dir, 'OUT_SPOTCALL_PIXELS.csv', ifelse(gZip, '.gz', '')), 
+      spotcalldf,
+      paste0(params$out_dir, 'OUT_SPOTCALL_PIXELS.csv', ifelse(gZip, '.gz', '')),
       row.names = F, append = T)
     data.table::fwrite(
-      cellsegdf, 
-      paste0(params$out_dir, 'OUT_CELLSEG_PIXELS.csv', ifelse(gZip, '.gz', '')), 
+      cellsegdf,
+      paste0(params$out_dir, 'OUT_CELLSEG_PIXELS.csv', ifelse(gZip, '.gz', '')),
       row.names = F, append = T)
 
     ## Summarise info per cell
@@ -516,12 +522,12 @@ synthesiseData <- function(
       cellMeta$nCounts <- as.numeric(nCounts)[match(cellMeta$CELLNAME, names(nCounts))]
       cellMeta$nCounts[is.na(cellMeta$nCounts)] <- 0
       data.table::fwrite(
-        cellExp, 
-        paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')), 
+        cellExp,
+        paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')),
         row.names = T, append = T)
       data.table::fwrite(
-        cellMeta, 
-        paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')), 
+        cellMeta,
+        paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
         row.names = F, append = T)
     }
 
@@ -531,7 +537,7 @@ synthesiseData <- function(
   ## Note that above tends to create duplicate entries in CELLEXPRESSION, have to load and edit
   if(verbose){ message('\nCleaning up...') }
   cellMetaClean <- cellMeta <- data.table::fread(
-    paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')), 
+    paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
     data.table = F)
   if( any(duplicated(cellMeta$CELLNAME)) ){
     duplicatedCells <- sort(unique( cellMeta[duplicated(cellMeta$CELLNAME), 'CELLNAME'] ))
@@ -553,13 +559,13 @@ synthesiseData <- function(
   }
   cellMeta <- cellMetaClean
   data.table::fwrite(
-    cellMeta, 
+    cellMeta,
     paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
     row.names = T, append = F)
   suppressWarnings(rm(list=c('cellMetaClean', 'npix', 'weightedX', 'weightedY', 'res', 'duplicatedCells')))
 
   cellExp <- data.table::fread(
-    paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')), 
+    paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')),
     data.table = F)
   duplicatedCells <- sort(unique(cellExp[duplicated(cellExp[,1]),1]))
   dupCellExp <- cellExp[(cellExp[,1] %in% duplicatedCells),]
@@ -578,8 +584,8 @@ synthesiseData <- function(
   cellExpClean[is.na(cellExpClean)] <- 0
   rownames(cellExpClean) <- cellMeta$CELLNAME
   data.table::fwrite(
-    cellExpClean, 
-    paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')), 
+    cellExpClean,
+    paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')),
     row.names = T, append = F)
 
 }
