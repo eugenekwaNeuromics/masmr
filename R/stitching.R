@@ -59,8 +59,19 @@ readImagesForStitch <- function(
   gcxi$ref <- bool <- gcxi$fov==currentFOVName
   gcxi$x <- as.integer( factor(rank( round(abs( gcxi[,'x_microns'] - gcxi[bool,'x_microns'] )), ties.method = 'average')) )-1
   gcxi$y <- as.integer( factor(rank( round(abs( gcxi[,'y_microns'] - gcxi[bool,'y_microns'] )), ties.method = 'average')) )-1
-  gcxi$block_dist <- rowSums(gcxi[,c('x', 'y')])
-  gcxi$nn <- gcxi$block_dist==1
+  # gcxi$block_dist <- rowSums(gcxi[,c('x', 'y')])
+  # gcxi$nn <- gcxi$block_dist==1
+
+  ## Calculate physical distance
+  cx <- (gcxi$x_microns + 1i * gcxi$y_microns)
+  dist <- round( Mod(cx - cx[bool]), digits=2 ) #Within 0.01 microns
+  dist_thresh <- sort(unique(dist[dist>0]))[4]
+
+  miny_whenx0 <- sort(gcxi[gcxi$x==0 & dist<=dist_thresh,'y'])
+  miny_whenx0 <- min(miny_whenx0[miny_whenx0>0])
+  minx_wheny0 <- sort(gcxi[gcxi$y==0 & dist<=dist_thresh,'x'])
+  minx_wheny0 <- min(minx_wheny0[minx_wheny0>0])
+  gcxi$nn <- (gcxi$x==0 & gcxi$y==miny_whenx0) | (gcxi$y==0 & gcxi$x==minx_wheny0)
 
   ## Parse image read info
   gcx <- gcxi[gcxi$fov==currentFOVName,]
