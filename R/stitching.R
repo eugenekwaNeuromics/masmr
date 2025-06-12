@@ -199,6 +199,7 @@ stitchImages <- function(
     stop( paste0('registerTo needs to between 1 and ', length(imList), '!'))
   }
   refx <- imList[[registerTo]]
+  ZDETECTED = F
   if(length(dim(refx))>2){
     ZDETECTED = T
   }
