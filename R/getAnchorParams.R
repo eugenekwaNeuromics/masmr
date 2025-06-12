@@ -376,6 +376,15 @@ maxIntensityProject <- function(im, zDim = NULL){
     stop('Can only except a max 4 dimensional object for im (a list of 3D arrays is considered 4D)!')
   }
 
+  if( !(length(imageDimension) %n% c(2, 4, 3) ) ){
+    warning(
+      paste0('Images loaded of unusual dimension size: ',
+             paste(imageDimension, collapse=' x '),
+             '...Skipping MIP...')
+    )
+    return( im )
+  }
+
   if(length(imageDimension)==2){
     warning('2D matrix provided...Skipping MIP...')
     return(im)

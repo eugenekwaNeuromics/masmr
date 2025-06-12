@@ -1,5 +1,6 @@
 ## This contains functions for stitching
 
+require(ggplot2)
 require(data.table)
 
 readImagesForStitch <- function(
@@ -192,6 +193,7 @@ readImagesForStitch <- function(
 stitchImages <- function(
     imList,
     registerTo = 1,
+    returnTroubleShootPlots = FALSE,
     stitchParams = get('stitchParams', envir=globalenv())
 ){
 
@@ -286,6 +288,10 @@ stitchImages <- function(
       'fov' = names(shifts),
       'shift_pixel' = shifts
     )
+
+  if(returnTroubleShootPlots){
+    troubleshootPlots <<- new.env()
+  }
 
   return(final)
 }
