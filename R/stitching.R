@@ -295,7 +295,6 @@ stitchImages <- function(
 
   return(final)
 }
-
 ###
 
 saveStitch <- function(
