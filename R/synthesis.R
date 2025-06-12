@@ -321,7 +321,7 @@ synthesiseData <- function(
     }
     isThereStitch <- any(grepl(paste0('STITCH_', fovName, '.csv'), names(stitchResults)))
     if( !isThereStitch ){
-      if(verbose){ message('No stitch file found...Skipping...', appendLF = T) }
+      if(verbose){ message('No stitch file found...Assuming spots called are spurious...Skipping...', appendLF = T) }
       next
     }
 
