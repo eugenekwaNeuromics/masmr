@@ -6,6 +6,258 @@ require(ggplot2)
 require(scales)
 require(reshape2)
 
+###
+
+getPNNMatrix <- function(
+
+  ## INPUT
+  x, ## X coordinates
+  y, ## Y coordinates
+  label, ## Cell type labels
+
+  ## Delaunay Triangulation Option: fast, and number of times run depends on delaunayNNDegrees
+  delaunayTriangulation = T,
+  delaunayDistanceThreshold = 20,
+  delaunayNNDegrees = c(1:3),
+
+  ## Distances option: much slower, but only done once
+  euclideanDistances = NULL,
+
+  seed = 12345,
+  verbose = TRUE,
+  ...
+){
+
+
+  ###
+  if(length(x) != length(y) | length(x) != length(label) ){
+    stop('x, y, and labels must be all of same length!')
+    break
+  }
+
+  if(!delaunayTriangulation & is.null(euclideanDistances)){
+    stop('delaunayTriangulation is FALSE but no euclideanDistances provided!')
+  }
+  ###
+
+  set.seed( as.integer(seed) )
+
+  ###
+  CLB <- as.integer(factor(label))
+  OUT <- list()
+  all_coords <- x + (y * 1i)
+  ###
+
+  ###
+  if(delaunayTriangulation){
+
+    if(verbose){ message('Running delaunay triangulation approach for getting nearest neighbours...') }
+    dt <- tripack::tri.mesh(
+      x=x, y=y, ...
+    )
+    nns_raw <- tripack::neighbours(dt)
+    convex_hull <- tripack::convex.hull(dt)
+
+    if(verbose){ message('\nTabulating...') }
+
+    DTS <- list()
+    for(j in 1:length(delaunayNNDegrees)){
+      DEGREE <- delaunayNNDegrees[j]
+      if(verbose){ message(paste0('Examining neighbours of ', DEGREE, ' degree...')) }
+
+      ## Iteratively add more neighbours
+      di = 1
+      while(di <= DEGREE){
+        if(verbose){ message(paste0('Updating neighbours list with ', di, ' order neighbours...'), appendLF = F)}
+        if(di == 1){
+          nns <- nns_raw
+          di = di + 1
+          next
+        }
+        nns <- lapply(nns, function(x){
+          return(unique(unlist(nns_raw[x])))
+        })
+        di = di + 1
+      }
+      if(DEGREE != 1){
+        nns <- lapply(1:length(nns), function(j){
+          return(nns[[j]][(nns[[j]]!=j)])
+        })
+      }
+
+
+      if(verbose){ message('\nBuilding frequency matrix...') }
+      frequency_matrix <- do.call(rbind, lapply(1:length(nns), function(i){
+
+        if(verbose){
+          if(i %% 1000 == 0 | i == 1){
+            message(paste0(i, ' of ', length(nns), '...'), appendLF = F)
+          }
+        }
+
+        ## Removal of convex hull
+        nnvector <- nns[[i]]
+        if(i %in% convex_hull$i){
+          nnvector <- nnvector[!(nnvector %in% convex_hull$i)]
+        }
+
+        ## Cutting by distance
+        if(!is.null(delaunayDistanceThreshold) &
+           !is.na(delaunayDistanceThreshold) &
+           !is.infinite(delaunayDistanceThreshold)){
+          ref_coord <- all_coords[i]
+          coords <- all_coords[nnvector]
+          dists <- Mod(coords - ref_coord)
+          nnvector <- nnvector[dists < delaunayDistanceThreshold]
+        }
+
+        values <- tabulate( CLB[nnvector] )
+        if(length(values) < max(CLB)){
+          values <- c(values, rep(0, max(CLB) - length(values)))
+        }
+
+        return(values)
+      }))
+      if(verbose){ message('') }
+
+      colnames(frequency_matrix) <-
+        paste0('DT', sprintf(paste0('%0', max(nchar(delaunayNNDegrees)), 'd'), DEGREE), '_', levels(factor(label)))
+      DTS[[j]] <- frequency_matrix
+    }
+    DTS <- do.call(cbind, DTS)
+    OUT[['DT']] <- DTS
+  }
+  ###
+
+
+  ###
+  if(!is.null(euclideanDistances)){
+
+    euDists <- sort(unique(euclideanDistances))
+    if(verbose){ message('Getting nearest neighbours within specific euclidean distances...') }
+
+    FM <- matrix(0, nrow = length(all_coords), ncol = max(CLB) * length(euDists))
+
+    for(i in 1:length(all_coords)){
+      if(verbose){
+        if(i %% 1000 == 0 | i == 1){
+          message(paste0(i, ' of ', length(all_coords), '...'), appendLF = F)
+        }
+      }
+      dists <- Mod(all_coords - all_coords[i])
+      reflab <- CLB[i] + c( (1:length(euDists)) - 1) * max(CLB)
+      for(j in 1:length(reflab)){
+        FM[,reflab[j]] <- FM[,reflab[j]] + (dists < euDists[j])
+      }
+    }
+
+    colns <- sapply(1:length(euDists), function(j){
+      paste0('EUD',
+             sprintf( paste0('%0', max(nchar(euclideanDistances)), 'd'), euDists[j]),
+             '_', levels(factor(label)))
+    })
+    colnames(FM) <- as.vector(colns)
+    OUT[['EUD']] <- FM
+  }
+  ###
+
+  OUT <- do.call(cbind, OUT)
+  return(OUT)
+}
+
+getPNNLatentFactors <- function(
+
+  ## INPUT
+  PNNMatrix,
+
+  ## Expected number of clusters
+  nFactors = 4,
+
+  mergeSimilarFactors = TRUE,
+  correlationThreshold = 0.1,
+
+  seed = 12345,
+  verbose = T,
+  ...
+){
+
+  ###
+  set.seed(as.integer(seed))
+  k = as.integer(nFactors)
+  OUT <- list()
+  ###
+
+  ###
+  if(verbose){ message('\nRunning NMF...') }
+  nmfd <- RcppML::nmf(
+    PNNMatrix,
+    k=nFactors,
+    verbose = verbose,
+    seed = seed,
+    ...)
+  w <- nmfd$w
+  h <- nmfd$h
+
+  ## Min-max scale
+  w_scaled <- apply(w, 2, function(x) (x-min(x)) / (max(x) - min(x)) )
+  h_scaled <- apply(t(h), 2, function(x) (x-min(x)) / (max(x) - min(x)) )
+  if( mergeSimilarFactors ){
+    if(verbose){ message('Merging similar factors...') }
+
+    ## Will just cluster using the feature matrix
+    corw <- cor(w_scaled)
+    hc <- hclust( dist( 1-corw ) )
+    clusts <- cutree(hc, h=1-correlationThreshold)
+
+    w_merged <- ( do.call(cbind, by(1:ncol(w_scaled), clusts, function(x){
+      if(length(x) > 1){
+        y <- rowSums(w_scaled[,x])
+      }else{
+        y <- w_scaled[,x]
+      }
+      y = (y - min(y)) / (max(y) - min(y))
+      return(y)
+    })) )
+
+    h_merged <- ( do.call(cbind, by(1:ncol(h_scaled), clusts, function(x){
+      if(length(x) > 1){
+        y <- rowSums(h_scaled[,x])
+      }else{
+        y <- h_scaled[,x]
+      }
+      y = (y - min(y)) / (max(y) - min(y))
+      return(y)
+    })) )
+
+    k <- ncol(w_merged)
+    if(k != nFactors){
+      if(verbose){ message( paste0(
+        'Similar factors (>', correlationThreshold,  ' correlation) found...Returning ',
+        k, ' instead of ', nFactors, ' factors...'))}
+    }else{
+      if(verbose){ message('No factor merging needed...Returning ', k, ' factors...')}
+    }
+    w_scaled <- w_merged
+    h_scaled <- h_merged
+  }
+  h_scaled <- t(h_scaled)
+
+  w_scaled <- data.frame(w_scaled)
+  h_scaled <- data.frame(h_scaled)
+  rownames(h_scaled) <- colnames(w_scaled) <- paste0('NMF', sprintf(paste0('%0', nchar(k), 'd'), 1:k))
+  colnames(h_scaled) <- colnames(PNNMatrix)
+  rownames(w_scaled) <- rownames(PNNMatrix)
+
+  OUT[['n_factors']] <- k
+  OUT[['point_scores']] <- w_scaled
+  OUT[['coefficients']] <- h_scaled
+
+  return(OUT)
+}
+
+
+###
+
 plotQC <- function(
     includeNewBlanks = T,
     synthesisDir = NULL,
@@ -17,6 +269,10 @@ plotQC <- function(
     verbose = params$verbose
   }else{
     verbose = T
+  }
+  seed <- params$seed
+  if(is.null(seed)){
+    seed = 12345L
   }
 
   if( is.null(synthesisDir) ){
@@ -520,6 +776,97 @@ plotQC <- function(
     width = 14
     height = 14
     ggplot2::ggsave(paste0(params$out_dir, plotName, '_nCounts.png'), plot = p, height = height, width = width, units = 'cm')
+  }
+
+  ## SpatialPatternsPlot
+  fx <- fs['SPOTCALL_PIXELS']
+  if(!is.na(fx)){
+
+    plotName <- 'SpatialPatterns'
+    if(verbose){ message( paste0(plotName, '...') ) }
+
+    nnm <- getPNNMatrix(
+      x=spotcalldf$Xm, y=spotcalldf$Ym, label=spotcalldf$g,
+      delaunayTriangulation = T, delaunayDistanceThreshold = 20,
+      delaunayNNDegrees = c(1:4),
+      euclideanDistances = NULL,
+      seed = seed,
+      verbose = verbose
+      )
+    nmfResults = getPNNLatentFactors(
+      nnm,
+      nFactors = 4,
+      mergeSimilarFactors = TRUE,
+      correlationThreshold = 0.1,
+      seed = seed,
+      verbose = verbose
+    )
+    df <- cbind( spotcalldf[,c('Xm', 'Ym', 'g', 'blank')], nmfResults[['point_scores']] )
+
+    plotTitle <- paste0('Spatial patterns of gene expression (k=', nmfResults$n_factors, ')')
+    p <-
+      ggplot2::ggplot(
+        reshape2::melt(df, measure.vars=colnames(nmfResults[['point_scores']])),
+        ggplot2::aes(x=Xm, y=Ym, z=value)) +
+        ggplot2::stat_summary_hex( fun = mean, bins=100 ) +
+        ggplot2::facet_wrap(~variable) +
+        ggplot2::scale_y_reverse() +
+        ggplot2::scale_fill_viridis_c(name='Score', option='turbo') +
+        ggplot2::theme_void(base_size=14) +
+        ggplot2::ggtitle(plotTitle) +
+        ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5) ) +
+        ggplot2::coord_fixed()
+    width = 14
+    height = 14
+    ggplot2::ggsave(paste0(params$out_dir, plotName, '_SpatialPatterns.png'), plot = p, height = height, width = width, units = 'cm')
+
+    plotTitle <- paste0('Mean membership to each pattern (k=', nmfResults$n_factors, ')')
+    df <- df[!df$blank,]
+    normdf <- meandf <- cvdf <- list()
+    for( gi in sort(unique(as.character(df$g))) ){
+      dfsub <- df[df$g==gi, colnames(nmfResults[['point_scores']])]
+      dfcv <- rep(0, ncol(dfsub))
+      if(nrow(dfsub) > 1){
+        dfcv <- apply(dfsub, 2, function(x){
+          sum(x>mean(x)) / length(x)
+        })
+        dfsub <- colMeans(dfsub)
+      }
+      dfsub <- setNames( as.numeric(dfsub), colnames(nmfResults[['point_scores']]) )
+      # dfcv <- setNames(dfcv, colnames(nmfResults[['point_scores']])  )
+      meandf[[gi]] <- ( dfsub - min(dfsub) ) / (max(dfsub) - min(dfsub))
+      # cvdf[[gi]] <- dfcv
+      dfsub_ordered <- sort(dfsub, decreasing = T)
+      dfnorm <- dfsub - dfsub_ordered[2]
+      dfnorm[dfnorm <0] <- 0
+      normdf[[gi]] <- dfnorm
+    }
+    normdf <- do.call(rbind, normdf)
+    gene_order <- c()
+    for( ri in 1:ncol(normdf) ){
+      subdf <- normdf[ order(normdf[,ri], decreasing=T), ]
+      gene_order <- c(gene_order, rownames(subdf)[subdf[,ri] > 0] )
+    }
+    gene_order <- c( gene_order, rownames(normdf)[!(rownames(normdf) %in% gene_order)] )
+    newdf <- reshape2::melt( data.frame('gene' = names(meandf), do.call(rbind, meandf), check.names = F), id.vars = 'gene', value.name = 'mean' )
+    # newdf$variability <- reshape2::melt( data.frame('gene' = names(cvdf), do.call(rbind, cvdf), check.names = F), id.vars = 'gene')$value
+    newdf$gene <- factor(newdf$gene, levels=gene_order)
+    newdf$variable <- factor(newdf$variable, levels=rev(sort(unique(newdf$variable))))
+
+    p <-
+    ggplot2::ggplot(
+      newdf, ggplot2::aes(y=variable, x=gene, fill=mean)
+    ) +
+      ggplot2::geom_raster() +
+      ggplot2::xlab('') + ggplot2::ylab('') +
+      ggplot2::theme_minimal(base_size=16) +
+      ggplot2::theme( axis.text.x = ggplot2::element_text(angle=90, hjust=1, vjust=0.5) ) +
+      ggplot2::scale_fill_viridis_c(name='Membership', option='rocket') +
+      ggplot2::ggtitle( plotTitle ) +
+      ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5))
+    width = length(gene_order) * 0.5 + 2
+    height = ncol(nmfResults[['point_scores']]) * 2 + 2
+    ggplot2::ggsave(paste0(params$out_dir, plotName, '_GeneMembership.png'), plot = p, height = height, width = width, units = 'cm')
   }
 
   if(verbose){ message('Done!') }

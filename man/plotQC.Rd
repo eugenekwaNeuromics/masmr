@@ -33,12 +33,18 @@ plotQC(
   \item{ \code{FOVMetrics}: Heatmap of FOVs, with each tile showing average metric values. Several metrics reported. }
   \item{ \code{CellMetrics_CellSize}: Mean cell size per 2D spatial bin (across entire tissue). }
   \item{ \code{CellMetrics_nCounts}: Mean cellular counts per 2D spatial bin (across entire tissue). }
+  \item{ \code{SpatialPatterns_SpatialPatterns}: Mean spatial pattern score per 2D spatial bin (across entire tissue). }
+  \item{ \code{SpatialPatterns_GeneMembership}: Heatmap showing extent of gene's expression explained by a given spatial pattern. }
   }
+
+  For more information on \code{SpatialPatterns}, see documentation for \code{getPNNMatrix} and \code{getPNNLatentFactors}.
 
   If missing certain files -- e.g. if no \code{fpkmFileName} is provided for \code{establishParams} -- some plots will be skipped.
 }
 \seealso{
 \link{ prepareCodebook }
 \link{ establishParams }
+\link{ getPNNMatrix }
+\link{ getPNNLatentFactors }
 }
 \examples{}
