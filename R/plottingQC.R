@@ -805,8 +805,8 @@ plotQC <- function(
     nnm <- getPNNMatrix(
       x=spotcalldf$Xm, y=spotcalldf$Ym, label=spotcalldf$g,
       delaunayTriangulation = T,
-      delaunayDistanceThreshold = NULL,
-      delaunayNNDegrees = c(1:4),
+      delaunayDistanceThreshold = 20,
+      delaunayNNDegrees = c(1:3),
       euclideanDistances = NULL,
       seed = seed,
       verbose = verbose
