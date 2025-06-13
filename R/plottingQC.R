@@ -32,7 +32,6 @@ getPNNMatrix <- function(
   ###
   if(length(x) != length(y) | length(x) != length(label) ){
     stop('x, y, and labels must be all of same length!')
-    break
   }
 
   if(!delaunayTriangulation & is.null(euclideanDistances)){
