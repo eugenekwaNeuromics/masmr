@@ -11,7 +11,7 @@ getPNNMatrix(
   label,
 
   delaunayTriangulation = TRUE,
-  delaunayDistanceThreshold = 20,
+  delaunayDistanceThreshold = NULL,
   delaunayNNDegrees = c(1:3),
 
   euclideanDistances = NULL,
@@ -27,7 +27,7 @@ getPNNMatrix(
 \item{ label }{ String, integer, or factor vector. Indicates the identity of each point (e.g. gene name, cell type). }
 
 \item{ delaunayTriangulation }{ Boolean (default \code{TRUE}). Determines whether to use the Delaunay Triangulation approach to finding neighbours (see details). If \code{FALSE}, then \code{euclideanDistances} must be specified. }
-\item{ delaunayDistanceThreshold }{ Numeric. Determines the maximum allowable distance for a connection in the Delaunay Triangulation graph. Edges longer than this distance are dropped. Units depend on the units of \code{x} and \code{y}.}
+\item{ delaunayDistanceThreshold }{ Numeric. Determines the maximum allowable distance for a connection in the Delaunay Triangulation graph. Edges longer than this distance are dropped. Units depend on the units of \code{x} and \code{y}. If unspecified, will attempt to find a reasonable value (see details). }
 \item{ delaunayNNDegrees }{ Integer vector. Determines the degree bins to find nearest neighbours. Bins are inclusive: i.e. "1" contains just 1st order neighbours, while "2" contains 1st and 2nd order neighbours. }
 
 \item{ euclideanDistances }{ Numeric vector. Determines the distance bins to find nearest neighbours. Bins are inclusive: i.e. a 10-distance bin contains a 5-distance bin. Units depend on the units of \code{x} and \code{y}.  }
@@ -48,6 +48,9 @@ getPNNMatrix(
   Alternatively, bins can be determined according to physical distances with \code{euclideanDistances}. However, this approach is slower.
 
   When \code{delaunayTriangulation} is \code{TRUE} and  \code{euclideanDistances} is specified, then both the DT and Euclidean methods are employed. Columns are labelled with a "DT" prefix for DT, and "EUD" for Euclidean. Columns will also contain the distance / degree of the bin used.
+
+  When \code{delaunayDistanceThreshold} is unspecified, will attempt to estimate by sampling 100 coordinates, and calculating the distance of the top 100 nearest neighbours to each of those 100. The threshold for \code{delaunayDistanceThreshold} will then be set to 4 standard deviations away from the mean, or 20 units (whichever is bigger).
+
 }
 \seealso{
 \link{ tripack::tri.mesh }

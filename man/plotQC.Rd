@@ -37,7 +37,7 @@ plotQC(
   \item{ \code{SpatialPatterns_GeneMembership}: Heatmap showing extent of gene's expression explained by a given spatial pattern. }
   }
 
-  For more information on \code{SpatialPatterns}, see documentation for \code{getPNNMatrix} and \code{getPNNLatentFactors}.
+  For more information on \code{SpatialPatterns}, see documentation for \code{getPNNMatrix} and \code{getPNNLatentFactors}. Additionally, the output of \code{getPNNMatrix} is saved as \code{PNNMatrix.csv} in the QC folder.
 
   If missing certain files -- e.g. if no \code{fpkmFileName} is provided for \code{establishParams} -- some plots will be skipped.
 }

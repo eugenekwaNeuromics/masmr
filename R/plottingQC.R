@@ -17,7 +17,7 @@ getPNNMatrix <- function(
 
   ## Delaunay Triangulation Option: fast, and number of times run depends on delaunayNNDegrees
   delaunayTriangulation = T,
-  delaunayDistanceThreshold = 20,
+  delaunayDistanceThreshold = NULL,
   delaunayNNDegrees = c(1:3),
 
   ## Distances option: much slower, but only done once
@@ -46,6 +46,24 @@ getPNNMatrix <- function(
   OUT <- list()
   all_coords <- x + (y * 1i)
   ###
+
+  ###
+  if( is.null(delaunayDistanceThreshold) ){
+    if(verbose){ message('delaunayDistanceThreshold not provided...Will approximate...') }
+
+    n_samples = 100
+    sampledCx <- sample(all_coords, size=pmin(n_samples, length(all_coords)), replace = F)
+    delaunayDistanceThreshold <- mean( sapply(sampledCx, function(cxi){
+      distances <- sort( Mod(all_coords - cxi), decreasing = F )
+      distances <- distances[1:pmin(100, length(distances))]
+      return( mean( distances[-1] ) + 4 * sd( distances[-1] ) )
+    }) )
+    delaunayDistanceThreshold <- pmax(delaunayDistanceThreshold, 20)
+
+    if(verbose){ message( paste0('Setting delaunayDistanceThreshold to ', delaunayDistanceThreshold, '...')) }
+  }
+  ###
+
 
   ###
   if(delaunayTriangulation){
@@ -88,11 +106,11 @@ getPNNMatrix <- function(
       if(verbose){ message('\nBuilding frequency matrix...') }
       frequency_matrix <- do.call(rbind, lapply(1:length(nns), function(i){
 
-        if(verbose){
-          if(i %% 1000 == 0 | i == 1){
-            message(paste0(i, ' of ', length(nns), '...'), appendLF = F)
-          }
-        }
+        # if(verbose){
+        #   if(i %% 1000 == 0 | i == 1){
+        #     message(paste0(i, ' of ', length(nns), '...'), appendLF = F)
+        #   }
+        # }
 
         ## Removal of convex hull
         nnvector <- nns[[i]]
@@ -117,7 +135,7 @@ getPNNMatrix <- function(
 
         return(values)
       }))
-      if(verbose){ message('') }
+      # if(verbose){ message('') }
 
       colnames(frequency_matrix) <-
         paste0('DT', sprintf(paste0('%0', max(nchar(delaunayNNDegrees)), 'd'), DEGREE), '_', levels(factor(label)))
@@ -786,86 +804,103 @@ plotQC <- function(
 
     nnm <- getPNNMatrix(
       x=spotcalldf$Xm, y=spotcalldf$Ym, label=spotcalldf$g,
-      delaunayTriangulation = T, delaunayDistanceThreshold = 20,
+      delaunayTriangulation = T,
+      delaunayDistanceThreshold = NULL,
       delaunayNNDegrees = c(1:4),
       euclideanDistances = NULL,
       seed = seed,
       verbose = verbose
       )
-    nmfResults = getPNNLatentFactors(
+
+    ## Save the NNM
+    if(verbose){ message('Saving PNNMatrix.csv...') }
+    data.table::fwrite(
+      data.frame(nnm, check.names = F),
+      paste0(params$out_dir, 'PNNMatrix.csv'),
+      row.names = F, showProgress = F
+    )
+
+    nmfResults <- try(getPNNLatentFactors(
       nnm,
       nFactors = 4,
       mergeSimilarFactors = TRUE,
       correlationThreshold = 0.1,
       seed = seed,
       verbose = verbose
-    )
-    df <- cbind( spotcalldf[,c('Xm', 'Ym', 'g', 'blank')], nmfResults[['point_scores']] )
+    ) )
 
-    plotTitle <- paste0('Spatial patterns of gene expression (k=', nmfResults$n_factors, ')')
-    p <-
-      ggplot2::ggplot(
-        reshape2::melt(df, measure.vars=colnames(nmfResults[['point_scores']])),
-        ggplot2::aes(x=Xm, y=Ym, z=value)) +
-        ggplot2::stat_summary_hex( fun = mean, bins=100 ) +
-        ggplot2::facet_wrap(~variable) +
-        ggplot2::scale_y_reverse() +
-        ggplot2::scale_fill_viridis_c(name='Score', option='turbo') +
-        ggplot2::theme_void(base_size=14) +
-        ggplot2::ggtitle(plotTitle) +
-        ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5) ) +
-        ggplot2::coord_fixed()
-    width = 14
-    height = 14
-    ggplot2::ggsave(paste0(params$out_dir, plotName, '_SpatialPatterns.png'), plot = p, height = height, width = width, units = 'cm')
+    if(inherits(nmfResults, 'try-error')){
+      warning('Something went wrong with getPNNLatentFactors...Unable to return SpatialPatterns plots...')
 
-    plotTitle <- paste0('Mean membership to each pattern (k=', nmfResults$n_factors, ')')
-    df <- df[!df$blank,]
-    normdf <- meandf <- cvdf <- list()
-    for( gi in sort(unique(as.character(df$g))) ){
-      dfsub <- df[df$g==gi, colnames(nmfResults[['point_scores']])]
-      dfcv <- rep(0, ncol(dfsub))
-      if(nrow(dfsub) > 1){
-        dfcv <- apply(dfsub, 2, function(x){
-          sum(x>mean(x)) / length(x)
-        })
-        dfsub <- colMeans(dfsub)
+    }else{
+
+      df <- cbind( spotcalldf[,c('Xm', 'Ym', 'g', 'blank')], nmfResults[['point_scores']] )
+
+      plotTitle <- paste0('Spatial patterns of gene expression (k=', nmfResults$n_factors, ')')
+      p <-
+        ggplot2::ggplot(
+          reshape2::melt(df, measure.vars=colnames(nmfResults[['point_scores']])),
+          ggplot2::aes(x=Xm, y=Ym, z=value)) +
+          ggplot2::stat_summary_hex( fun = mean, bins=100 ) +
+          ggplot2::facet_wrap(~variable) +
+          ggplot2::scale_y_reverse() +
+          ggplot2::scale_fill_viridis_c(name='Score', option='turbo') +
+          ggplot2::theme_void(base_size=14) +
+          ggplot2::ggtitle(plotTitle) +
+          ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5) ) +
+          ggplot2::coord_fixed()
+      width = 14
+      height = 14
+      ggplot2::ggsave(paste0(params$out_dir, plotName, '_SpatialPatterns.png'), plot = p, height = height, width = width, units = 'cm')
+
+      plotTitle <- paste0('Mean membership to each pattern (k=', nmfResults$n_factors, ')')
+      df <- df[!df$blank,]
+      normdf <- meandf <- cvdf <- list()
+      for( gi in sort(unique(as.character(df$g))) ){
+        dfsub <- df[df$g==gi, colnames(nmfResults[['point_scores']])]
+        dfcv <- rep(0, ncol(dfsub))
+        if(nrow(dfsub) > 1){
+          dfcv <- apply(dfsub, 2, function(x){
+            sum(x>mean(x)) / length(x)
+          })
+          dfsub <- colMeans(dfsub)
+        }
+        dfsub <- setNames( as.numeric(dfsub), colnames(nmfResults[['point_scores']]) )
+        # dfcv <- setNames(dfcv, colnames(nmfResults[['point_scores']])  )
+        meandf[[gi]] <- ( dfsub - min(dfsub) ) / (max(dfsub) - min(dfsub))
+        # cvdf[[gi]] <- dfcv
+        dfsub_ordered <- sort(dfsub, decreasing = T)
+        dfnorm <- dfsub - dfsub_ordered[2]
+        dfnorm[dfnorm <0] <- 0
+        normdf[[gi]] <- dfnorm
       }
-      dfsub <- setNames( as.numeric(dfsub), colnames(nmfResults[['point_scores']]) )
-      # dfcv <- setNames(dfcv, colnames(nmfResults[['point_scores']])  )
-      meandf[[gi]] <- ( dfsub - min(dfsub) ) / (max(dfsub) - min(dfsub))
-      # cvdf[[gi]] <- dfcv
-      dfsub_ordered <- sort(dfsub, decreasing = T)
-      dfnorm <- dfsub - dfsub_ordered[2]
-      dfnorm[dfnorm <0] <- 0
-      normdf[[gi]] <- dfnorm
-    }
-    normdf <- do.call(rbind, normdf)
-    gene_order <- c()
-    for( ri in 1:ncol(normdf) ){
-      subdf <- normdf[ order(normdf[,ri], decreasing=T), ]
-      gene_order <- c(gene_order, rownames(subdf)[subdf[,ri] > 0] )
-    }
-    gene_order <- c( gene_order, rownames(normdf)[!(rownames(normdf) %in% gene_order)] )
-    newdf <- reshape2::melt( data.frame('gene' = names(meandf), do.call(rbind, meandf), check.names = F), id.vars = 'gene', value.name = 'mean' )
-    # newdf$variability <- reshape2::melt( data.frame('gene' = names(cvdf), do.call(rbind, cvdf), check.names = F), id.vars = 'gene')$value
-    newdf$gene <- factor(newdf$gene, levels=gene_order)
-    newdf$variable <- factor(newdf$variable, levels=rev(sort(unique(newdf$variable))))
+      normdf <- do.call(rbind, normdf)
+      gene_order <- c()
+      for( ri in 1:ncol(normdf) ){
+        subdf <- normdf[ order(normdf[,ri], decreasing=T), ]
+        gene_order <- c(gene_order, rownames(subdf)[subdf[,ri] > 0] )
+      }
+      gene_order <- c( gene_order, rownames(normdf)[!(rownames(normdf) %in% gene_order)] )
+      newdf <- reshape2::melt( data.frame('gene' = names(meandf), do.call(rbind, meandf), check.names = F), id.vars = 'gene', value.name = 'mean' )
+      # newdf$variability <- reshape2::melt( data.frame('gene' = names(cvdf), do.call(rbind, cvdf), check.names = F), id.vars = 'gene')$value
+      newdf$gene <- factor(newdf$gene, levels=gene_order)
+      newdf$variable <- factor(newdf$variable, levels=rev(sort(unique(newdf$variable))))
 
-    p <-
-    ggplot2::ggplot(
-      newdf, ggplot2::aes(y=variable, x=gene, fill=mean)
-    ) +
-      ggplot2::geom_raster() +
-      ggplot2::xlab('') + ggplot2::ylab('') +
-      ggplot2::theme_minimal(base_size=16) +
-      ggplot2::theme( axis.text.x = ggplot2::element_text(angle=90, hjust=1, vjust=0.5) ) +
-      ggplot2::scale_fill_viridis_c(name='Membership', option='rocket') +
-      ggplot2::ggtitle( plotTitle ) +
-      ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5))
-    width = length(gene_order) * 0.5 + 2
-    height = ncol(nmfResults[['point_scores']]) * 2 + 2
-    ggplot2::ggsave(paste0(params$out_dir, plotName, '_GeneMembership.png'), plot = p, height = height, width = width, units = 'cm')
+      p <-
+      ggplot2::ggplot(
+        newdf, ggplot2::aes(y=variable, x=gene, fill=mean)
+      ) +
+        ggplot2::geom_raster() +
+        ggplot2::xlab('') + ggplot2::ylab('') +
+        ggplot2::theme_minimal(base_size=16) +
+        ggplot2::theme( axis.text.x = ggplot2::element_text(angle=90, hjust=1, vjust=0.5) ) +
+        ggplot2::scale_fill_viridis_c(name='Membership', option='rocket') +
+        ggplot2::ggtitle( plotTitle ) +
+        ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5))
+      width = length(gene_order) * 0.5 + 2
+      height = ncol(nmfResults[['point_scores']]) * 2 + 2
+      ggplot2::ggsave(paste0(params$out_dir, plotName, '_GeneMembership.png'), plot = p, height = height, width = width, units = 'cm')
+    }
   }
 
   if(verbose){ message('Done!') }
