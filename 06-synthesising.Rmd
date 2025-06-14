@@ -280,6 +280,86 @@ Below shows average number of spots per 2D bin.
 knitr::include_graphics( paste0('./images/', 'CellMetrics_nCounts', '.png') )
 ```
 
+### `SpatialPatterns` {-}
+
+This comprises two related plots. The first comprises the `SpatialPatterns` themselves. As default, we typically return four or fewer spatial patterns.
+
+```{r syn-spatialpatterns_spatialpatterns, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics( paste0('./images/', 'SpatialPatterns_SpatialPatterns', '.png') )
+```
+
+The second is `GeneMembership`, and is used to determine how much each spatial pattern contributes to a given gene's expression pattern. 
+
+```{r syn-spatialpatterns_genemembership, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics( paste0('./images/', 'SpatialPatterns_GeneMembership', '.png') )
+```
+
+These plots provide a quick way for users to determine if their genes are adopting spatial patterns of expression that matches their expectations.
+
+We also acknowledge that this analysis may have applications beyond QC. For users wishing to tune this analysis for their own downstream use (e.g. including more/fewer factors etc), we will now explain how these plots are generated under the hood.
+
+## Explaining how spatial patterns were identified 
+
+We first generate a table indicating how often a given gene X is a neighbour of gene Y. There are several ways to do this; we have found a fast and scaleable solution by creating a graph of spots with Delaunay triangulation, then scanning for neighbours at increasing degrees. For each spot belonging to gene X, calculate how often it is a neighbour of gene Y. [A first degree neighbour of a spot is immediately connected to that reference spot in a graph. Second degree neighbours are connected to first degree etc.]
+
+Users may alternatively, or simultaneously, wish to consider physical Euclidean distances (i.e. genes within 5 microns of a coordinate, within 10 microns etc). This method is typically slower and more memory intensive. 
+
+Both can be accomplished with our `getPNNMatrix` function (PNN stands for "Point's Nearest Neighbour").
+
+[Note: when run inside `plotQC`, the output of `getPNNMatrix` is saved as its own `.csv` file.]
+
+```{r syn-explaining-getNNMatrix }
+nearestNeighbourMatrix <- getPNNMatrix(
+  
+  x = spotcalldf$Xm, # The x coordinate
+  y = spotcalldf$Ym, # The y coordinate
+  label = spotcalldf$g, # The category that a given spot belongs to
+  
+  delaunayTriangulation = T, # Whether to use Delaunay Triangulation approach
+  delaunayDistanceThreshold = 20, # Ignore links longer than this distance (Xm is in microns, so this is 20 microns) 
+  delaunayNNDegrees = c(1:3), # Consider 1st, 1st + 2nd, and 1st + 2nd + 3rd order neighbours
+  
+  euclideanDistances = c(5, 10), # Consider spots <5, and <10 microns away
+  verbose = F # Turn off messages
+)
+print( paste0('Dimensions of nearest neighbour matrix: ', paste(dim(nearestNeighbourMatrix), collapse = ' x ') ))
+knitr::kable( nearestNeighbourMatrix[1:5, 1:5], format = 'html', booktabs = TRUE )
+```
+
+The end product is a table with spots as rows, and how often it gene Y is its neighbour for a given distance as columns. This table has many uses: e.g. users can look to see how the probability of gene X is a neighbour of gene Y changes with distance. For our plots, we use this matrix to cluster genes into spatial patterns. 
+
+[Note: `getPNNMatrix` is not just confined to looking at spatial patterns of genes, but can be applied to any point data (e.g. cell coordinates and cell types).]
+
+Clustering is accomplished here with non-negative matrix factorization (NMF). The number of 'clusters' (aka 'factors') is defined by the user. How to choose the appropriate number of factors is more of a personal decision, but the literature provides some helpful guidelines:
+
+* Estimate from the number of Principle Components that explain X% variance of your data (or use an elbow plot).
+* Try different numbers of factors and find the elbow where the reduction in residuals (e.g. sum of squared error) plateaus.
+
+[Note: we chose NMF because of the speed of the `RcppML` package. Users may also explore other approaches to clustering: e.g. hierarchical clustering, leiden etc.]
+
+To do so, users can use our `getPNNLatentFactors` function. This function not only runs NMF, but also merges similar factors together (based on a Pearson correlation threshold indicated by `correlationThreshold`). 
+
+```{r syn-explaining-getPNNLatentFactors }
+resultsOfNMF <- getPNNLatentFactors(
+  nearestNeighbourMatrix,
+  nFactors = 4, #Number of factors specified here
+  mergeSimilarFactors = TRUE,
+  correlationThreshold = 0.1, #If correlation >0.1 in W matrix ('point_scores'), merge
+  verbose = F
+)
+print( names(resultsOfNMF) )
+```
+
+What is returned is a list of three objects:
+
+* `n_factors`: the number of factors (after merging, if merging occured).
+* `point_scores`: the "score" for each row of `nearestNeighbourMatrix` (i.e. spot) in each of the factors (aka the W matrix). These have undergone min-max scaling per factor.
+* `coefficients`: the "score" for each column of `nearestNeighbourMatrix` in each of the factors (aka the H matrix). These have undergone min-max scaling per factor.
+
+`point_scores` is most relevant here, and can be appended to `spotcalldf` to tell us the score for each spot -- which we then plot in `SpatialPatterns` (averaging over 2D bins) and `GeneMembership` (averaging per gene).
+
+[Note: `getPNNLatentFactors` can actually be applied on any non-negative matrix, not just the one returned by `getPNNMatrix`.]
+
 ## Next steps
 
 Yay! Your MERFISH pipeline is now done. If satisfied with the results, downstream analysis can be done on `OUT_CELLEXPRESSION.csv.gz` matrix -- which contains cell-wise gene expression -- using standard single cell RNA-sequencing pipelines. [More advanced bioinformaticians may wish to perform custom analysis to address e.g. lower counts per cell in spatial technologies (that violates assumptions of some normalisation algorithms used in scRNA-seq).]

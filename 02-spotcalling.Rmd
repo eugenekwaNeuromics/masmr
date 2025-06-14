@@ -414,7 +414,7 @@ print(
 )
 ```
 
-The default is to plot registrations with respect to the reference FOV (blue). A window centred on the brightest pixel in the reference FOV is selected as default.
+The default is to plot registrations with respect to the reference FOV (red). A window centred on the brightest pixel in the reference FOV is selected as default.
 
 ```{r spotcall-checkshifts-after, fig.width=10, fig.height=10}
 p <- troubleshootPlots[['REGISTRATION_EVAL']][[1]][['POST_REGISTER']]
@@ -577,6 +577,7 @@ Another option is to consider how filtering changes quality control metrics: e.g
 ```{r spotcall-filter1}
 params$verbose <- TRUE ## To see output of filterDF, verbose is changed to True
 spotcalldf <- filterDF(spotcalldf, filtout>0, returnTroubleShootPlots = T, plotWindowRadius = 5)
+params$verbose <- FALSE ## Turn it back off if want to avoid messages entirely (warnings and errors will still be given)
 ```
 
 Perhaps the safest option -- in that one that does not require _a priori_ assumptions -- is to perform some decoding by eye on a small FOV region, and ensure that one's spotcalling pipeline returns results that agree with these manually obtained results. To attempt this, we provide a `returnTroubleShootPlots` parameter in `filterDF`. When set to `TRUE` (default `FALSE`), plots are returned showing pixel intensity images for each bit, overlaid with gene labels. [Do note that these plots are only available if users have kept their `imMetrics` environment, or have specified a list of images (`imList`).]

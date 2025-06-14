@@ -137,65 +137,29 @@ knitr::kable(stitchResults, format = 'html', booktabs = T)
 Users may wish to stitch both DAPI and MERFISH images to compare.
 
 ```{r stitch-actuallystitching-comparingdapi}
+## Keep the old stitch vector
 df <- stitchResults
 colnames(df)[2] <- paste0('merfish_', colnames(stitchResults)[2])
-stitchResults <- stitchImages(dapiList)
+
+## Re-run stitching but with DAPI images
+stitchResults <- stitchImages(dapiList, returnTroubleShootPlots = TRUE) 
 colnames(stitchResults)[2] <- paste0('dapi_', colnames(stitchResults)[2])
 stitchResults[,colnames(df)[2]] <- df[match(stitchResults[,1], df[,1]),2]
 knitr::kable(stitchResults, format = 'html', booktabs = T)
 ```
 
-Stitching can be evaluated visually. Below we show how a FOV to the right of our reference FOV aligns prior to and after stitching.  
+Stitching can be evaluated visually. These can be obtained by setting `returnTroubleShootPlots` in `stitchImages` to `TRUE`, or through manual use of the `stitch_troubleshootPlots` function (see documentation). The reference FOV is shown in red, while the neighbour is in blue.  
 
-```{r stitch-visualchecking}
-## Subset a portion of the reference image and query image
-refImage <- as.data.frame( imager::as.cimg( dapiList[[1]] ) ) #2_3
-querImage <- as.data.frame( imager::as.cimg( dapiList[[5]] ) ) #3_3, right of 2_3
-refImage <- refImage[refImage$x > 2000,] #Image dimensions: 2960 x 2960, values of x between 2000-2960
-querImage <- querImage[querImage$x < 960,] #Values of x between 0-960
-refImage$image <- names( dapiList )[1]
-querImage$image <- names( dapiList )[5]
+```{r stitch-visualchecking, message=FALSE}
+## Plots are returned for each neihgbour, will show just one below
+p_unstitched <- troubleshootPlots[['STITCH_EVAL']][[4]][['UNSTITCHED']]
+p_stitched <- troubleshootPlots[['STITCH_EVAL']][[4]][['STITCHED']]
 
-## Get corresponding shift vector
-shiftVector <- stitchResults[stitchResults$fov == names(dapiList)[5], 'dapi_shift_pixel']
-
-## Visualise: Note the difference between stitched and unstitched are the values added to x,y
+## Re-scale alpha so that low brightness is more solid
+## We find this makes the stitch visually clearer for DAPI images
 cowplot::plot_grid( plotlist = list(
-  ggplot() +
-    geom_raster( 
-      data=refImage, 
-      aes(x=x, y=y, alpha=value, fill = image), 
-      ) +
-    geom_raster( 
-      data=querImage, 
-      aes(x=x + 2960, y=y + 0, 
-          alpha=value, fill = image)) +
-    scale_fill_manual(name='', values=c('red', 'blue')) +
-    scale_alpha_continuous( range = c(0.75, 0) ) +
-    guides( alpha = 'none', fill = guide_legend(ncol=1) ) +
-    scale_y_reverse() +
-    theme_void( base_size= 14 ) +
-    theme(legend.position = 'bottom') +
-    coord_fixed() +
-    ggtitle('Unstitched'),
-  
-  ggplot() +
-    geom_raster( 
-      data=refImage, 
-      aes(x=x, y=y, alpha=value, fill = image), 
-      ) +
-    geom_raster( 
-      data=querImage, 
-      aes(x=x + Re(shiftVector), y=y + Im(shiftVector), 
-          alpha=value, fill = image)) +
-    scale_fill_manual(name='', values=c('red', 'blue')) +
-    scale_alpha_continuous( range = c(0.75, 0) ) +
-    guides( alpha = 'none', fill = guide_legend(ncol=1) ) +
-    scale_y_reverse() +
-    theme_void( base_size= 14 ) +
-    theme(legend.position = 'bottom') +
-    coord_fixed() +
-    ggtitle('Stitched')
+  p_unstitched  + ggtitle('Unstitched') + scale_alpha(range=c(0.75, 0)),
+  p_stitched  + ggtitle('Stitched') + scale_alpha(range=c(0.75, 0))
 ), nrow=1)
 ```
 

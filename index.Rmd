@@ -47,6 +47,7 @@ Currently depends on the following packages:
 * `reticulate`: for interfacing with Python (used during cell segmentation).
 * `parallel`: for getting number of cores on machine.
 * `Rcpp`, `RcppEigen`: for functions written in C++.
+* `RcppML`: for fast non-negative matrix factorization.
 * `igraph`: for clustering.
 * `rlang`: for parsing arguments.
 
@@ -56,7 +57,7 @@ library(masmr)
 knitr::write_bib(c(
   .packages(), 
   'ggplot2', 'viridis', 'data.table', 'RBioFormats', 'imager', 'EBImage', 'tripack', 
-  'reticulate', 'parallel', 'Rcpp', 'RcppEigen',
+  'reticulate', 'parallel', 'Rcpp', 'RcppEigen', 'RcppML',
   'scales', 'reshape2', 'igraph', 'rlang'
 ), 'packages.bib')
 ```
