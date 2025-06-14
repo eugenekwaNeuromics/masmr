@@ -56,3 +56,4 @@ troubleshooting
 url-your-book-url-like-httpsbookdown.orgyihuibookdown
 building-your-own-function-an-example
 maximum-intensity-projection
+explaining-how-spatial-patterns-were-identified

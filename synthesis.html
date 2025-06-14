@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-06-06" />
+<meta name="date" content="2025-06-14" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -259,8 +259,10 @@ div.csl-indent {
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#bitwiseerrorrates"><i class="fa fa-check"></i><code>BitwiseErrorRates</code></a></li>
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#fovmetrics"><i class="fa fa-check"></i><code>FOVMetrics</code></a></li>
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#cellmetrics"><i class="fa fa-check"></i><code>CellMetrics</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#spatialpatterns"><i class="fa fa-check"></i><code>SpatialPatterns</code></a></li>
 </ul></li>
-<li class="chapter" data-level="7.3" data-path="synthesis.html"><a href="synthesis.html#next-steps"><i class="fa fa-check"></i><b>7.3</b> Next steps</a></li>
+<li class="chapter" data-level="7.3" data-path="synthesis.html"><a href="synthesis.html#explaining-how-spatial-patterns-were-identified"><i class="fa fa-check"></i><b>7.3</b> Explaining how spatial patterns were identified</a></li>
+<li class="chapter" data-level="7.4" data-path="synthesis.html"><a href="synthesis.html#next-steps"><i class="fa fa-check"></i><b>7.4</b> Next steps</a></li>
 </ul></li>
 <li class="chapter" data-level="8" data-path="troubleshooting.html"><a href="troubleshooting.html"><i class="fa fa-check"></i><b>8</b> Troubleshooting</a>
 <ul>
@@ -501,9 +503,175 @@ div.csl-indent {
 <p>Below shows average number of spots per 2D bin.</p>
 <p><img src="images/CellMetrics_nCounts.png" width="100%" style="display: block; margin: auto;" /></p>
 </div>
+<div id="spatialpatterns" class="section level3 unnumbered hasAnchor">
+<h3><code>SpatialPatterns</code><a href="synthesis.html#spatialpatterns" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>This comprises two related plots. The first comprises the <code>SpatialPatterns</code> themselves. As default, we typically return four or fewer spatial patterns.</p>
+<p><img src="images/SpatialPatterns_SpatialPatterns.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>The second is <code>GeneMembership</code>, and is used to determine how much each spatial pattern contributes to a given gene’s expression pattern.</p>
+<p><img src="images/SpatialPatterns_GeneMembership.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>These plots provide a quick way for users to determine if their genes are adopting spatial patterns of expression that matches their expectations.</p>
+<p>We also acknowledge that this analysis may have applications beyond QC. For users wishing to tune this analysis for their own downstream use (e.g. including more/fewer factors etc), we will now explain how these plots are generated under the hood.</p>
 </div>
-<div id="next-steps" class="section level2 hasAnchor" number="7.3">
-<h2><span class="header-section-number">7.3</span> Next steps<a href="synthesis.html#next-steps" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+</div>
+<div id="explaining-how-spatial-patterns-were-identified" class="section level2 hasAnchor" number="7.3">
+<h2><span class="header-section-number">7.3</span> Explaining how spatial patterns were identified<a href="synthesis.html#explaining-how-spatial-patterns-were-identified" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We first generate a table indicating how often a given gene X is a neighbour of gene Y. There are several ways to do this; we have found a fast and scaleable solution by creating a graph of spots with Delaunay triangulation, then scanning for neighbours at increasing degrees. For each spot belonging to gene X, calculate how often it is a neighbour of gene Y. [A first degree neighbour of a spot is immediately connected to that reference spot in a graph. Second degree neighbours are connected to first degree etc.]</p>
+<p>Users may alternatively, or simultaneously, wish to consider physical Euclidean distances (i.e. genes within 5 microns of a coordinate, within 10 microns etc). This method is typically slower and more memory intensive.</p>
+<p>Both can be accomplished with our <code>getPNNMatrix</code> function (PNN stands for “Point’s Nearest Neighbour”).</p>
+<p>[Note: when run inside <code>plotQC</code>, the output of <code>getPNNMatrix</code> is saved as its own <code>.csv</code> file.]</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="synthesis.html#cb24-1" aria-hidden="true" tabindex="-1"></a>nearestNeighbourMatrix <span class="ot">&lt;-</span> <span class="fu">getPNNMatrix</span>(</span>
+<span id="cb24-2"><a href="synthesis.html#cb24-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb24-3"><a href="synthesis.html#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> spotcalldf<span class="sc">$</span>Xm, <span class="co"># The x coordinate</span></span>
+<span id="cb24-4"><a href="synthesis.html#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> spotcalldf<span class="sc">$</span>Ym, <span class="co"># The y coordinate</span></span>
+<span id="cb24-5"><a href="synthesis.html#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">label =</span> spotcalldf<span class="sc">$</span>g, <span class="co"># The category that a given spot belongs to</span></span>
+<span id="cb24-6"><a href="synthesis.html#cb24-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb24-7"><a href="synthesis.html#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">delaunayTriangulation =</span> T, <span class="co"># Whether to use Delaunay Triangulation approach</span></span>
+<span id="cb24-8"><a href="synthesis.html#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">delaunayDistanceThreshold =</span> <span class="dv">20</span>, <span class="co"># Ignore links longer than this distance (Xm is in microns, so this is 20 microns) </span></span>
+<span id="cb24-9"><a href="synthesis.html#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">delaunayNNDegrees =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="co"># Consider 1st, 1st + 2nd, and 1st + 2nd + 3rd order neighbours</span></span>
+<span id="cb24-10"><a href="synthesis.html#cb24-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb24-11"><a href="synthesis.html#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">euclideanDistances =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">10</span>), <span class="co"># Consider spots &lt;5, and &lt;10 microns away</span></span>
+<span id="cb24-12"><a href="synthesis.html#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> F <span class="co"># Turn off messages</span></span>
+<span id="cb24-13"><a href="synthesis.html#cb24-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-14"><a href="synthesis.html#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>( <span class="fu">paste0</span>(<span class="st">&#39;Dimensions of nearest neighbour matrix: &#39;</span>, <span class="fu">paste</span>(<span class="fu">dim</span>(nearestNeighbourMatrix), <span class="at">collapse =</span> <span class="st">&#39; x &#39;</span>) ))</span></code></pre></div>
+<pre><code>## [1] &quot;Dimensions of nearest neighbour matrix: 13146 x 735&quot;</code></pre>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="synthesis.html#cb26-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>( nearestNeighbourMatrix[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">format =</span> <span class="st">&#39;html&#39;</span>, <span class="at">booktabs =</span> <span class="cn">TRUE</span> )</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+DT1_ASCL1
+</th>
+<th style="text-align:right;">
+DT1_ASPM
+</th>
+<th style="text-align:right;">
+DT1_BCL11B
+</th>
+<th style="text-align:right;">
+DT1_Blank-1
+</th>
+<th style="text-align:right;">
+DT1_Blank-2
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<p>The end product is a table with spots as rows, and how often it gene Y is its neighbour for a given distance as columns. This table has many uses: e.g. users can look to see how the probability of gene X is a neighbour of gene Y changes with distance. For our plots, we use this matrix to cluster genes into spatial patterns.</p>
+<p>[Note: <code>getPNNMatrix</code> is not just confined to looking at spatial patterns of genes, but can be applied to any point data (e.g. cell coordinates and cell types).]</p>
+<p>Clustering is accomplished here with non-negative matrix factorization (NMF). The number of ‘clusters’ (aka ‘factors’) is defined by the user. How to choose the appropriate number of factors is more of a personal decision, but the literature provides some helpful guidelines:</p>
+<ul>
+<li>Estimate from the number of Principle Components that explain X% variance of your data (or use an elbow plot).</li>
+<li>Try different numbers of factors and find the elbow where the reduction in residuals (e.g. sum of squared error) plateaus.</li>
+</ul>
+<p>[Note: we chose NMF because of the speed of the <code>RcppML</code> package. Users may also explore other approaches to clustering: e.g. hierarchical clustering, leiden etc.]</p>
+<p>To do so, users can use our <code>getPNNLatentFactors</code> function. This function not only runs NMF, but also merges similar factors together (based on a Pearson correlation threshold indicated by <code>correlationThreshold</code>).</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="synthesis.html#cb27-1" aria-hidden="true" tabindex="-1"></a>resultsOfNMF <span class="ot">&lt;-</span> <span class="fu">getPNNLatentFactors</span>(</span>
+<span id="cb27-2"><a href="synthesis.html#cb27-2" aria-hidden="true" tabindex="-1"></a>  nearestNeighbourMatrix,</span>
+<span id="cb27-3"><a href="synthesis.html#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">nFactors =</span> <span class="dv">4</span>, <span class="co">#Number of factors specified here</span></span>
+<span id="cb27-4"><a href="synthesis.html#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">mergeSimilarFactors =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb27-5"><a href="synthesis.html#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">correlationThreshold =</span> <span class="fl">0.1</span>, <span class="co">#If correlation &gt;0.1 in W matrix (&#39;point_scores&#39;), merge</span></span>
+<span id="cb27-6"><a href="synthesis.html#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> F</span>
+<span id="cb27-7"><a href="synthesis.html#cb27-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-8"><a href="synthesis.html#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>( <span class="fu">names</span>(resultsOfNMF) )</span></code></pre></div>
+<pre><code>## [1] &quot;n_factors&quot;    &quot;point_scores&quot; &quot;coefficients&quot;</code></pre>
+<p>What is returned is a list of three objects:</p>
+<ul>
+<li><code>n_factors</code>: the number of factors (after merging, if merging occured).</li>
+<li><code>point_scores</code>: the “score” for each row of <code>nearestNeighbourMatrix</code> (i.e. spot) in each of the factors (aka the W matrix). These have undergone min-max scaling per factor.</li>
+<li><code>coefficients</code>: the “score” for each column of <code>nearestNeighbourMatrix</code> in each of the factors (aka the H matrix). These have undergone min-max scaling per factor.</li>
+</ul>
+<p><code>point_scores</code> is most relevant here, and can be appended to <code>spotcalldf</code> to tell us the score for each spot – which we then plot in <code>SpatialPatterns</code> (averaging over 2D bins) and <code>GeneMembership</code> (averaging per gene).</p>
+<p>[Note: <code>getPNNLatentFactors</code> can actually be applied on any non-negative matrix, not just the one returned by <code>getPNNMatrix</code>.]</p>
+</div>
+<div id="next-steps" class="section level2 hasAnchor" number="7.4">
+<h2><span class="header-section-number">7.4</span> Next steps<a href="synthesis.html#next-steps" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Yay! Your MERFISH pipeline is now done. If satisfied with the results, downstream analysis can be done on <code>OUT_CELLEXPRESSION.csv.gz</code> matrix – which contains cell-wise gene expression – using standard single cell RNA-sequencing pipelines. [More advanced bioinformaticians may wish to perform custom analysis to address e.g. lower counts per cell in spatial technologies (that violates assumptions of some normalisation algorithms used in scRNA-seq).]</p>
 <p>If unsatisfied, users can go back and re-process their data with tweaked parameters. Suggestions for troubleshooting are provided in the next chapter.</p>
 

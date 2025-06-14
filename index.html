@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-06-07" />
+<meta name="date" content="2025-06-13" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -237,8 +237,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#bitwiseerrorrates"><i class="fa fa-check"></i><code>BitwiseErrorRates</code></a></li>
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#fovmetrics"><i class="fa fa-check"></i><code>FOVMetrics</code></a></li>
 <li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#cellmetrics"><i class="fa fa-check"></i><code>CellMetrics</code></a></li>
+<li class="chapter" data-level="" data-path="synthesis.html"><a href="synthesis.html#spatialpatterns"><i class="fa fa-check"></i><code>SpatialPatterns</code></a></li>
 </ul></li>
-<li class="chapter" data-level="7.3" data-path="synthesis.html"><a href="synthesis.html#next-steps"><i class="fa fa-check"></i><b>7.3</b> Next steps</a></li>
+<li class="chapter" data-level="7.3" data-path="synthesis.html"><a href="synthesis.html#explaining-how-spatial-patterns-were-identified"><i class="fa fa-check"></i><b>7.3</b> Explaining how spatial patterns were identified</a></li>
+<li class="chapter" data-level="7.4" data-path="synthesis.html"><a href="synthesis.html#next-steps"><i class="fa fa-check"></i><b>7.4</b> Next steps</a></li>
 </ul></li>
 <li class="chapter" data-level="8" data-path="troubleshooting.html"><a href="troubleshooting.html"><i class="fa fa-check"></i><b>8</b> Troubleshooting</a>
 <ul>
@@ -270,7 +272,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="header">
 <h1 class="title">Introduction to the masmr project</h1>
 <p class="author"><em>Eugene Kwa</em></p>
-<p class="date"><em>2025-06-07</em></p>
+<p class="date"><em>2025-06-13</em></p>
 </div>
 <div id="about-masmr" class="section level1 hasAnchor" number="1">
 <h1><span class="header-section-number">Chapter 1</span> About <code>masmr</code><a href="index.html#about-masmr" class="anchor-section" aria-label="Anchor link to header"></a></h1>
@@ -294,6 +296,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><code>reticulate</code>: for interfacing with Python (used during cell segmentation).</li>
 <li><code>parallel</code>: for getting number of cores on machine.</li>
 <li><code>Rcpp</code>, <code>RcppEigen</code>: for functions written in C++.</li>
+<li><code>RcppML</code>: for fast non-negative matrix factorization.</li>
 <li><code>igraph</code>: for clustering.</li>
 <li><code>rlang</code>: for parsing arguments.</li>
 </ul>
