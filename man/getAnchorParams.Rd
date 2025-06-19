@@ -10,8 +10,8 @@ getAnchorParams(
     out_dir,
     returnTroubleShootPlots = FALSE,
     imageFunctions = list(
-      'brightness_min' = imsBrightnessMin,
-      'brightness_max' = imsBrightnessMax
+      'brightness_min' = imsBrightnessMin_MIP,
+      'brightness_max' = imsBrightnessMax_MIP
     ),
     summaryFunctions = list(
       'brightness_min' = conservativeMean,
@@ -30,7 +30,7 @@ getAnchorParams(
 \item{ anchors }{ Character vector. Subset of \code{params$fov_names} to load. If unspecified, automatically determined: see Details below. }
 \item{ out_dir }{ Character. Output directory. If unspecified, read from \code{params$out_dir}. }
 \item{ returnTroubleShootPlots }{ Boolean. Determines if troubleshooting plots are to be returned. }
-\item{ imageFunctions }{ Named list of functions, with names also shared by \code{summaryFunctions}. Functions chosen must return a single numeric per image. Currently defaults to \code{imsBrightnessMin} and \code{imsBrightnessMax}. }
+\item{ imageFunctions }{ Named list of functions, with names also shared by \code{summaryFunctions}. Functions chosen must return a single numeric per image. Currently defaults to \code{imsBrightnessMin_MIP} and \code{imsBrightnessMax_MIP}. }
 \item{ summaryFunctions }{ Named list of functions, with names also shared by \code{imageFunctions}. Functions chosen to summarise one or more values. Currently defaults to \code{conservativeMean}. }
 \item{ anchorMode }{ Character. Determines if anchor FOVs are to be selected from regularly spaced FOVs (\code{'grid'}) or randomly sampled (\code{'sample', default}). }
 \item{ nSamples }{ Integer. Number of FOVs to sample. Used when \code{anchors} is unspecified, and \code{anchorMode} is \code{sample}. }
@@ -66,8 +66,8 @@ getAnchorParams(
 }
 \seealso{
 \link{readImageList}
-\link{imsBrightnessMin}
-\link{imsBrightnessMax}
+\link{imsBrightnessMin_MIP}
+\link{imsBrightnessMax_MIP}
 \link{conservativeMean}
 }
 \examples{

@@ -1,6 +1,6 @@
 # `masmr`
 
-Project status: Under construction (2025/06/13).
+Project status: Under construction (2025/06/19).
 
 The `masmr` package is designed to allow users to build custom image processing pipelines, with a focus on MERFISH decoding.
 

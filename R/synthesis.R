@@ -300,6 +300,10 @@ synthesiseData <- function(
   gcx$y_microns <- Im( unlist(new_gcx)[match(gcx$fov, names(new_gcx))] )
   params$global_coords_final <<- gcx
   data.table::fwrite(gcx, paste0(params$out_dir, 'OUT_GLOBALCOORD.csv'), row.names = F)
+  # finalGlobalCoords <- gcx
+
+  ## For redundancy, create a winLose temp file
+  winLoseFile <- paste0( params$out_dir, 'TEMP_WINLOSE.csv' )
 
   ## Begin looping through files to synthesise data
   if(verbose){ message('\nSynthesising data...') }
@@ -341,38 +345,222 @@ synthesiseData <- function(
 
     ## Load neighbours
     if(removeRedundancy){
+
       if(verbose){ message('\nRemoving redundant spot calls...', appendLF = F) }
       fovNeighbours <- stitchResults[grepl(paste0('STITCH_', fovName, '.csv'), names(stitchResults))][[1]]
-      for( i in 1:nrow(fovNeighbours) ){
+      colnames(fovNeighbours) <- tolower(colnames(fovNeighbours))
+      if( sum(colnames(fovNeighbours)=='fov') != 1){
+        stop('STITCH files need to have a single column named "fov"!')
+      }
+      fovNeighbours <- as.vector( fovNeighbours[,'fov'] )
 
-        ## Load neighbouring spotcalld
-        neighbourfx <- spotcallfs[grepl( paste0(fovNeighbours$fov[i], '.csv'), spotcallfs )]
+      redundancyWinnersLosers <- NULL
+      if(file.exists(winLoseFile)){
+        redundancyWinnersLosers <- data.table::fread(winLoseFile, data.table = F)
+      }
+
+      ## Not strict enough
+      # ## NEWER ##
+      # ## Load all data
+      # allNeighbours <- list()
+      # for( i in 1:length(fovNeighbours) ){
+      #   neighbourfx <- spotcallfs[grepl( paste0(fovNeighbours[i], '.csv'), spotcallfs )]
+      #   if( length(neighbourfx)==0 ){ next }
+      #   neighbourdf <- try(data.table::fread(neighbourfx, data.table = F))
+      #   if(inherits(neighbourdf, 'try-error')){
+      #     stop('Unable to read neighbouring spotcall file!')
+      #   }
+      #
+      #   neighbour_coords <-
+      #     neighbourdf$WX * as.numeric(resolutions$per_pixel_microns[1])  +
+      #     1i * neighbourdf$WY * as.numeric(resolutions$per_pixel_microns[2]) +
+      #     gcx[match(neighbourdf$fov, gcx$fov), 'x_microns'] +
+      #     1i * gcx[match(neighbourdf$fov, gcx$fov), 'y_microns']
+      #   neighbourdf$Xm <- Re(neighbour_coords)
+      #   neighbourdf$Ym <- Im(neighbour_coords)
+      #
+      #   neighbourdf <- neighbourdf[
+      #     neighbourdf$Xm >= min(spotcalldf$Xm)
+      #     & neighbourdf$Xm < max(spotcalldf$Xm)
+      #     & neighbourdf$Ym >= min(spotcalldf$Ym)
+      #     & neighbourdf$Ym < max(spotcalldf$Ym),
+      #   ]
+      #   if( nrow(neighbourdf) == 0 ){ next }
+      #   allNeighbours[[ length(allNeighbours) + 1 ]] <- neighbourdf
+      # }
+      # ## Now split overlaps even further
+      # for(i in 1:length(allNeighbours) ){
+      #   ref <- allNeighbours[[i]]
+      #   everyoneElse <- c(1:length(allNeighbours))[-i]
+      #   if(length(everyoneElse)==0){ next }
+      #   for(j in everyoneElse){
+      #     quer <- allNeighbours[[j]]
+      #     querbool <- (
+      #       quer$Xm >= min(ref$Xm)
+      #       & quer$Xm < max(ref$Xm)
+      #       & quer$Ym >= min(ref$Ym)
+      #       & quer$Ym < max(ref$Ym)
+      #     )
+      #     quer <- quer[querbool,]
+      #     if(nrow(quer)==0){ next }
+      #     boundingWindow <- c(range(quer$Xm), range(quer$Ym) )
+      #     underContention <-
+      #       (ref$Xm >= boundingWindow[1]
+      #        & ref$Xm <  boundingWindow[2]
+      #        & ref$Ym >= boundingWindow[3]
+      #        & ref$Ym <  boundingWindow[4])
+      #
+      #     ## If there are more spots in window from neighbour, filter out the reference FOV
+      #     if(sum(underContention) < ( nrow(quer) )){
+      #       allNeighbours[[length(allNeighbours) + 1]] <- quer
+      #       allNeighbours[[i]] <- ref[!underContention,]
+      #       allNeighbours[[j]] <- allNeighbours[[j]][!querbool,]
+      #     }else{
+      #       allNeighbours[[length(allNeighbours) + 1]] <- ref[underContention,]
+      #       allNeighbours[[i]] <- ref[!underContention,]
+      #       allNeighbours[[j]] <- allNeighbours[[j]][!querbool,]
+      #     }
+      #   }
+      # }
+      # ## Now compare against our spotcalldf
+      # for(i in 1:length(allNeighbours)){
+      #   neighbourdf <- allNeighbours[[i]]
+      #   if(nrow(neighbourdf)==0){ next }
+      #   boundingWindow <- c(range(neighbourdf$Xm), range(neighbourdf$Ym) )
+      #   underContention <-
+      #     (spotcalldf$Xm >= boundingWindow[1]
+      #      & spotcalldf$Xm <  boundingWindow[2]
+      #      & spotcalldf$Ym >= boundingWindow[3]
+      #      & spotcalldf$Ym <  boundingWindow[4])
+      #   ## If there are more spots in window from neighbour, filter out the current FOV
+      #   if(sum(underContention) < ( nrow(neighbourdf) )){
+      #     spotcalldf <- spotcalldf[!underContention,]
+      #   }
+      # }
+      # ## NEWER ##
+
+
+      ## OLDER ##
+      for( i in 1:length(fovNeighbours) ){
+
+        ## First, check if fovNeighbours[i] is already competed against
+        checkCompetition <- NULL
+        if(!is.null(redundancyWinnersLosers)){
+          checkCompetition <- redundancyWinnersLosers[
+            redundancyWinnersLosers$reference==fovNeighbours[i]
+            & redundancyWinnersLosers$query==fovName,]
+        }
+
+        neighbourfx <- spotcallfs[grepl( paste0(fovNeighbours[i], '.csv'), spotcallfs )]
         if( length(neighbourfx)==0 ){ next }
         neighbourdf <- try(data.table::fread(neighbourfx, data.table = F))
         if(inherits(neighbourdf, 'try-error')){
           stop('Unable to read neighbouring spotcall file!')
         }
-        neighbourdf$WX <- neighbourdf$WX + Re( round(fovNeighbours[i, 'shift_pixel']) )
-        neighbourdf$WY <- neighbourdf$WY + Im( round(fovNeighbours[i, 'shift_pixel']) )
+        neighbour_coords <-
+          neighbourdf$WX * as.numeric(resolutions$per_pixel_microns[1])  +
+          1i * neighbourdf$WY * as.numeric(resolutions$per_pixel_microns[2]) +
+          gcx[match(neighbourdf$fov, gcx$fov), 'x_microns'] +
+          1i * gcx[match(neighbourdf$fov, gcx$fov), 'y_microns']
+        neighbourdf$Xm <- Re(neighbour_coords)
+        neighbourdf$Ym <- Im(neighbour_coords)
+
         neighbourdf <- neighbourdf[
-          neighbourdf$WX >= min(spotcalldf$WX)
-          & neighbourdf$WX < max(spotcalldf$WX)
-          & neighbourdf$WY >= min(spotcalldf$WY)
-          & neighbourdf$WY < max(spotcalldf$WY),
+          neighbourdf$Xm >= min(spotcalldf$Xm)
+          & neighbourdf$Xm < max(spotcalldf$Xm)
+          & neighbourdf$Ym >= min(spotcalldf$Ym)
+          & neighbourdf$Ym < max(spotcalldf$Ym),
+        ]
+        if(!is.null(checkCompetition)){
+          if( nrow(checkCompetition) == 1 ){
+            if( !as.logical(checkCompetition$refWon) ){
+              previousBound <- c(
+                checkCompetition$queryBound1,
+                checkCompetition$queryBound2,
+                checkCompetition$queryBound3,
+                checkCompetition$queryBound4
+              )
+              neighbourdf <- neighbourdf[
+                !(neighbourdf$Xm >= previousBound[1]
+                & neighbourdf$Xm < previousBound[2]
+                & neighbourdf$Ym >= previousBound[3]
+                & neighbourdf$Ym < previousBound[4]),
+              ]
+            }
+          }
+        }
+        if( nrow(neighbourdf) == 0 ){ next }
+        boundingWindow <- c(range(neighbourdf$Xm), range(neighbourdf$Ym) )
+        underContention <-
+          (spotcalldf$Xm >= boundingWindow[1]
+           & spotcalldf$Xm <  boundingWindow[2]
+           & spotcalldf$Ym >= boundingWindow[3]
+           & spotcalldf$Ym <  boundingWindow[4])
+
+        ## NEW ##
+        ## Double check that bounding window is correctly sized
+        newBounding <- c(
+          range(spotcalldf$Xm[underContention]), range(spotcalldf$Ym[underContention])
+        )
+        neighbourdf <- neighbourdf[
+          neighbourdf$Xm >= newBounding[1]
+          & neighbourdf$Xm < newBounding[2]
+          & neighbourdf$Ym >= newBounding[3]
+          & neighbourdf$Ym < newBounding[4],
         ]
         if( nrow(neighbourdf) == 0 ){ next }
-        boundingWindow <- c(range(neighbourdf$WX), range(neighbourdf$WY) )
+        boundingWindow <- c(range(neighbourdf$Xm), range(neighbourdf$Ym) )
         underContention <-
-          (spotcalldf$WX >= boundingWindow[1]
-           & spotcalldf$WX <  boundingWindow[2]
-           & spotcalldf$WY >= boundingWindow[3]
-           & spotcalldf$WY <  boundingWindow[4])
+          (spotcalldf$Xm >= boundingWindow[1]
+           & spotcalldf$Xm <  boundingWindow[2]
+           & spotcalldf$Ym >= boundingWindow[3]
+           & spotcalldf$Ym <  boundingWindow[4]) & underContention #From before
+        ## NEW ##
 
+        ## First check if competition has been done before
         ## If there are more spots in window from neighbour, filter out the current FOV
-        if(sum(underContention) < nrow(neighbourdf)){
-          spotcalldf <- spotcalldf[!underContention,]
+        competedBefore = F
+        if(!is.null(checkCompetition)){
+          competedBefore = T
+          if(nrow(checkCompetition)==1){
+            if( as.logical(checkCompetition$refWon) ){
+              spotcalldf <- spotcalldf[!underContention,]
+            }
+            next
+          }
         }
+
+        if( (sum(underContention) < nrow(neighbourdf)) & !competedBefore){
+          spotcalldf <- spotcalldf[!underContention,]
+          newWinLose <- data.frame(
+            'reference' = fovName,
+            'query' = fovNeighbours[i],
+            'refWon' = FALSE,
+            'queryBound1' = boundingWindow[1],
+            'queryBound2' = boundingWindow[2],
+            'queryBound3' = boundingWindow[3],
+            'queryBound4' = boundingWindow[4]
+          )
+        }else{
+          newWinLose <- data.frame(
+            'reference' = fovName,
+            'query' = fovNeighbours[i],
+            'refWon' = TRUE,
+            'queryBound1' = boundingWindow[1],
+            'queryBound2' = boundingWindow[2],
+            'queryBound3' = boundingWindow[3],
+            'queryBound4' = boundingWindow[4]
+          )
+        }
+
+        if(is.null(redundancyWinnersLosers)){
+          redundancyWinnersLosers <- newWinLose
+        }else{
+          redundancyWinnersLosers <- rbind( redundancyWinnersLosers, newWinLose )
+        }
+        data.table::fwrite(redundancyWinnersLosers, file = winLoseFile, row.names = F, append = F, quote = F)
       }
+      ## OLDER ##
     }
     if(nrow(spotcalldf)==0){
       if(verbose){ message(paste0('No spots left in this FOV...'), appendLF = F) }
@@ -536,6 +724,7 @@ synthesiseData <- function(
 
   ## Note that above tends to create duplicate entries in CELLEXPRESSION, have to load and edit
   if(verbose){ message('\nCleaning up...') }
+  if(file.exists(winLoseFile)){ file.remove( winLoseFile ) }
   cellMetaClean <- cellMeta <- data.table::fread(
     paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
     data.table = F)
