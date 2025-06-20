@@ -441,24 +441,26 @@ plotQC <- function(
       ' | Blank %: ', round(100 * sum(df$Freq[df$blank])/sum(df$Freq), digits=3), '% (',
       sum(df$Freq[df$blank]), ' counts)'
     )
-    p <-
-      ggplot2::ggplot( df ) +
-      ggplot2::geom_text( ggplot2::aes(
-        x= log10(1+fpkm),
-        y= log10(1+Freq),
-        label = Var1,
-        colour=spottype,
-        alpha = blank
-      ) ) +
-      ggplot2::scale_y_continuous( labels = scales::math_format() ) +
-      ggplot2::scale_x_continuous( labels = scales::math_format() ) +
-      ggplot2::theme_minimal(base_size=14) +
-      ggplot2::scale_colour_manual( name='Spot type', values=c('Gene'='black', 'Blank'='red', 'New blank'='blue')) +
-      ggplot2::scale_alpha_manual( values=c('TRUE' = 0.25, 'FALSE'=1) ) +
-      ggplot2::ylab('Log10 nSpots') + ggplot2::xlab( 'Log10 FPKM') +
-      ggplot2::ggtitle( plotTitle ) +
-      ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5)) +
-      ggplot2::guides(alpha='none')
+    suppressWarnings({
+      p <-
+        ggplot2::ggplot( df ) +
+        ggplot2::geom_text( ggplot2::aes(
+          x= log10(1+fpkm),
+          y= log10(1+Freq),
+          label = Var1,
+          colour=spottype,
+          alpha = blank
+        ) ) +
+        ggplot2::scale_y_continuous( labels = scales::math_format() ) +
+        ggplot2::scale_x_continuous( labels = scales::math_format() ) +
+        ggplot2::theme_minimal(base_size=14) +
+        ggplot2::scale_colour_manual( name='Spot type', values=c('Gene'='black', 'Blank'='red', 'New blank'='blue')) +
+        ggplot2::scale_alpha_manual( values=c('TRUE' = 0.25, 'FALSE'=1) ) +
+        ggplot2::ylab('Log10 nSpots') + ggplot2::xlab( 'Log10 FPKM') +
+        ggplot2::ggtitle( plotTitle ) +
+        ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5)) +
+        ggplot2::guides(alpha='none')
+      })
 
     ggplot2::ggsave(paste0(params$out_dir, plotName, '.png'), plot = p, height = 16, width = 30, units = 'cm')
 
@@ -477,23 +479,25 @@ plotQC <- function(
     plotTitle <- paste0(
       'Distribution of Cosine Distances'
     )
-    p <-
-      ggplot2::ggplot(
-        df,
-        ggplot2::aes(
-          y= COS,
-          x= factor(g, levels = gOrder),
-          colour=spottype
-        )
-      ) +
-      ggplot2::geom_violin( fill='transparent' ) +
-      ggplot2::geom_boxplot( fill='transparent', width=0.25 ) +
-      ggplot2::theme_minimal(base_size=14) +
-      ggplot2::scale_colour_manual( name='Spot type', values=c('Gene'='black', 'Blank'='red', 'New blank'='blue')) +
-      ggplot2::ylab('Cosine distance') + ggplot2::xlab('') +
-      ggplot2::ggtitle( plotTitle ) +
-      ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5),
-                     axis.text = ggplot2::element_text(angle=90, hjust=1, vjust=0.5))
+    suppressWarnings({
+      p <-
+        ggplot2::ggplot(
+          df,
+          ggplot2::aes(
+            y= COS,
+            x= factor(g, levels = gOrder),
+            colour=spottype
+          )
+        ) +
+        ggplot2::geom_violin( fill='transparent' ) +
+        ggplot2::geom_boxplot( fill='transparent', width=0.25 ) +
+        ggplot2::theme_minimal(base_size=14) +
+        ggplot2::scale_colour_manual( name='Spot type', values=c('Gene'='black', 'Blank'='red', 'New blank'='blue')) +
+        ggplot2::ylab('Cosine distance') + ggplot2::xlab('') +
+        ggplot2::ggtitle( plotTitle ) +
+        ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5),
+                       axis.text = ggplot2::element_text(angle=90, hjust=1, vjust=0.5))
+    })
 
     width = length(gOrder) * 0.75
     height = 0.1 * width
@@ -511,24 +515,26 @@ plotQC <- function(
     plotTitle <- paste0(
       'Spot spatial distributions'
     )
-    p <-
-      ggplot2::ggplot(
-        spotcalldf,
-        ggplot2::aes(
-          y= WY,
-          x= WX
-        )
-      ) +
-      ggplot2::facet_wrap( ~spottype ) +
-      ggplot2::geom_hex( bins=100 ) +
-      ggplot2::theme_minimal(base_size=14) +
-      ggplot2::scale_x_continuous( limits = c(0, as.numeric(resolutions$xydimensions_pixels[1])) ) +
-      ggplot2::scale_y_continuous( limits = c(0, as.numeric(resolutions$xydimensions_pixels[2])) ) +
-      ggplot2::ylab('Y pixel coordinate') + ggplot2::xlab('X pixel coordinate') +
-      ggplot2::scale_fill_viridis_c(name='nSpots', option='turbo', trans='log10') +
-      ggplot2::ggtitle( plotTitle ) +
-      ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5)) +
-      ggplot2::coord_fixed()
+    suppressWarnings({
+      p <-
+        ggplot2::ggplot(
+          spotcalldf,
+          ggplot2::aes(
+            y= WY,
+            x= WX
+          )
+        ) +
+        ggplot2::facet_wrap( ~spottype ) +
+        ggplot2::geom_hex( bins=100 ) +
+        ggplot2::theme_minimal(base_size=14) +
+        ggplot2::scale_x_continuous( limits = c(0, as.numeric(resolutions$xydimensions_pixels[1])) ) +
+        ggplot2::scale_y_continuous( limits = c(0, as.numeric(resolutions$xydimensions_pixels[2])) ) +
+        ggplot2::ylab('Y pixel coordinate') + ggplot2::xlab('X pixel coordinate') +
+        ggplot2::scale_fill_viridis_c(name='nSpots', option='turbo', trans='log10') +
+        ggplot2::ggtitle( plotTitle ) +
+        ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5)) +
+        ggplot2::coord_fixed()
+    })
 
     width = 14 * 2
     height = 14
@@ -546,25 +552,27 @@ plotQC <- function(
     plotTitle <- paste0(
       'Mean cosine distance across spatial bins'
     )
-    p <-
-      ggplot2::ggplot(
-        df,
-        ggplot2::aes(
-          y= WY,
-          x= WX,
-          z= COS
-        )
-      ) +
-      ggplot2::facet_wrap( ~spottype ) +
-      ggplot2::stat_summary_hex( bins=100 ) +
-      ggplot2::theme_minimal(base_size=14) +
-      ggplot2::scale_x_continuous( limits = c(0, as.numeric(resolutions$xydimensions_pixels[1])) ) +
-      ggplot2::scale_y_continuous( limits = c(0, as.numeric(resolutions$xydimensions_pixels[2])) ) +
-      ggplot2::ylab('Y pixel coordinate') + ggplot2::xlab('X pixel coordinate') +
-      ggplot2::scale_fill_viridis_c(name='Mean Cosine', option='turbo') +
-      ggplot2::ggtitle( plotTitle ) +
-      ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5)) +
-      ggplot2::coord_fixed()
+    suppressWarnings({
+      p <-
+        ggplot2::ggplot(
+          df,
+          ggplot2::aes(
+            y= WY,
+            x= WX,
+            z= COS
+          )
+        ) +
+        ggplot2::facet_wrap( ~spottype ) +
+        ggplot2::stat_summary_hex( bins=100 ) +
+        ggplot2::theme_minimal(base_size=14) +
+        ggplot2::scale_x_continuous( limits = c(0, as.numeric(resolutions$xydimensions_pixels[1])) ) +
+        ggplot2::scale_y_continuous( limits = c(0, as.numeric(resolutions$xydimensions_pixels[2])) ) +
+        ggplot2::ylab('Y pixel coordinate') + ggplot2::xlab('X pixel coordinate') +
+        ggplot2::scale_fill_viridis_c(name='Mean Cosine', option='turbo') +
+        ggplot2::ggtitle( plotTitle ) +
+        ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5)) +
+        ggplot2::coord_fixed()
+    })
 
     width = 14 * 2
     height = 14
@@ -589,23 +597,25 @@ plotQC <- function(
     plotTitle <- paste0(
       'Influence of bit status on detection rate (all spots)'
     )
-    p <-
-      ggplot2::ggplot(
-        df,
-        ggplot2::aes(
-          y= Freq,
-          x= factor(value),
-          colour=factor(value)
-        )
-      ) +
-      ggplot2::facet_wrap( ~variable, scales='free' ) +
-      ggplot2::geom_boxplot() +
-      ggplot2::theme_minimal(base_size=14) +
-      ggplot2::ylab('N spots per gene') + ggplot2::xlab('Bit status') +
-      ggplot2::scale_colour_manual(values=c('0'='black', '1'='red')) +
-      ggplot2::ggtitle( plotTitle ) +
-      ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5), legend.position = 'none') +
-      ggplot2::scale_y_log10()
+    suppressWarnings({
+      p <-
+        ggplot2::ggplot(
+          df,
+          ggplot2::aes(
+            y= Freq,
+            x= factor(value),
+            colour=factor(value)
+          )
+        ) +
+        ggplot2::facet_wrap( ~variable, scales='free' ) +
+        ggplot2::geom_boxplot() +
+        ggplot2::theme_minimal(base_size=14) +
+        ggplot2::ylab('N spots per gene') + ggplot2::xlab('Bit status') +
+        ggplot2::scale_colour_manual(values=c('0'='black', '1'='red')) +
+        ggplot2::ggtitle( plotTitle ) +
+        ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5), legend.position = 'none') +
+        ggplot2::scale_y_log10()
+    })
 
     width = 20
     height = 24
@@ -631,23 +641,25 @@ plotQC <- function(
     plotTitle <- paste0(
       'Influence of bit status on detection rate (non-blanks only)'
     )
-    p <-
-      ggplot2::ggplot(
-        df,
-        ggplot2::aes(
-          y= Freq,
-          x= factor(value),
-          colour=factor(value)
-        )
-      ) +
-      ggplot2::facet_wrap( ~variable, scales='free' ) +
-      ggplot2::geom_boxplot() +
-      ggplot2::theme_minimal(base_size=14) +
-      ggplot2::ylab('N spots per gene') + ggplot2::xlab('Bit status') +
-      ggplot2::scale_colour_manual(values=c('0'='black', '1'='red')) +
-      ggplot2::ggtitle( plotTitle ) +
-      ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5), legend.position = 'none') +
-      ggplot2::scale_y_log10()
+    suppressWarnings({
+      p <-
+        ggplot2::ggplot(
+          df,
+          ggplot2::aes(
+            y= Freq,
+            x= factor(value),
+            colour=factor(value)
+          )
+        ) +
+        ggplot2::facet_wrap( ~variable, scales='free' ) +
+        ggplot2::geom_boxplot() +
+        ggplot2::theme_minimal(base_size=14) +
+        ggplot2::ylab('N spots per gene') + ggplot2::xlab('Bit status') +
+        ggplot2::scale_colour_manual(values=c('0'='black', '1'='red')) +
+        ggplot2::ggtitle( plotTitle ) +
+        ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5), legend.position = 'none') +
+        ggplot2::scale_y_log10()
+    })
 
     width = 20
     height = 22
@@ -676,17 +688,18 @@ plotQC <- function(
     plotTitle <- paste0(
       'Bitwise error rates'
     )
-    p <-
-      ggplot2::ggplot( df ) +
-      ggplot2::facet_wrap( ~spottype, ncol=1, strip.position = 'right' ) +
-      ggplot2::geom_bar( ggplot2::aes(x=as.integer(variable), fill=error_type),
-                         position = 'fill' ) +
-      ggplot2::theme_minimal(base_size=14) +
-      ggplot2::ylab('Error Proportion') + ggplot2::xlab('Bit') +
-      ggplot2::ggtitle( plotTitle ) +
-      ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5) ) +
-      ggplot2::scale_fill_manual( name='', values=c('No error' = 'grey', 'OFF to ON' = 'blue', 'ON to OFF' = 'red'))
-
+    suppressWarnings({
+      p <-
+        ggplot2::ggplot( df ) +
+        ggplot2::facet_wrap( ~spottype, ncol=1, strip.position = 'right' ) +
+        ggplot2::geom_bar( ggplot2::aes(x=as.integer(variable), fill=error_type),
+                           position = 'fill' ) +
+        ggplot2::theme_minimal(base_size=14) +
+        ggplot2::ylab('Error Proportion') + ggplot2::xlab('Bit') +
+        ggplot2::ggtitle( plotTitle ) +
+        ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5) ) +
+        ggplot2::scale_fill_manual( name='', values=c('No error' = 'grey', 'OFF to ON' = 'blue', 'ON to OFF' = 'red'))
+    })
     height = length(unique(df$spottype)) * 10
     width = 20
     ggplot2::ggsave(paste0(params$out_dir, plotName, '.png'), plot = p, height = height, width = width, units = 'cm')
@@ -727,6 +740,7 @@ plotQC <- function(
       'FOV-wise metrics'
     )
 
+    suppressWarnings({
     p <-
       ggplot2::ggplot( df ) +
       ggplot2::facet_wrap( ~varName, nrow = 2 ) +
@@ -741,7 +755,7 @@ plotQC <- function(
       ggplot2::scale_x_continuous(limits=c(0.5, max(df$x) + 0.5)) +
       ggplot2::scale_y_reverse(limits=c(max(df$y) + 0.5, 0.5)) +
       ggplot2::coord_fixed()
-
+    })
     width = length(measureVars)/2 * sqrt( length(unique(df$Var1)) ) * 2.5
     height =  2 * sqrt( length(unique(df$Var1)) ) * 2.5
     ggplot2::ggsave(paste0(params$out_dir, plotName, '.png'), plot = p, height = height, width = width, units = 'cm')
@@ -764,16 +778,18 @@ plotQC <- function(
     plotTitle <- paste0(
       'Cell size spatial distribution'
     )
-    p <-
-      ggplot2::ggplot( cellMeta, ggplot2::aes(x=Xm, y=Ym, z=nPixels) ) +
-      ggplot2::stat_summary_hex(fun = mean, bins=100) +
-      ggplot2::theme_void(base_size=14) +
-      ggplot2::scale_fill_viridis_c(name = 'Cell Size', option='turbo', trans='log10') +
-      ggplot2::theme( legend.position = 'right' ) +
-      ggplot2::ggtitle( plotTitle ) +
-      ggplot2::scale_y_reverse() +
-      ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5) ) +
-      ggplot2::coord_fixed()
+    suppressWarnings({
+      p <-
+        ggplot2::ggplot( cellMeta, ggplot2::aes(x=Xm, y=Ym, z=nPixels) ) +
+        ggplot2::stat_summary_hex(fun = mean, bins=100) +
+        ggplot2::theme_void(base_size=14) +
+        ggplot2::scale_fill_viridis_c(name = 'Cell Size', option='turbo', trans='log10') +
+        ggplot2::theme( legend.position = 'right' ) +
+        ggplot2::ggtitle( plotTitle ) +
+        ggplot2::scale_y_reverse() +
+        ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5) ) +
+        ggplot2::coord_fixed()
+    })
     width = 14
     height = 14
     ggplot2::ggsave(paste0(params$out_dir, plotName, '_CellSize.png'), plot = p, height = height, width = width, units = 'cm')
@@ -781,16 +797,18 @@ plotQC <- function(
     plotTitle <- paste0(
       'Cell counts spatial distribution'
     )
-    p <-
-      ggplot2::ggplot( cellMeta, ggplot2::aes(x=Xm, y=Ym, z=nCounts) ) +
-      ggplot2::stat_summary_hex(fun = mean, bins=100) +
-      ggplot2::theme_void(base_size=14) +
-      ggplot2::scale_fill_viridis_c(name = 'nCounts', option='turbo', trans='log10') +
-      ggplot2::theme( legend.position = 'right' ) +
-      ggplot2::ggtitle( plotTitle ) +
-      ggplot2::scale_y_reverse() +
-      ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5) ) +
-      ggplot2::coord_fixed()
+    suppressWarnings({
+      p <-
+        ggplot2::ggplot( cellMeta, ggplot2::aes(x=Xm, y=Ym, z=nCounts) ) +
+        ggplot2::stat_summary_hex(fun = mean, bins=100) +
+        ggplot2::theme_void(base_size=14) +
+        ggplot2::scale_fill_viridis_c(name = 'nCounts', option='turbo', trans='log10') +
+        ggplot2::theme( legend.position = 'right' ) +
+        ggplot2::ggtitle( plotTitle ) +
+        ggplot2::scale_y_reverse() +
+        ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5) ) +
+        ggplot2::coord_fixed()
+    })
     width = 14
     height = 14
     ggplot2::ggsave(paste0(params$out_dir, plotName, '_nCounts.png'), plot = p, height = height, width = width, units = 'cm')
@@ -838,18 +856,20 @@ plotQC <- function(
       df <- cbind( spotcalldf[,c('Xm', 'Ym', 'g', 'blank')], nmfResults[['point_scores']] )
 
       plotTitle <- paste0('Spatial patterns of gene expression (k=', nmfResults$n_factors, ')')
-      p <-
-        ggplot2::ggplot(
-          reshape2::melt(df, measure.vars=colnames(nmfResults[['point_scores']])),
-          ggplot2::aes(x=Xm, y=Ym, z=value)) +
-          ggplot2::stat_summary_hex( fun = mean, bins=100 ) +
-          ggplot2::facet_wrap(~variable) +
-          ggplot2::scale_y_reverse() +
-          ggplot2::scale_fill_viridis_c(name='Score', option='turbo') +
-          ggplot2::theme_void(base_size=14) +
-          ggplot2::ggtitle(plotTitle) +
-          ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5) ) +
-          ggplot2::coord_fixed()
+      suppressWarnings({
+        p <-
+          ggplot2::ggplot(
+            reshape2::melt(df, measure.vars=colnames(nmfResults[['point_scores']])),
+            ggplot2::aes(x=Xm, y=Ym, z=value)) +
+            ggplot2::stat_summary_hex( fun = mean, bins=100 ) +
+            ggplot2::facet_wrap(~variable) +
+            ggplot2::scale_y_reverse() +
+            ggplot2::scale_fill_viridis_c(name='Score', option='turbo') +
+            ggplot2::theme_void(base_size=14) +
+            ggplot2::ggtitle(plotTitle) +
+            ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5) ) +
+            ggplot2::coord_fixed()
+      })
       width = 14
       height = 14
       ggplot2::ggsave(paste0(params$out_dir, plotName, '_SpatialPatterns.png'), plot = p, height = height, width = width, units = 'cm')
@@ -887,17 +907,19 @@ plotQC <- function(
       newdf$gene <- factor(newdf$gene, levels=gene_order)
       newdf$variable <- factor(newdf$variable, levels=rev(sort(unique(newdf$variable))))
 
-      p <-
-      ggplot2::ggplot(
-        newdf, ggplot2::aes(y=variable, x=gene, fill=mean)
-      ) +
-        ggplot2::geom_raster() +
-        ggplot2::xlab('') + ggplot2::ylab('') +
-        ggplot2::theme_minimal(base_size=16) +
-        ggplot2::theme( axis.text.x = ggplot2::element_text(angle=90, hjust=1, vjust=0.5) ) +
-        ggplot2::scale_fill_viridis_c(name='Membership', option='rocket') +
-        ggplot2::ggtitle( plotTitle ) +
-        ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5))
+      suppressWarnings({
+        p <-
+        ggplot2::ggplot(
+          newdf, ggplot2::aes(y=variable, x=gene, fill=mean)
+        ) +
+          ggplot2::geom_raster() +
+          ggplot2::xlab('') + ggplot2::ylab('') +
+          ggplot2::theme_minimal(base_size=16) +
+          ggplot2::theme( axis.text.x = ggplot2::element_text(angle=90, hjust=1, vjust=0.5) ) +
+          ggplot2::scale_fill_viridis_c(name='Membership', option='rocket') +
+          ggplot2::ggtitle( plotTitle ) +
+          ggplot2::theme( plot.title = ggplot2::element_text(hjust=0.5))
+      })
       width = length(gene_order) * 0.5 + 2
       height = ncol(nmfResults[['point_scores']]) * 2 + 2
       ggplot2::ggsave(paste0(params$out_dir, plotName, '_GeneMembership.png'), plot = p, height = height, width = width, units = 'cm')
