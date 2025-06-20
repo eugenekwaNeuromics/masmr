@@ -23,9 +23,9 @@ synthesiseData <- function(
 
   ## First, check that append=True is working for data.table
   test_file <- paste0(params$parent_out_dir, 'DATATABLE_TEST_FILE.csv', ifelse(gZip, '.gz', ''))
-  data.table::fwrite(data.frame('x'=1), test_file, row.names = F)
-  data.table::fwrite(data.frame('x'=1), test_file, append = T, row.names = F)
-  test_df <- data.table::fread(test_file, data.table = F)
+  data.table::fwrite(data.frame('x'=1), test_file, row.names = F, showProgress = F)
+  data.table::fwrite(data.frame('x'=1), test_file, append = T, row.names = F, showProgress = F)
+  test_df <- data.table::fread(test_file, data.table = F, showProgress = F)
   if( nrow(test_df) != 2 ){
     warning('Unable to append to .csv.gz with data.table! Attempting to update data.table package...')
     oldversion = utils::packageVersion('data.table')
@@ -41,9 +41,9 @@ synthesiseData <- function(
         ))
     }
     ## Check again
-    data.table::fwrite(data.frame('x'=1), test_file, row.names = F)
-    data.table::fwrite(data.frame('x'=1), test_file, append = T, row.names = F)
-    test_df <- data.table::fread(test_file, data.table = F)
+    data.table::fwrite(data.frame('x'=1), test_file, row.names = F, showProgress =F)
+    data.table::fwrite(data.frame('x'=1), test_file, append = T, row.names = F, showProgress =F)
+    test_df <- data.table::fread(test_file, data.table = F, showProgress =F)
     if(nrow(test_df)==2){
       if(verbose){ message( paste0('Successful update of data.table: ', oldversion, ' --> ', newversion, '...') ) }
     }else{
@@ -153,10 +153,11 @@ synthesiseData <- function(
 
   ## Pick a reference FOV
   if(missing(referenceFOV)){
-    if(verbose){ message(paste0('\nReference FOV not specified...Choosing FOV with most spots...')) }
-    nspots <- lapply(spotcallfs, function(fx){
-      nrow(data.table::fread(fx))
-    })
+    if(verbose){ message(paste0('\nReference FOV not specified...Choosing FOV with most spots (approximated from file size)...')) }
+    # nspots <- lapply(spotcallfs, function(fx){
+    #   nrow(data.table::fread(fx))
+    # })
+    nspots <- lapply(spotcallfs, function(x) file.info(x)$size) #Faster
     referenceFOV <- basename( spotcallfs[which.max(unlist(nspots))] )
     referenceFOV <- gsub('SPOTCALL_|[.]csv|[.]gz', '', referenceFOV)
   }
@@ -299,11 +300,23 @@ synthesiseData <- function(
   gcx$x_microns <- Re( unlist(new_gcx)[match(gcx$fov, names(new_gcx))] )
   gcx$y_microns <- Im( unlist(new_gcx)[match(gcx$fov, names(new_gcx))] )
   params$global_coords_final <<- gcx
-  data.table::fwrite(gcx, paste0(params$out_dir, 'OUT_GLOBALCOORD.csv'), row.names = F)
-  # finalGlobalCoords <- gcx
+  data.table::fwrite(gcx, paste0(params$out_dir, 'OUT_GLOBALCOORD.csv'), row.names = F, showProgress = F)
 
   ## For redundancy, create a winLose temp file
   winLoseFile <- paste0( params$out_dir, 'TEMP_WINLOSE.csv' )
+  if( file.exists(winLoseFile) ){
+    warning( paste0(
+      'Found an existing temporary file: ', winLoseFile,
+      '...\nIf intending a fresh run this should be deleted, otherwise will read from this file...' )
+      )
+  }
+  cellDropFile <- paste0( params$out_dir, 'TEMP_CELLDROP.csv' )
+  if( file.exists(cellDropFile) ){
+    warning( paste0(
+      'Found an existing temporary file: ', cellDropFile,
+      '...\nIf intending a fresh run this should be deleted, otherwise will read from this file...' )
+    )
+  }
 
   ## Begin looping through files to synthesise data
   if(verbose){ message('\nSynthesising data...') }
@@ -325,12 +338,12 @@ synthesiseData <- function(
     }
     isThereStitch <- any(grepl(paste0('STITCH_', fovName, '.csv'), names(stitchResults)))
     if( !isThereStitch ){
-      if(verbose){ message('No stitch file found...Assuming spots called are spurious...Skipping...', appendLF = T) }
+      if(verbose){ message('\nNo stitch file found...Assuming spots called in this FOV are spurious...Skipping...', appendLF = F) }
       next
     }
 
     ## Update coordinates
-    spotcalldf <- try(data.table::fread(spotcallfx, data.table = F))
+    spotcalldf <- try(data.table::fread(spotcallfx, data.table = F, showProgress = F))
     if(inherits(spotcalldf, 'try-error')){
       stop('Unable to read spotcall file!')
     }
@@ -354,9 +367,23 @@ synthesiseData <- function(
       }
       fovNeighbours <- as.vector( fovNeighbours[,'fov'] )
 
+      ## But also get the first order neighbours for each neighbour in fovNeighbours
+      firstDegreeNeighbours <- unlist( lapply( fovNeighbours, function(x){
+        tmpdf <- stitchResults[grepl(paste0('STITCH_', x, '.csv'), names(stitchResults))][[1]]
+        colnames(tmpdf) <- tolower(colnames(tmpdf))
+        if( sum(colnames(tmpdf)=='fov') != 1){
+          stop('STITCH files need to have a single column named "fov"!')
+        }
+        tmpdf <- as.vector( tmpdf[,'fov'] )
+        tmpdf <- tmpdf[tmpdf!=fovName]
+        return(tmpdf)
+      }) )
+      fovNeighbours <- c(fovNeighbours, firstDegreeNeighbours)
+      fovNeighbours <- unique(fovNeighbours)
+
       redundancyWinnersLosers <- NULL
       if(file.exists(winLoseFile)){
-        redundancyWinnersLosers <- data.table::fread(winLoseFile, data.table = F)
+        redundancyWinnersLosers <- data.table::fread(winLoseFile, data.table = F, showProgress = F)
       }
 
       ## Not strict enough
@@ -453,10 +480,12 @@ synthesiseData <- function(
 
         neighbourfx <- spotcallfs[grepl( paste0(fovNeighbours[i], '.csv'), spotcallfs )]
         if( length(neighbourfx)==0 ){ next }
-        neighbourdf <- try(data.table::fread(neighbourfx, data.table = F))
+        neighbourdf <- try(data.table::fread(neighbourfx, data.table = F, showProgress =F))
         if(inherits(neighbourdf, 'try-error')){
           stop('Unable to read neighbouring spotcall file!')
         }
+
+        ## Instead of pixel wise-info, we will use micron info here [both should work]
         neighbour_coords <-
           neighbourdf$WX * as.numeric(resolutions$per_pixel_microns[1])  +
           1i * neighbourdf$WY * as.numeric(resolutions$per_pixel_microns[2]) +
@@ -467,12 +496,15 @@ synthesiseData <- function(
 
         neighbourdf <- neighbourdf[
           neighbourdf$Xm >= min(spotcalldf$Xm)
-          & neighbourdf$Xm < max(spotcalldf$Xm)
+          & neighbourdf$Xm <= max(spotcalldf$Xm)
           & neighbourdf$Ym >= min(spotcalldf$Ym)
-          & neighbourdf$Ym < max(spotcalldf$Ym),
+          & neighbourdf$Ym <= max(spotcalldf$Ym),
         ]
+
+        competedBefore = F
         if(!is.null(checkCompetition)){
           if( nrow(checkCompetition) == 1 ){
+            competedBefore = T
             if( !as.logical(checkCompetition$refWon) ){
               previousBound <- c(
                 checkCompetition$queryBound1,
@@ -482,9 +514,9 @@ synthesiseData <- function(
               )
               neighbourdf <- neighbourdf[
                 !(neighbourdf$Xm >= previousBound[1]
-                & neighbourdf$Xm < previousBound[2]
+                & neighbourdf$Xm <= previousBound[2]
                 & neighbourdf$Ym >= previousBound[3]
-                & neighbourdf$Ym < previousBound[4]),
+                & neighbourdf$Ym <= previousBound[4]),
               ]
             }
           }
@@ -493,41 +525,37 @@ synthesiseData <- function(
         boundingWindow <- c(range(neighbourdf$Xm), range(neighbourdf$Ym) )
         underContention <-
           (spotcalldf$Xm >= boundingWindow[1]
-           & spotcalldf$Xm <  boundingWindow[2]
+           & spotcalldf$Xm <=  boundingWindow[2]
            & spotcalldf$Ym >= boundingWindow[3]
-           & spotcalldf$Ym <  boundingWindow[4])
+           & spotcalldf$Ym <=  boundingWindow[4])
 
-        ## NEW ##
+        ## NEW ## Actually, this might shrink the bounding window, which we don't want
         ## Double check that bounding window is correctly sized
-        newBounding <- c(
-          range(spotcalldf$Xm[underContention]), range(spotcalldf$Ym[underContention])
-        )
-        neighbourdf <- neighbourdf[
-          neighbourdf$Xm >= newBounding[1]
-          & neighbourdf$Xm < newBounding[2]
-          & neighbourdf$Ym >= newBounding[3]
-          & neighbourdf$Ym < newBounding[4],
-        ]
-        if( nrow(neighbourdf) == 0 ){ next }
-        boundingWindow <- c(range(neighbourdf$Xm), range(neighbourdf$Ym) )
-        underContention <-
-          (spotcalldf$Xm >= boundingWindow[1]
-           & spotcalldf$Xm <  boundingWindow[2]
-           & spotcalldf$Ym >= boundingWindow[3]
-           & spotcalldf$Ym <  boundingWindow[4]) & underContention #From before
+        # newBounding <- c(
+        #   range(spotcalldf$Xm[underContention]), range(spotcalldf$Ym[underContention])
+        # )
+        # neighbourdf <- neighbourdf[
+        #   neighbourdf$Xm >= newBounding[1]
+        #   & neighbourdf$Xm <= newBounding[2]
+        #   & neighbourdf$Ym >= newBounding[3]
+        #   & neighbourdf$Ym <= newBounding[4],
+        # ]
+        # if( nrow(neighbourdf) == 0 ){ next }
+        # boundingWindow <- c(range(neighbourdf$Xm), range(neighbourdf$Ym) )
+        # underContention <-
+        #   (spotcalldf$Xm >= boundingWindow[1]
+        #    & spotcalldf$Xm <=  boundingWindow[2]
+        #    & spotcalldf$Ym >= boundingWindow[3]
+        #    & spotcalldf$Ym <=  boundingWindow[4]) & underContention #From before
         ## NEW ##
 
         ## First check if competition has been done before
         ## If there are more spots in window from neighbour, filter out the current FOV
-        competedBefore = F
-        if(!is.null(checkCompetition)){
-          competedBefore = T
-          if(nrow(checkCompetition)==1){
-            if( as.logical(checkCompetition$refWon) ){
-              spotcalldf <- spotcalldf[!underContention,]
-            }
-            next
+        if( competedBefore ){
+          if( as.logical(checkCompetition$refWon) ){
+            spotcalldf <- spotcalldf[!underContention,]
           }
+          next
         }
 
         if( (sum(underContention) < nrow(neighbourdf)) & !competedBefore){
@@ -558,7 +586,7 @@ synthesiseData <- function(
         }else{
           redundancyWinnersLosers <- rbind( redundancyWinnersLosers, newWinLose )
         }
-        data.table::fwrite(redundancyWinnersLosers, file = winLoseFile, row.names = F, append = F, quote = F)
+        data.table::fwrite(redundancyWinnersLosers, file = winLoseFile, row.names = F, append = F, quote = F, showProgress =F)
       }
       ## OLDER ##
     }
@@ -578,7 +606,7 @@ synthesiseData <- function(
       cellsegfx <- cellsegfx[1]
     }
     if(length(cellsegfx)==1){
-      cellsegdf <- try(data.table::fread(cellsegfx, data.table = F))
+      cellsegdf <- try(data.table::fread(cellsegfx, data.table = F, showProgress =F))
       if(inherits(cellsegdf, 'try-error')){
         stop('Unable to read cell segmentation file!')
       }
@@ -590,40 +618,80 @@ synthesiseData <- function(
       cellsegdf$Xm <- Re(coords)
       cellsegdf$Ym <- Im(coords)
       cellsegdf$IDX <- cellsegdf$WX + (cellsegdf$WY-1) * as.numeric(resolutions$xydimensions_pixels[1])
-      NCHAR_NAME <- pmax(NCHAR_NAME, nchar(max(cellsegdf$cell[!is.na(cellsegdf$cell)])) + 2)
+
+      NCHAR_NAME <- pmax(nLeadingZeroes, nchar(max(cellsegdf$cell[!is.na(cellsegdf$cell)])) + 2)
       cellsegdf$CELLNAME <- paste0(cellsegdf$fov, '_', sprintf( paste0('%0', NCHAR_NAME, 'd'), cellsegdf$cell ))
 
       ## Load neighbours
       if(removeRedundancy){
         if(verbose){ message('\nRemoving redundant cell calls...', appendLF = F) }
         fovNeighbours <- stitchResults[grepl(paste0('STITCH_', fovName, '.csv'), names(stitchResults))][[1]]
+
+        ## Also propagate to diagonal neighbours
+        ## Because of earlier checks, can make things simpler here
+
+        firstDegreeNeighbours <- do.call(rbind, lapply( fovNeighbours$fov, function(x){
+          tmpdf <- stitchResults[grepl(paste0('STITCH_', x, '.csv'), names(stitchResults))][[1]]
+          colnames(tmpdf) <- tolower(colnames(tmpdf))
+          if( sum(colnames(tmpdf)=='fov') != 1){
+            stop('STITCH files need to have a single column named "fov"!')
+          }
+          tmpdf <- tmpdf[tmpdf[,'fov']!=fovName,]
+          tmpdf[,'shift_pixel'] = tmpdf[,'shift_pixel'] + fovNeighbours[fovNeighbours$fov==x,'shift_pixel']
+          return(tmpdf)
+        }) )
+        fovNeighbours <- rbind(fovNeighbours, firstDegreeNeighbours)
+        fovNeighbours <- fovNeighbours[!duplicated(fovNeighbours$fov),]
+
+        cellDropCheck <- NULL
+        if(file.exists(cellDropFile)){
+          cellDropCheck <- data.table::fread(cellDropFile, data.table = F, showProgress =F)$CELLNAME
+        }
+        cellsegdf <- cellsegdf[!(cellsegdf$CELLNAME %in% cellDropCheck),]
+
         for( i in 1:nrow(fovNeighbours) ){
 
           ## Load neighbour cell segment calls
           neighbourfx <- cellsegfs[grepl( paste0(fovNeighbours$fov[i], '.csv'), cellsegfs )]
           if( length(neighbourfx)==0 ){ next }
-          neighbourdf <- try(data.table::fread(neighbourfx, data.table = F))
+          neighbourdf <- try(data.table::fread(neighbourfx, data.table = F, showProgress =F))
           if(inherits(neighbourdf, 'try-error')){
             stop('Unable to read neighbouring cell segmentation file!')
           }
+
           neighbourdf$WX <- neighbourdf$WX + Re( round(fovNeighbours[i, 'shift_pixel']) )
           neighbourdf$WY <- neighbourdf$WY + Im( round(fovNeighbours[i, 'shift_pixel']) )
           neighbourdf$IDX <- neighbourdf$WX + (neighbourdf$WY-1) * as.numeric(resolutions$xydimensions_pixels[1])
-          neighbourdf$CELLNAME <- paste0(neighbourdf$fov, '_', sprintf( paste0('%0', NCHAR_NAME, 'd'), neighbourdf$cell ))
-          if(!all(colnames(neighbourdf)==colnames(cellsegdf))){
+          NEIGHBOUR_CHAR_NAME <- pmax(nLeadingZeroes, nchar(max(neighbourdf$cell[!is.na(neighbourdf$cell)])) + 2)
+          neighbourdf$CELLNAME <- paste0(neighbourdf$fov, '_', sprintf( paste0('%0', NEIGHBOUR_CHAR_NAME, 'd'), neighbourdf$cell ))
+          if(
+            !all(colnames(neighbourdf)==colnames(cellsegdf))
+            ){
             stop('Column names between neighbour cell segmentation and current FOV dataframes not matching!')
           }
+          # neighbourdf <- neighbourdf[,colnames(cellsegdf)]
+
+          ## Drop cells that have lost before:
+          neighbourdf <- neighbourdf[!(neighbourdf$CELLNAME %in% cellDropCheck),]
 
           ## These contain just the pixels that overlap with our FOV
           neighbourdfWindowed <- neighbourdf[
             neighbourdf$WX >= min(cellsegdf$WX)
-            & neighbourdf$WX < max(cellsegdf$WX)
+            & neighbourdf$WX <= max(cellsegdf$WX)
             & neighbourdf$WY >= min(cellsegdf$WY)
-            & neighbourdf$WY < max(cellsegdf$WY),
+            & neighbourdf$WY <= max(cellsegdf$WY),
           ]
 
           neighbourCells <- unique( neighbourdfWindowed$cell  )
           if( length(neighbourCells) == 0 ){ next }
+
+          ## Plot to check
+          # library(ggplot2)
+          # ggplot() +
+          #   geom_point(data=cellsegdf, aes(x=WX, y=WY), colour='red', pch='.', alpha=0.5) +
+          #   geom_point(data=neighbourdf, aes(x=WX, y=WY), colour='blue', pch='.', alpha=0.5) +
+          #   scale_y_reverse() +
+          #   theme_minimal(base_size=20)
 
           ## This contains all pixels belonging to relevant cells
           neighbourdf <- neighbourdf[neighbourdf$cell %in% neighbourCells,]
@@ -635,49 +703,75 @@ synthesiseData <- function(
           underContentionCells <-
             cellsegdf[
               (cellsegdf$WX >= boundingWindow[1]
-               & cellsegdf$WX <  boundingWindow[2]
+               & cellsegdf$WX <=  boundingWindow[2]
                & cellsegdf$WY >= boundingWindow[3]
-               & cellsegdf$WY <  boundingWindow[4]),
+               & cellsegdf$WY <=  boundingWindow[4]),
               'cell'
             ]
           underContentionCells <- sort(unique(underContentionCells))
 
+          ## Plot to check
+          # library(ggplot2)
+          # ggplot() +
+          #   geom_point(data=cellsegdf[cellsegdf$cell %in% underContentionCells,], aes(x=WX, y=WY), colour='red', pch=16, alpha=0.5) +
+          #   # geom_point(data=neighbourdf, aes(x=WX, y=WY), colour='blue', pch=16, alpha=0.5) +
+          #   scale_y_reverse() +
+          #   theme_minimal(base_size=20)
+
+          
           for( celli in 1:length(underContentionCells) ){
             ## Pick the bigger of two cells
             contentionCellIDX <- cellsegdf[cellsegdf$cell==underContentionCells[i],'IDX']
-            competeingCell <- sort( unique(neighbourdfWindowed[neighbourdfWindowed$IDX %in% contentionCellIDX,'cell']) )
+            competeingCell <- sort( unique(neighbourdfWindowed[neighbourdfWindowed[,'IDX'] %in% contentionCellIDX,'cell']) )
             competeingCellSizes <- table(neighbourdf[neighbourdf$cell %in% competeingCell, 'cell'])
             isThereConsiderableOverlap <- sapply(competeingCell, function(x){
               pixLocs <- neighbourdf[neighbourdf$cell==x,'IDX']
               AinB = length(intersect(pixLocs,contentionCellIDX)) / length(pixLocs) #Jaccard for competing cell in contention cell
               BinA = length(intersect(pixLocs,contentionCellIDX)) / length(contentionCellIDX) #Jaccard for vice versa
-              considerableOverlap <- AinB > cellOverlapFraction | BinA > cellOverlapFraction
+              considerableOverlap <- (AinB > cellOverlapFraction) | (BinA > cellOverlapFraction)
               return(considerableOverlap)
             })
+
+            ## Plot to check
+            # library(ggplot2)
+            # ggplot() +
+            #   geom_point(data=cellsegdf[cellsegdf$IDX %in% contentionCellIDX,], aes(x=WX, y=WY), colour='red', pch=16, alpha=0.5) +
+            #   geom_point(data=neighbourdf[neighbourdf$cell %in% competeingCell,], aes(x=WX, y=WY), colour='blue', pch=16, alpha=0.5) +
+            #   scale_y_reverse() +
+            #   theme_minimal(base_size=20)
 
             ## When overlap is small, we ignore pixels
             if( any(!isThereConsiderableOverlap) ){
               ignorePixels <- neighbourdfWindowed[neighbourdfWindowed$cell %in% competeingCell[!isThereConsiderableOverlap], 'IDX']
-              cellsegdf <- cellsegdf[!(cellsegdf$IDX %in% ignorePixels),]
+              cellsegdf <- cellsegdf[!(cellsegdf[,'IDX'] %in% ignorePixels),]
             }
 
             ## When overlap is big, have to choose which cell to drop: drop the smaller nucleus, or if the nucleus has multiple overlaps
             if( any(isThereConsiderableOverlap) ){
               competeingCellSizes <- competeingCellSizes[names(competeingCellSizes) %in% competeingCell[isThereConsiderableOverlap]]
+              correspondingCELLNAMES <- neighbourdfWindowed[match(names(competeingCellSizes), neighbourdfWindowed$cell),'CELLNAME']
               if( length(competeingCellSizes) > 1 | any(competeingCellSizes > length(contentionCellIDX)) ){
                 filtout <- (cellsegdf$cell == underContentionCells[i])
+                cellDropCheck <- unique( c(cellDropCheck, unique(cellsegdf[cellsegdf$cell == underContentionCells[i],'CELLNAME'])) )
                 cellsegdf <- cellsegdf[!filtout,]
                 cellsegdf <- rbind(
                   neighbourdfWindowed[neighbourdfWindowed$cell %in% competeingCell[isThereConsiderableOverlap],],
                   cellsegdf)
-                cellsegdf <- cellsegdf[!duplicated(cellsegdf$IDX),]
+                cellsegdf <- cellsegdf[!duplicated(cellsegdf[,'IDX']),]
+              }else{
+                cellDropCheck <- unique(c(cellDropCheck, unique(correspondingCELLNAMES)))
               }
             }
           }
         }
+        
+        ## Remember which cells to drop in future
+        data.table::fwrite(data.frame('CELLNAME' = unique(cellDropCheck)), cellDropFile,
+                           row.names = F, quote = F, append = F, showProgress = F)
       }
 
       ## Transfer cellnames to spotcalldf
+      ## IDX for cross referencing with spotcalldf, CIDX for cross referencing with other cellsegdf
       spotcalldf$CELLNAME <- cellsegdf[match(spotcalldf$IDX, cellsegdf$IDX),'CELLNAME']
     }
 
@@ -685,11 +779,11 @@ synthesiseData <- function(
     data.table::fwrite(
       spotcalldf,
       paste0(params$out_dir, 'OUT_SPOTCALL_PIXELS.csv', ifelse(gZip, '.gz', '')),
-      row.names = F, append = T)
+      row.names = F, append = T, showProgress = F)
     data.table::fwrite(
       cellsegdf,
       paste0(params$out_dir, 'OUT_CELLSEG_PIXELS.csv', ifelse(gZip, '.gz', '')),
-      row.names = F, append = T)
+      row.names = F, append = T, showProgress = F)
 
     ## Summarise info per cell
     if(!all(is.na(spotcalldf$CELLNAME)) & nrow(cellsegdf) > 0){
@@ -712,11 +806,11 @@ synthesiseData <- function(
       data.table::fwrite(
         cellExp,
         paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')),
-        row.names = T, append = T)
+        row.names = T, append = T, showProgress = F)
       data.table::fwrite(
         cellMeta,
         paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
-        row.names = F, append = T)
+        row.names = F, append = T, showProgress = F)
     }
 
     if(verbose){ message('Done!', appendLF = F) }
@@ -724,58 +818,68 @@ synthesiseData <- function(
 
   ## Note that above tends to create duplicate entries in CELLEXPRESSION, have to load and edit
   if(verbose){ message('\nCleaning up...') }
+
   if(file.exists(winLoseFile)){ file.remove( winLoseFile ) }
-  cellMetaClean <- cellMeta <- data.table::fread(
+  # if(file.exists(cellDropFile)){ file.remove( cellDropFile ) }
+
+  cellMetaClean <- cellMeta <- try( data.table::fread(
     paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
-    data.table = F)
-  if( any(duplicated(cellMeta$CELLNAME)) ){
-    duplicatedCells <- sort(unique( cellMeta[duplicated(cellMeta$CELLNAME), 'CELLNAME'] ))
-    cellMetaClean <- cellMeta[!(cellMeta$CELLNAME %in% duplicatedCells), ]
-    dupMeta <- cellMeta[(cellMeta$CELLNAME %in% duplicatedCells), ]
-    for( dupCelli in duplicatedCells ){
-      npix <- sum( as.numeric(dupMeta[dupMeta$CELLNAME==dupCelli, 'nPixels']) )
-      weightedX <- sum( dupMeta[dupMeta$CELLNAME==dupCelli, 'nPixels'] * dupMeta[dupMeta$CELLNAME==dupCelli, 'Xm'] / npix )
-      weightedY <- sum( dupMeta[dupMeta$CELLNAME==dupCelli, 'nPixels'] * dupMeta[dupMeta$CELLNAME==dupCelli, 'Ym'] / npix )
-      res <- data.frame(
-        'CELLNAME' = dupCelli,
-        'Xm' =  weightedX,
-        'Ym' = weightedY,
-        'nPixels' = npix,
-        'nCounts' = sum(as.numeric(dupMeta[dupMeta$CELLNAME==dupCelli, 'nCounts']))
+    data.table = F, showProgress = F) )
+  if( inherits(cellMeta, 'try-error') ){
+    warning('OUT_CELLS file was not created / could not be read! Unable to perform clean up!')
+  }else{
+    if( any(duplicated(cellMeta$CELLNAME)) ){
+      duplicatedCells <- sort(unique( cellMeta[duplicated(cellMeta$CELLNAME), 'CELLNAME'] ))
+      cellMetaClean <- cellMeta[!(cellMeta$CELLNAME %in% duplicatedCells), ]
+      dupMeta <- cellMeta[(cellMeta$CELLNAME %in% duplicatedCells), ]
+      for( dupCelli in duplicatedCells ){
+        npix <- sum( as.numeric(dupMeta[dupMeta$CELLNAME==dupCelli, 'nPixels']) )
+        weightedX <- sum( dupMeta[dupMeta$CELLNAME==dupCelli, 'nPixels'] * dupMeta[dupMeta$CELLNAME==dupCelli, 'Xm'] / npix )
+        weightedY <- sum( dupMeta[dupMeta$CELLNAME==dupCelli, 'nPixels'] * dupMeta[dupMeta$CELLNAME==dupCelli, 'Ym'] / npix )
+        res <- data.frame(
+          'CELLNAME' = dupCelli,
+          'Xm' =  weightedX,
+          'Ym' = weightedY,
+          'nPixels' = npix,
+          'nCounts' = sum(as.numeric(dupMeta[dupMeta$CELLNAME==dupCelli, 'nCounts']))
         )
-      cellMetaClean <- rbind(cellMetaClean, res)
+        cellMetaClean <- rbind(cellMetaClean, res)
+      }
     }
+    cellMeta <- cellMetaClean
+    data.table::fwrite(
+      cellMeta,
+      paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
+      row.names = T, append = F, showProgress = F)
+    suppressWarnings(rm(list=c('cellMetaClean', 'npix', 'weightedX', 'weightedY', 'res', 'duplicatedCells')))
   }
-  cellMeta <- cellMetaClean
-  data.table::fwrite(
-    cellMeta,
-    paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
-    row.names = T, append = F)
-  suppressWarnings(rm(list=c('cellMetaClean', 'npix', 'weightedX', 'weightedY', 'res', 'duplicatedCells')))
 
-  cellExp <- data.table::fread(
+  cellExp <- try( data.table::fread(
     paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')),
-    data.table = F)
-  duplicatedCells <- sort(unique(cellExp[duplicated(cellExp[,1]),1]))
-  dupCellExp <- cellExp[(cellExp[,1] %in% duplicatedCells),]
-  cellExpClean <- cellExp[!(cellExp[,1] %in% duplicatedCells),]
-  rownames(cellExpClean) <- cellExpClean[,1]
-  cellExpClean[,1] <- NULL
-  if( nrow(dupCellExp) > 0){
-    newVals <- data.frame(matrix(0, nrow=length(duplicatedCells), ncol=ncol(cellExp)-1), row.names = duplicatedCells)
-    colnames(newVals) <- colnames(cellExp)[-1]
-    for( dupCelli in duplicatedCells ){
-      newVals[dupCelli,] <- colSums( dupCellExp[dupCellExp[,1]==dupCelli,-1] )
+    data.table = F, showProgress = F) )
+  if( inherits(cellExp, 'try-error') ){
+    warning('OUT_CELLEXPRESSION file was not created / could not be read! Unable to perform clean up!')
+  }else{
+    duplicatedCells <- sort(unique(cellExp[duplicated(cellExp[,1]),1]))
+    dupCellExp <- cellExp[(cellExp[,1] %in% duplicatedCells),]
+    cellExpClean <- cellExp[!(cellExp[,1] %in% duplicatedCells),]
+    rownames(cellExpClean) <- cellExpClean[,1]
+    cellExpClean[,1] <- NULL
+    if( nrow(dupCellExp) > 0){
+      newVals <- data.frame(matrix(0, nrow=length(duplicatedCells), ncol=ncol(cellExp)-1), row.names = duplicatedCells)
+      colnames(newVals) <- colnames(cellExp)[-1]
+      for( dupCelli in duplicatedCells ){
+        newVals[dupCelli,] <- colSums( dupCellExp[dupCellExp[,1]==dupCelli,-1] )
+      }
+      cellExpClean <- rbind(cellExpClean, newVals)
     }
-    cellExpClean <- rbind(cellExpClean, newVals)
+    cellExpClean <- cellExpClean[match(cellMeta$CELLNAME, rownames(cellExpClean)),]
+    cellExpClean[is.na(cellExpClean)] <- 0
+    rownames(cellExpClean) <- cellMeta$CELLNAME
+    data.table::fwrite(
+      cellExpClean,
+      paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')),
+      row.names = T, append = F, showProgress = F)
   }
-  cellExpClean <- cellExpClean[match(cellMeta$CELLNAME, rownames(cellExpClean)),]
-  cellExpClean[is.na(cellExpClean)] <- 0
-  rownames(cellExpClean) <- cellMeta$CELLNAME
-  data.table::fwrite(
-    cellExpClean,
-    paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')),
-    row.names = T, append = F)
-
 }
 

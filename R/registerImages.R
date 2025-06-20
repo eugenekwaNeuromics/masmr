@@ -269,11 +269,18 @@ registerImages <- function(
 
   # The end result is a vector of shifts, expressed as complex coordinates
   # Now, user decides if want additional normalisations
+  
+  if( any(is.null(names(shifts))) ){
+    warning( paste0('Your image list has no names...Will default to calling them 1:', length(shifts), '...'))
+    names(shifts) <- sprintf(paste0('%0', nchar(length(shifts)), 'd'), 1:length(shifts))
+    if(standardiseShifts){
+      warning('Will also not perform standardiseShifts since channel name and image name cannot be inferred...')
+      standardiseShifts = F
+    }
+
+  }
   new_shifts <- shifts
-  if( standardiseShifts & any(is.null(names(shifts))) ){
-    warning('Invalid image names found: will not perform standardiseShifts')
-    standardiseShifts = F
-  }else{
+  if( standardiseShifts ){ 
     channels <- unique(strsplit2(names(shifts), '_')[,1])
     ims <- unique(strsplit2(names(shifts), '_')[,2])
     if(!all(channels %in% params$resolutions$channel_order)){
@@ -289,7 +296,7 @@ registerImages <- function(
       }
     }
   }
-  if(standardiseShifts){
+  if( standardiseShifts ){
     if(verbose){ message('\nStandardising shift across channels and images...') }
     shift_bychannel <- by(shifts, channels, function(x){
       val <- mean(x, na.rm=T)
@@ -339,7 +346,7 @@ registerImages <- function(
       if(!is.null(chosenZslice)){
         y <- x[,,chosenZslice]
       }else{
-        y <- maxIntensityProject(x)
+        y <- suppressWarnings( maxIntensityProject(x) )
       }
       return(y)
     }), names(imList) )

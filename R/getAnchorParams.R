@@ -400,6 +400,7 @@ maxIntensityProject <- function(im, zDim = NULL){
       }
       result[[ci]] <- maxIntensityProject(imx, zDim=zDim)
     }
+    names(result) <- names(im) #If there are names for im
   }
 
   if(length(imageDimension)==3){
