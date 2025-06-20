@@ -366,9 +366,16 @@ synthesiseData <- function(
         stop('STITCH files need to have a single column named "fov"!')
       }
       fovNeighbours <- as.vector( fovNeighbours[,'fov'] )
+      if(length(fovNeighbours)==0){
+
+      }
 
       ## But also get the first order neighbours for each neighbour in fovNeighbours
       firstDegreeNeighbours <- unlist( lapply( fovNeighbours, function(x){
+
+        check <- grepl(paste0('STITCH_', x, '.csv'), names(stitchResults))
+        if(!any(check)){ return( c() ) }
+
         tmpdf <- stitchResults[grepl(paste0('STITCH_', x, '.csv'), names(stitchResults))][[1]]
         colnames(tmpdf) <- tolower(colnames(tmpdf))
         if( sum(colnames(tmpdf)=='fov') != 1){
@@ -620,7 +627,8 @@ synthesiseData <- function(
       cellsegdf$IDX <- cellsegdf$WX + (cellsegdf$WY-1) * as.numeric(resolutions$xydimensions_pixels[1])
 
       NCHAR_NAME <- pmax(nLeadingZeroes, nchar(max(cellsegdf$cell[!is.na(cellsegdf$cell)])) + 2)
-      cellsegdf$CELLNAME <- paste0(cellsegdf$fov, '_', sprintf( paste0('%0', NCHAR_NAME, 'd'), cellsegdf$cell ))
+      cellsegdf$CELLNAME <- as.character(paste0(cellsegdf$fov, '_', sprintf( paste0('%0', NCHAR_NAME, 'd'), cellsegdf$cell )))
+      orig_cell_names <- sort(unique(cellsegdf$CELLNAME))
 
       ## Load neighbours
       if(removeRedundancy){
@@ -631,6 +639,8 @@ synthesiseData <- function(
         ## Because of earlier checks, can make things simpler here
 
         firstDegreeNeighbours <- do.call(rbind, lapply( fovNeighbours$fov, function(x){
+          check <- grepl(paste0('STITCH_', x, '.csv'), names(stitchResults))
+          if(!any(check)){ return(data.frame()) }
           tmpdf <- stitchResults[grepl(paste0('STITCH_', x, '.csv'), names(stitchResults))][[1]]
           colnames(tmpdf) <- tolower(colnames(tmpdf))
           if( sum(colnames(tmpdf)=='fov') != 1){
@@ -648,8 +658,14 @@ synthesiseData <- function(
           cellDropCheck <- data.table::fread(cellDropFile, data.table = F, showProgress =F)$CELLNAME
         }
         cellsegdf <- cellsegdf[!(cellsegdf$CELLNAME %in% cellDropCheck),]
+        valid_cellsegdf = T
+        if(nrow(cellsegdf) < 1){ valid_cellsegdf = F }
 
         for( i in 1:nrow(fovNeighbours) ){
+
+          # if(verbose){ message(paste0('Current ncells: ', length(unique(cellsegdf$CELLNAME)), '...'))}
+
+          if(!valid_cellsegdf){ next }
 
           ## Load neighbour cell segment calls
           neighbourfx <- cellsegfs[grepl( paste0(fovNeighbours$fov[i], '.csv'), cellsegfs )]
@@ -664,15 +680,15 @@ synthesiseData <- function(
           neighbourdf$IDX <- neighbourdf$WX + (neighbourdf$WY-1) * as.numeric(resolutions$xydimensions_pixels[1])
           NEIGHBOUR_CHAR_NAME <- pmax(nLeadingZeroes, nchar(max(neighbourdf$cell[!is.na(neighbourdf$cell)])) + 2)
           neighbourdf$CELLNAME <- paste0(neighbourdf$fov, '_', sprintf( paste0('%0', NEIGHBOUR_CHAR_NAME, 'd'), neighbourdf$cell ))
+          if( length(unique(neighbourdf$fov)) != 1 ){
+            stop('More than one FOV in neighbour dataframe!')
+          }
           if(
             !all(colnames(neighbourdf)==colnames(cellsegdf))
             ){
             stop('Column names between neighbour cell segmentation and current FOV dataframes not matching!')
           }
           # neighbourdf <- neighbourdf[,colnames(cellsegdf)]
-
-          ## Drop cells that have lost before:
-          neighbourdf <- neighbourdf[!(neighbourdf$CELLNAME %in% cellDropCheck),]
 
           ## These contain just the pixels that overlap with our FOV
           neighbourdfWindowed <- neighbourdf[
@@ -681,6 +697,8 @@ synthesiseData <- function(
             & neighbourdf$WY >= min(cellsegdf$WY)
             & neighbourdf$WY <= max(cellsegdf$WY),
           ]
+          ## Drop cells that have lost before:
+          neighbourdfWindowed <- neighbourdfWindowed[!(neighbourdfWindowed$CELLNAME %in% cellDropCheck),]
 
           neighbourCells <- unique( neighbourdfWindowed$cell  )
           if( length(neighbourCells) == 0 ){ next }
@@ -709,6 +727,7 @@ synthesiseData <- function(
               'cell'
             ]
           underContentionCells <- sort(unique(underContentionCells))
+          if(length(underContentionCells)==0){ next }
 
           ## Plot to check
           # library(ggplot2)
@@ -718,11 +737,12 @@ synthesiseData <- function(
           #   scale_y_reverse() +
           #   theme_minimal(base_size=20)
 
-          
+
           for( celli in 1:length(underContentionCells) ){
             ## Pick the bigger of two cells
             contentionCellIDX <- cellsegdf[cellsegdf$cell==underContentionCells[i],'IDX']
             competeingCell <- sort( unique(neighbourdfWindowed[neighbourdfWindowed[,'IDX'] %in% contentionCellIDX,'cell']) )
+            if(length(competeingCell)==0){ next }
             competeingCellSizes <- table(neighbourdf[neighbourdf$cell %in% competeingCell, 'cell'])
             isThereConsiderableOverlap <- sapply(competeingCell, function(x){
               pixLocs <- neighbourdf[neighbourdf$cell==x,'IDX']
@@ -750,6 +770,9 @@ synthesiseData <- function(
             if( any(isThereConsiderableOverlap) ){
               competeingCellSizes <- competeingCellSizes[names(competeingCellSizes) %in% competeingCell[isThereConsiderableOverlap]]
               correspondingCELLNAMES <- neighbourdfWindowed[match(names(competeingCellSizes), neighbourdfWindowed$cell),'CELLNAME']
+              if( all(is.na(correspondingCELLNAMES)) | length(correspondingCELLNAMES)<1 ){
+                stop('Unable to get CELLNAME for neighbour!')
+              }
               if( length(competeingCellSizes) > 1 | any(competeingCellSizes > length(contentionCellIDX)) ){
                 filtout <- (cellsegdf$cell == underContentionCells[i])
                 cellDropCheck <- unique( c(cellDropCheck, unique(cellsegdf[cellsegdf$cell == underContentionCells[i],'CELLNAME'])) )
@@ -762,17 +785,28 @@ synthesiseData <- function(
                 cellDropCheck <- unique(c(cellDropCheck, unique(correspondingCELLNAMES)))
               }
             }
+
+            ## Remember which cells to drop in future
+            data.table::fwrite(data.frame('CELLNAME' = unique(cellDropCheck)), cellDropFile,
+                               row.names = F, quote = F, append = F, showProgress = F)
+
           }
         }
-        
-        ## Remember which cells to drop in future
+
+        cellDropCheck <- unique( c(cellDropCheck, unique(orig_cell_names)) )
         data.table::fwrite(data.frame('CELLNAME' = unique(cellDropCheck)), cellDropFile,
                            row.names = F, quote = F, append = F, showProgress = F)
+
+
       }
 
       ## Transfer cellnames to spotcalldf
       ## IDX for cross referencing with spotcalldf, CIDX for cross referencing with other cellsegdf
-      spotcalldf$CELLNAME <- cellsegdf[match(spotcalldf$IDX, cellsegdf$IDX),'CELLNAME']
+      if( nrow(cellsegdf)>0 ){
+        spotcalldf$CELLNAME <- cellsegdf[match(spotcalldf$IDX, cellsegdf$IDX),'CELLNAME']
+      }else{
+        spotcalldf$CELLNAME <- NA
+      }
     }
 
     ## Append information with fwrite
@@ -787,7 +821,7 @@ synthesiseData <- function(
 
     ## Summarise info per cell
     if(!all(is.na(spotcalldf$CELLNAME)) & nrow(cellsegdf) > 0){
-      cellNames <- sort(unique(cellsegdf$CELLNAME))
+      cellNames <- sort(unique(as.character(cellsegdf$CELLNAME)))
       cellMeta <- data.frame(
         'CELLNAME' = cellNames,
         'Xm' = as.numeric(by(cellsegdf$Xm, factor(cellsegdf$CELLNAME, levels=cellNames), median )),
@@ -817,10 +851,10 @@ synthesiseData <- function(
   }
 
   ## Note that above tends to create duplicate entries in CELLEXPRESSION, have to load and edit
-  if(verbose){ message('\nCleaning up...') }
+  if(verbose){ message('\nCleaning up...', appendLF = F) }
 
   if(file.exists(winLoseFile)){ file.remove( winLoseFile ) }
-  # if(file.exists(cellDropFile)){ file.remove( cellDropFile ) }
+  if(file.exists(cellDropFile)){ file.remove( cellDropFile ) }
 
   cellMetaClean <- cellMeta <- try( data.table::fread(
     paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
@@ -846,7 +880,8 @@ synthesiseData <- function(
         cellMetaClean <- rbind(cellMetaClean, res)
       }
     }
-    cellMeta <- cellMetaClean
+    ## Remove cells with 0 counts, since those were filtered as a result of redundancy filtering
+    cellMeta <- cellMetaClean[cellMetaClean$nCounts>0,]
     data.table::fwrite(
       cellMeta,
       paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
@@ -876,10 +911,17 @@ synthesiseData <- function(
     cellExpClean <- cellExpClean[match(cellMeta$CELLNAME, rownames(cellExpClean)),]
     cellExpClean[is.na(cellExpClean)] <- 0
     rownames(cellExpClean) <- cellMeta$CELLNAME
+
     data.table::fwrite(
       cellExpClean,
       paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')),
       row.names = T, append = F, showProgress = F)
   }
+
+  if(verbose){
+    message('Done!', appendLF = F)
+    message('')
+  }
+
 }
 

@@ -755,6 +755,7 @@ plotQC <- function(
     if(verbose){ message( paste0(plotName, '...') ) }
 
     cellMeta <- data.table::fread(fx, data.table = F)
+    cellMeta <- cellMeta[cellMeta$nCounts>0,]
     cellMeta$fov <- gsub('_\\d+$', '', cellMeta$CELLNAME)
     if( !all(cellMeta$fov %in% params$fov_names) ){
       stop('Unable to parse cell names!')
