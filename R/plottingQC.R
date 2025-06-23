@@ -505,8 +505,17 @@ plotQC <- function(
   }
 
   ## Spot distribution
-  fx <- fs['SPOTCALL_PIXELS']
-  if(!is.na(fx)){
+  ## For this plot, we will go back to removeRedundancy=False
+  spotcalldf_full <- try( do.call(rbind, lapply(
+    list.files( params$parent_out_dir, full.names = T, recursive = T, pattern = '^SPOTCALL_'),
+    function(fx){
+      df <- data.table::fread(fx, data.table = F, check.names = F)
+    }
+  )) )
+  if(!inherits(spotcalldf_full, 'try-error')){
+
+    spotcalldf_full$spottype <- ifelse( !grepl('^blank', tolower(spotcalldf_full$g)), 'Gene',
+                                        ifelse( grepl('^blank-new-\\d+$', tolower(spotcalldf_full$g)), 'New blank', 'Blank' ))
 
     plotName <- 'SpotFOVDistribution'
     if(verbose){ message( paste0(plotName, '...') ) }
@@ -518,7 +527,7 @@ plotQC <- function(
     suppressWarnings({
       p <-
         ggplot2::ggplot(
-          spotcalldf,
+          spotcalldf_full,
           ggplot2::aes(
             y= WY,
             x= WX
@@ -539,11 +548,6 @@ plotQC <- function(
     width = 14 * 2
     height = 14
     ggplot2::ggsave(paste0(params$out_dir, plotName, '.png'), plot = p, height = height, width = width, units = 'cm')
-  }
-
-  ## Cosine distance distribution
-  fx <- fs['SPOTCALL_PIXELS']
-  if(!is.na(fx)){
 
     plotName <- 'CosineSpatialDistribution'
     if(verbose){ message( paste0(plotName, '...') ) }
@@ -577,7 +581,12 @@ plotQC <- function(
     width = 14 * 2
     height = 14
     ggplot2::ggsave(paste0(params$out_dir, plotName, '.png'), plot = p, height = height, width = width, units = 'cm')
+
   }
+  suppressWarnings(rm(spotcalldf_full))
+
+
+  ## Plots beyond here will use the final spotcalldf
 
   ## Bit detection rate
   fx <- fs['SPOTCALL_PIXELS']

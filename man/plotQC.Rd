@@ -25,8 +25,8 @@ plotQC(
   \itemize{
   \item{ \code{FPKMCorrelation}: Correlation of spots per gene to expected expression values (FPKM).}
   \item{ \code{CosineDistanceDistribution}: Distribution of cosine distances per gene (low cosine distance implies more confidence during decoding).}
-  \item{ \code{SpotFOVDistribution}: Mean spatial distribution of spots per FOV.}
-  \item{ \code{CosineSpatialDistribution}: Mean cosine distance per 2D spatial bin (across entire tissue). }
+  \item{ \code{SpotFOVDistribution}: Mean spatial distribution of spots per FOV. Note that this plot was made from all spots called, rather than just those that end up in the final \code{OUT_SPOTCALL_PIXELS.csv}. }
+  \item{ \code{CosineSpatialDistribution}: Mean cosine distance per 2D spatial bin (across entire tissue). Note that this plot was made from all spots called, rather than just those that end up in the final \code{OUT_SPOTCALL_PIXELS.csv}. }
   \item{ \code{BitDetectionRateAll}: Boxplots showing if the number of spots per gene depends on bit status (ON vs OFF) for each bit. }
   \item{ \code{BitDetectionRateNonBlank}: Same as \code{BitDetectionRateAll} but only for spots that are non-blanks. }
   \item{ \code{BitwiseErrorRates}: Percentage of "ON to OFF" and "OFF to ON" errors per bit. }
@@ -37,6 +37,8 @@ plotQC(
   \item{ \code{SpatialPatterns_GeneMembership}: Heatmap showing extent of gene's expression explained by a given spatial pattern. }
   }
 
+  Unless otherwise stated above, QC plots are derived from output in the \code{OUT} directory produced by \code{synthesiseData}.
+
   For more information on \code{SpatialPatterns}, see documentation for \code{getPNNMatrix} and \code{getPNNLatentFactors}. Additionally, the output of \code{getPNNMatrix} is saved as \code{PNNMatrix.csv} in the QC folder.
 
   If missing certain files -- e.g. if no \code{fpkmFileName} is provided for \code{establishParams} -- some plots will be skipped.
@@ -46,5 +48,6 @@ plotQC(
 \link{ establishParams }
 \link{ getPNNMatrix }
 \link{ getPNNLatentFactors }
+\link{ synthesiseData }
 }
 \examples{}
