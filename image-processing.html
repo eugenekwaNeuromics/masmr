@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-06-13" />
+<meta name="date" content="2025-06-23" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -440,7 +440,7 @@ x = \frac{\log{ \frac{\log{ceiling}}{\log{floor}}} }{ \log{\frac{floor}{ceiling}
 ##     norm &lt;- imNormalise(norm)
 ##     return(norm)
 ## }
-## &lt;bytecode: 0x000001ed246c5e50&gt;
+## &lt;bytecode: 0x0000017c8be37d50&gt;
 ## &lt;environment: namespace:masmr&gt;</code></pre>
 <p><strong>ALWAYS plot to check how your image processing has altered your image!</strong></p>
 <div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="image-processing.html#cb46-1" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> <span class="fu">imLowPass</span>(im, <span class="at">floorVal =</span> params<span class="sc">$</span>brightness_min[<span class="dv">1</span>], <span class="at">ceilVal =</span> params<span class="sc">$</span>brightness_max[<span class="dv">1</span>] )</span>
@@ -512,7 +512,7 @@ x = \frac{\log{ \frac{\log{ceiling}}{\log{floor}}} }{ \log{\frac{floor}{ceiling}
 ##     mask[labmask %in% toosmall] &lt;- F
 ##     return(mask)
 ## }
-## &lt;bytecode: 0x000001ed24a7d720&gt;
+## &lt;bytecode: 0x0000017c8c1fa7b8&gt;
 ## &lt;environment: namespace:masmr&gt;</code></pre>
 <p>Next, let’s create a new mask function that will be more permissive and flag more pixels. This <code>myCustomMask</code> function is created from copying and editing the default <code>imForMask</code> function above. Briefly, this new function replaces steps 5-7 in the default <code>imForMask</code> function with the union of multiple masks.</p>
 <p>[Note: the use of ellipsis (<code>...</code>) is to allow the passing arguments in <code>myCustomMask</code> to functions <strong>within</strong> <code>myCustomMask</code>: e.g. <code>imLaplacianOfGaussian</code>, <code>imHessianDeterminant</code> etc.]</p>

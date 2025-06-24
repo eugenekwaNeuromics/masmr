@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-06-14" />
+<meta name="date" content="2025-06-24" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -372,91 +372,89 @@ div.csl-indent {
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="synthesis.html#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">synthesiseData</span>(<span class="at">removeRedundancy =</span> T, <span class="at">cellOverlapFraction =</span> <span class="fl">0.25</span>)</span></code></pre></div>
 <pre><code>## Warning in synthesiseData(removeRedundancy = T, cellOverlapFraction = 0.25):
 ## Overwriting existing files</code></pre>
+<pre><code>## Warning in data.table::fwrite(data.frame(CELLNAME = unique(cellDropCheck)), :
+## Input has no columns; creating an empty file at
+## &#39;C:/Users/kwaje/Downloads/JYOUT/OUT/TEMP_CELLDROP.csv&#39; and exiting.</code></pre>
+<pre><code>## Warning in data.table::fwrite(data.frame(CELLNAME = unique(cellDropCheck)), : Input has no columns; doing nothing.
+## If you intended to overwrite the file at C:/Users/kwaje/Downloads/JYOUT/OUT/TEMP_CELLDROP.csv with an empty one, please use file.remove first.</code></pre>
 <p>Accordingly, removing duplicate calls reduces spot density at FOV boundaries…</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="synthesis.html#cb12-1" aria-hidden="true" tabindex="-1"></a>spotcalldf <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="fu">paste0</span>(params<span class="sc">$</span>parent_out_dir, <span class="st">&#39;/OUT/OUT_SPOTCALL_PIXELS.csv.gz&#39;</span>), <span class="at">data.table =</span> F)</span>
-<span id="cb12-2"><a href="synthesis.html#cb12-2" aria-hidden="true" tabindex="-1"></a>cowplot<span class="sc">::</span><span class="fu">plot_grid</span>( <span class="at">plotlist=</span><span class="fu">list</span>(</span>
-<span id="cb12-3"><a href="synthesis.html#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb12-4"><a href="synthesis.html#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hex</span>(<span class="at">data=</span>spotcalldf, <span class="fu">aes</span>(<span class="at">x=</span>Xm, <span class="at">y=</span>Ym), <span class="at">bins=</span><span class="dv">100</span>) <span class="sc">+</span></span>
-<span id="cb12-5"><a href="synthesis.html#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_viridis_c</span>(<span class="at">option=</span><span class="st">&#39;turbo&#39;</span>) <span class="sc">+</span></span>
-<span id="cb12-6"><a href="synthesis.html#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb12-7"><a href="synthesis.html#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size=</span><span class="dv">14</span>) <span class="sc">+</span></span>
-<span id="cb12-8"><a href="synthesis.html#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">&#39;X (microns)&#39;</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">&#39;Y (microns)&#39;</span>) <span class="sc">+</span></span>
-<span id="cb12-9"><a href="synthesis.html#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;none&#39;</span>) <span class="sc">+</span></span>
-<span id="cb12-10"><a href="synthesis.html#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb12-11"><a href="synthesis.html#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Spot density&#39;</span>), </span>
-<span id="cb12-12"><a href="synthesis.html#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb12-13"><a href="synthesis.html#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">data=</span>spotcalldf, <span class="fu">aes</span>(<span class="at">x=</span>Xm, <span class="at">y=</span>Ym, <span class="at">colour=</span>fov), <span class="at">shape=</span><span class="st">&#39;.&#39;</span>, <span class="at">alpha=</span><span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb12-14"><a href="synthesis.html#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_colour_viridis_d</span>(<span class="at">name =</span> <span class="st">&#39;&#39;</span>, <span class="at">option=</span><span class="st">&#39;turbo&#39;</span>) <span class="sc">+</span></span>
-<span id="cb12-15"><a href="synthesis.html#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb12-16"><a href="synthesis.html#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size=</span><span class="dv">14</span>) <span class="sc">+</span></span>
-<span id="cb12-17"><a href="synthesis.html#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">&#39;X (microns)&#39;</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">&#39;Y (microns)&#39;</span>) <span class="sc">+</span></span>
-<span id="cb12-18"><a href="synthesis.html#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">colour=</span><span class="fu">guide_legend</span>(<span class="at">override.aes =</span> <span class="fu">list</span>(<span class="at">size=</span><span class="dv">5</span>, <span class="at">shape=</span><span class="dv">16</span>), <span class="at">ncol=</span><span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb12-19"><a href="synthesis.html#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
-<span id="cb12-20"><a href="synthesis.html#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;none&#39;</span>) <span class="sc">+</span></span>
-<span id="cb12-21"><a href="synthesis.html#cb12-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Spots by FOV&#39;</span>)</span>
-<span id="cb12-22"><a href="synthesis.html#cb12-22" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow=</span><span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="synthesis.html#cb14-1" aria-hidden="true" tabindex="-1"></a>spotcalldf <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="fu">paste0</span>(params<span class="sc">$</span>parent_out_dir, <span class="st">&#39;/OUT/OUT_SPOTCALL_PIXELS.csv.gz&#39;</span>), <span class="at">data.table =</span> F)</span>
+<span id="cb14-2"><a href="synthesis.html#cb14-2" aria-hidden="true" tabindex="-1"></a>cowplot<span class="sc">::</span><span class="fu">plot_grid</span>( <span class="at">plotlist=</span><span class="fu">list</span>(</span>
+<span id="cb14-3"><a href="synthesis.html#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb14-4"><a href="synthesis.html#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hex</span>(<span class="at">data=</span>spotcalldf, <span class="fu">aes</span>(<span class="at">x=</span>Xm, <span class="at">y=</span>Ym), <span class="at">bins=</span><span class="dv">100</span>) <span class="sc">+</span></span>
+<span id="cb14-5"><a href="synthesis.html#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_viridis_c</span>(<span class="at">option=</span><span class="st">&#39;turbo&#39;</span>) <span class="sc">+</span></span>
+<span id="cb14-6"><a href="synthesis.html#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb14-7"><a href="synthesis.html#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size=</span><span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb14-8"><a href="synthesis.html#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">&#39;X (microns)&#39;</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">&#39;Y (microns)&#39;</span>) <span class="sc">+</span></span>
+<span id="cb14-9"><a href="synthesis.html#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;none&#39;</span>) <span class="sc">+</span></span>
+<span id="cb14-10"><a href="synthesis.html#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb14-11"><a href="synthesis.html#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Spot density&#39;</span>), </span>
+<span id="cb14-12"><a href="synthesis.html#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb14-13"><a href="synthesis.html#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">data=</span>spotcalldf, <span class="fu">aes</span>(<span class="at">x=</span>Xm, <span class="at">y=</span>Ym, <span class="at">colour=</span>fov), <span class="at">shape=</span><span class="st">&#39;.&#39;</span>, <span class="at">alpha=</span><span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb14-14"><a href="synthesis.html#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_colour_viridis_d</span>(<span class="at">name =</span> <span class="st">&#39;&#39;</span>, <span class="at">option=</span><span class="st">&#39;turbo&#39;</span>) <span class="sc">+</span></span>
+<span id="cb14-15"><a href="synthesis.html#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb14-16"><a href="synthesis.html#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size=</span><span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb14-17"><a href="synthesis.html#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">&#39;X (microns)&#39;</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">&#39;Y (microns)&#39;</span>) <span class="sc">+</span></span>
+<span id="cb14-18"><a href="synthesis.html#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">colour=</span><span class="fu">guide_legend</span>(<span class="at">override.aes =</span> <span class="fu">list</span>(<span class="at">size=</span><span class="dv">5</span>, <span class="at">shape=</span><span class="dv">16</span>), <span class="at">ncol=</span><span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb14-19"><a href="synthesis.html#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb14-20"><a href="synthesis.html#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;none&#39;</span>) <span class="sc">+</span></span>
+<span id="cb14-21"><a href="synthesis.html#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Spots by FOV&#39;</span>)</span>
+<span id="cb14-22"><a href="synthesis.html#cb14-22" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow=</span><span class="dv">1</span>)</span></code></pre></div>
 <p><img src="_main_files/figure-html/syn-synproper-result-1.png" width="672" /></p>
 <p>…and reduces the number of cells and counts per cell.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="synthesis.html#cb13-1" aria-hidden="true" tabindex="-1"></a>cellExp <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="fu">paste0</span>(params<span class="sc">$</span>parent_out_dir, <span class="st">&#39;/OUT/OUT_CELLEXPRESSION.csv.gz&#39;</span>), <span class="at">data.table =</span> F)</span>
-<span id="cb13-2"><a href="synthesis.html#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(cellExp) <span class="ot">&lt;-</span> cellExp[,<span class="dv">1</span>]</span>
-<span id="cb13-3"><a href="synthesis.html#cb13-3" aria-hidden="true" tabindex="-1"></a>cellExp[,<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb13-4"><a href="synthesis.html#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-5"><a href="synthesis.html#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">log10</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">colSums</span>(cellExp)), </span>
-<span id="cb13-6"><a href="synthesis.html#cb13-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="fu">paste0</span>( </span>
-<span id="cb13-7"><a href="synthesis.html#cb13-7" aria-hidden="true" tabindex="-1"></a>       <span class="st">&#39;Cells x genes: &#39;</span>, <span class="fu">paste</span>( <span class="fu">dim</span>(cellExp), <span class="at">collapse=</span><span class="st">&#39; x &#39;</span>), </span>
-<span id="cb13-8"><a href="synthesis.html#cb13-8" aria-hidden="true" tabindex="-1"></a>       <span class="st">&#39;, Median nCounts: &#39;</span>, <span class="fu">median</span>(<span class="fu">colSums</span>(cellExp))), </span>
-<span id="cb13-9"><a href="synthesis.html#cb13-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">breaks=</span><span class="dv">25</span>, <span class="at">xlab =</span> <span class="st">&#39;Log10 nCounts per cell&#39;</span>); </span>
-<span id="cb13-10"><a href="synthesis.html#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span><span class="fu">log10</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">median</span>(<span class="fu">colSums</span>(cellExp))), <span class="at">col=</span><span class="st">&#39;red&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="synthesis.html#cb15-1" aria-hidden="true" tabindex="-1"></a>cellExp <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="fu">paste0</span>(params<span class="sc">$</span>parent_out_dir, <span class="st">&#39;/OUT/OUT_CELLEXPRESSION.csv.gz&#39;</span>), <span class="at">data.table =</span> F)</span>
+<span id="cb15-2"><a href="synthesis.html#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(cellExp) <span class="ot">&lt;-</span> cellExp[,<span class="dv">1</span>]</span>
+<span id="cb15-3"><a href="synthesis.html#cb15-3" aria-hidden="true" tabindex="-1"></a>cellExp[,<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb15-4"><a href="synthesis.html#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="synthesis.html#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">log10</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">colSums</span>(cellExp)), </span>
+<span id="cb15-6"><a href="synthesis.html#cb15-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="fu">paste0</span>( </span>
+<span id="cb15-7"><a href="synthesis.html#cb15-7" aria-hidden="true" tabindex="-1"></a>       <span class="st">&#39;Cells x genes: &#39;</span>, <span class="fu">paste</span>( <span class="fu">dim</span>(cellExp), <span class="at">collapse=</span><span class="st">&#39; x &#39;</span>), </span>
+<span id="cb15-8"><a href="synthesis.html#cb15-8" aria-hidden="true" tabindex="-1"></a>       <span class="st">&#39;, Median nCounts: &#39;</span>, <span class="fu">median</span>(<span class="fu">colSums</span>(cellExp))), </span>
+<span id="cb15-9"><a href="synthesis.html#cb15-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">breaks=</span><span class="dv">25</span>, <span class="at">xlab =</span> <span class="st">&#39;Log10 nCounts per cell&#39;</span>); </span>
+<span id="cb15-10"><a href="synthesis.html#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span><span class="fu">log10</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">median</span>(<span class="fu">colSums</span>(cellExp))), <span class="at">col=</span><span class="st">&#39;red&#39;</span>)</span></code></pre></div>
 <p><img src="_main_files/figure-html/syn-synproper-cellwise-1.png" width="672" /></p>
 <p>One final feature to consider is the use of the <code>subsetFOV</code> field. This is used when your FOVs are disjoint, i.e. not connected to each other (such as when there are multiple samples on the microscopy stage, and the FOVs in between samples are not captured). In such cases, one needs to subset just the FOVs belonging to one intact block.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="synthesis.html#cb14-1" aria-hidden="true" tabindex="-1"></a>fovs_belonging_to_sample <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb14-2"><a href="synthesis.html#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;MMStack_1-Pos_002_004&#39;</span>,</span>
-<span id="cb14-3"><a href="synthesis.html#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;MMStack_1-Pos_002_002&#39;</span>,</span>
-<span id="cb14-4"><a href="synthesis.html#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;MMStack_1-Pos_002_003&#39;</span></span>
-<span id="cb14-5"><a href="synthesis.html#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb14-6"><a href="synthesis.html#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">synthesiseData</span>(<span class="at">removeRedundancy =</span> T, <span class="at">cellOverlapFraction =</span> <span class="fl">0.25</span>, <span class="at">subsetFOV =</span> fovs_belonging_to_sample)</span></code></pre></div>
-<p>Note that by subsetting, subdirectories within <code>\OUT</code> are created named in the <code>SUBSET_{ Reference FOV }</code> format. <strong>WARNING:</strong> It is assumed that no two subsets will have the same Reference FOV.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="synthesis.html#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>( params<span class="sc">$</span>out_dir )</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="synthesis.html#cb16-1" aria-hidden="true" tabindex="-1"></a>fovs_belonging_to_sample <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb16-2"><a href="synthesis.html#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;MMStack_1-Pos_002_004&#39;</span>,</span>
+<span id="cb16-3"><a href="synthesis.html#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;MMStack_1-Pos_002_002&#39;</span>,</span>
+<span id="cb16-4"><a href="synthesis.html#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;MMStack_1-Pos_002_003&#39;</span></span>
+<span id="cb16-5"><a href="synthesis.html#cb16-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-6"><a href="synthesis.html#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">synthesiseData</span>(<span class="at">removeRedundancy =</span> T, <span class="at">cellOverlapFraction =</span> <span class="fl">0.25</span>, <span class="at">subsetFOV =</span> fovs_belonging_to_sample)</span></code></pre></div>
+<p>Note that by subsetting, subdirectories within <code>\OUT</code> are created named in the <code>SUBSET_{ Reference FOV }</code> format. <strong>WARNING:</strong> It is assumed that no two subsets will have the same Reference FOV. [For more control over folder names, users can use the <code>customOutDirName</code> parameter in <code>synthesiseData</code>.]</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="synthesis.html#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>( params<span class="sc">$</span>out_dir )</span></code></pre></div>
 <pre><code>## [1] &quot;C:/Users/kwaje/Downloads/JYOUT/OUT/SUBSET_MMStack_1-Pos_002_002/&quot;</code></pre>
 <p>Accordingly, the output within this subdirectory is only a subset of all the processed FOVs.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="synthesis.html#cb17-1" aria-hidden="true" tabindex="-1"></a>spotcalldf <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="fu">paste0</span>(params<span class="sc">$</span>out_dir, <span class="st">&#39;/OUT_SPOTCALL_PIXELS.csv.gz&#39;</span>), <span class="at">data.table =</span> F)</span>
-<span id="cb17-2"><a href="synthesis.html#cb17-2" aria-hidden="true" tabindex="-1"></a>cowplot<span class="sc">::</span><span class="fu">plot_grid</span>( <span class="at">plotlist=</span><span class="fu">list</span>(</span>
-<span id="cb17-3"><a href="synthesis.html#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb17-4"><a href="synthesis.html#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hex</span>(<span class="at">data=</span>spotcalldf, <span class="fu">aes</span>(<span class="at">x=</span>Xm, <span class="at">y=</span>Ym), <span class="at">bins=</span><span class="dv">100</span>) <span class="sc">+</span></span>
-<span id="cb17-5"><a href="synthesis.html#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_viridis_c</span>(<span class="at">option=</span><span class="st">&#39;turbo&#39;</span>) <span class="sc">+</span></span>
-<span id="cb17-6"><a href="synthesis.html#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb17-7"><a href="synthesis.html#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size=</span><span class="dv">14</span>) <span class="sc">+</span></span>
-<span id="cb17-8"><a href="synthesis.html#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">&#39;X (microns)&#39;</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">&#39;Y (microns)&#39;</span>) <span class="sc">+</span></span>
-<span id="cb17-9"><a href="synthesis.html#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;none&#39;</span>) <span class="sc">+</span></span>
-<span id="cb17-10"><a href="synthesis.html#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb17-11"><a href="synthesis.html#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Spot density&#39;</span>), </span>
-<span id="cb17-12"><a href="synthesis.html#cb17-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb17-13"><a href="synthesis.html#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">data=</span>spotcalldf, <span class="fu">aes</span>(<span class="at">x=</span>Xm, <span class="at">y=</span>Ym, <span class="at">colour=</span>fov), <span class="at">shape=</span><span class="st">&#39;.&#39;</span>, <span class="at">alpha=</span><span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb17-14"><a href="synthesis.html#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_colour_viridis_d</span>(<span class="at">name =</span> <span class="st">&#39;&#39;</span>, <span class="at">option=</span><span class="st">&#39;turbo&#39;</span>) <span class="sc">+</span></span>
-<span id="cb17-15"><a href="synthesis.html#cb17-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb17-16"><a href="synthesis.html#cb17-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size=</span><span class="dv">14</span>) <span class="sc">+</span></span>
-<span id="cb17-17"><a href="synthesis.html#cb17-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">&#39;X (microns)&#39;</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">&#39;Y (microns)&#39;</span>) <span class="sc">+</span></span>
-<span id="cb17-18"><a href="synthesis.html#cb17-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">colour=</span><span class="fu">guide_legend</span>(<span class="at">override.aes =</span> <span class="fu">list</span>(<span class="at">size=</span><span class="dv">5</span>, <span class="at">shape=</span><span class="dv">16</span>), <span class="at">ncol=</span><span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb17-19"><a href="synthesis.html#cb17-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
-<span id="cb17-20"><a href="synthesis.html#cb17-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;none&#39;</span>) <span class="sc">+</span></span>
-<span id="cb17-21"><a href="synthesis.html#cb17-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Spots by FOV&#39;</span>)</span>
-<span id="cb17-22"><a href="synthesis.html#cb17-22" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow=</span><span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="synthesis.html#cb19-1" aria-hidden="true" tabindex="-1"></a>spotcalldf <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="fu">paste0</span>(params<span class="sc">$</span>out_dir, <span class="st">&#39;/OUT_SPOTCALL_PIXELS.csv.gz&#39;</span>), <span class="at">data.table =</span> F)</span>
+<span id="cb19-2"><a href="synthesis.html#cb19-2" aria-hidden="true" tabindex="-1"></a>cowplot<span class="sc">::</span><span class="fu">plot_grid</span>( <span class="at">plotlist=</span><span class="fu">list</span>(</span>
+<span id="cb19-3"><a href="synthesis.html#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb19-4"><a href="synthesis.html#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hex</span>(<span class="at">data=</span>spotcalldf, <span class="fu">aes</span>(<span class="at">x=</span>Xm, <span class="at">y=</span>Ym), <span class="at">bins=</span><span class="dv">100</span>) <span class="sc">+</span></span>
+<span id="cb19-5"><a href="synthesis.html#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_viridis_c</span>(<span class="at">option=</span><span class="st">&#39;turbo&#39;</span>) <span class="sc">+</span></span>
+<span id="cb19-6"><a href="synthesis.html#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb19-7"><a href="synthesis.html#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size=</span><span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb19-8"><a href="synthesis.html#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">&#39;X (microns)&#39;</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">&#39;Y (microns)&#39;</span>) <span class="sc">+</span></span>
+<span id="cb19-9"><a href="synthesis.html#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;none&#39;</span>) <span class="sc">+</span></span>
+<span id="cb19-10"><a href="synthesis.html#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb19-11"><a href="synthesis.html#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Spot density&#39;</span>), </span>
+<span id="cb19-12"><a href="synthesis.html#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb19-13"><a href="synthesis.html#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">data=</span>spotcalldf, <span class="fu">aes</span>(<span class="at">x=</span>Xm, <span class="at">y=</span>Ym, <span class="at">colour=</span>fov), <span class="at">shape=</span><span class="st">&#39;.&#39;</span>, <span class="at">alpha=</span><span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb19-14"><a href="synthesis.html#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_colour_viridis_d</span>(<span class="at">name =</span> <span class="st">&#39;&#39;</span>, <span class="at">option=</span><span class="st">&#39;turbo&#39;</span>) <span class="sc">+</span></span>
+<span id="cb19-15"><a href="synthesis.html#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb19-16"><a href="synthesis.html#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size=</span><span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb19-17"><a href="synthesis.html#cb19-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">&#39;X (microns)&#39;</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">&#39;Y (microns)&#39;</span>) <span class="sc">+</span></span>
+<span id="cb19-18"><a href="synthesis.html#cb19-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">colour=</span><span class="fu">guide_legend</span>(<span class="at">override.aes =</span> <span class="fu">list</span>(<span class="at">size=</span><span class="dv">5</span>, <span class="at">shape=</span><span class="dv">16</span>), <span class="at">ncol=</span><span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb19-19"><a href="synthesis.html#cb19-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb19-20"><a href="synthesis.html#cb19-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;none&#39;</span>) <span class="sc">+</span></span>
+<span id="cb19-21"><a href="synthesis.html#cb19-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">&#39;Spots by FOV&#39;</span>)</span>
+<span id="cb19-22"><a href="synthesis.html#cb19-22" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow=</span><span class="dv">1</span>)</span></code></pre></div>
 <p><img src="_main_files/figure-html/syn-subset-result-1.png" width="672" /></p>
 </div>
 <div id="qc-plotting" class="section level2 hasAnchor" number="7.2">
 <h2><span class="header-section-number">7.2</span> QC plotting<a href="synthesis.html#qc-plotting" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>We have provided a <code>plotQC</code> function that returns several default QC plots as <code>.png</code> files. This function depends on parameters input during <code>establishParams</code>: e.g. if <code>fpkmFileName</code> is missing, then FPKM correlations will not be plotted. Additionally, if users ran <code>prepareCodebook</code> with <code>exhaustiveBlanks</code>, the newly added blanks will be flagged. [Users wishing to ignore these new blanks can set <code>includeNewBlanks</code> in <code>plotQC</code> to <code>FALSE</code> (see below).]</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="synthesis.html#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotQC</span>( </span>
-<span id="cb18-2"><a href="synthesis.html#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">includeNewBlanks=</span>T,</span>
-<span id="cb18-3"><a href="synthesis.html#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">synthesisDir =</span> <span class="st">&#39;C:/Users/kwaje/Downloads/JYOUT/OUT/&#39;</span> <span class="co">#To refer to previously generated (un-subset) output</span></span>
-<span id="cb18-4"><a href="synthesis.html#cb18-4" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
-<pre><code>## Warning: Groups with fewer than two data points have been dropped.
-## Groups with fewer than two data points have been dropped.</code></pre>
-<pre><code>## Warning: Removed 55 rows containing missing values (`geom_hex()`).
-## Removed 55 rows containing missing values (`geom_hex()`).</code></pre>
-<pre><code>## Warning: Transformation introduced infinite values in continuous y-axis</code></pre>
-<pre><code>## Warning: Removed 16 rows containing non-finite values (`stat_boxplot()`).</code></pre>
-<pre><code>## Warning: Transformation introduced infinite values in discrete y-axis</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="synthesis.html#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotQC</span>( </span>
+<span id="cb20-2"><a href="synthesis.html#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">includeNewBlanks=</span>T,</span>
+<span id="cb20-3"><a href="synthesis.html#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">synthesisDir =</span> <span class="st">&#39;C:/Users/kwaje/Downloads/JYOUT/OUT/&#39;</span> <span class="co">#To refer to previously generated (un-subset) output</span></span>
+<span id="cb20-4"><a href="synthesis.html#cb20-4" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
 <p>The interpretation of these plots will be covered briefly below.</p>
 <div id="fpkmcorrelation" class="section level3 unnumbered hasAnchor">
 <h3><code>FPKMCorrelation</code><a href="synthesis.html#fpkmcorrelation" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -470,12 +468,14 @@ div.csl-indent {
 </div>
 <div id="spotfovdistribution" class="section level3 unnumbered hasAnchor">
 <h3><code>SpotFOVDistribution</code><a href="synthesis.html#spotfovdistribution" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>This shows the distribution of spots, averaged across FOVs. This is used to check if spot coordinate in a given FOV influences its detection rate – ideally, this should not occur. This plot is less useful if only a handful of FOVs were processed.</p>
+<p>This shows the distribution of spots, averaged across FOVs. This is used to check if spot coordinate in a given FOV influences its detection rate – ideally, this should not occur. If e.g. spots are more frequently detected in the centre of the FOV than the edges, this could suggest uneven lighting and a need to correct for that during image processing. [This plot is less useful if only a handful of FOVs were processed.]</p>
+<p>Note that this plot was created from all <code>SPOTCALL</code> files, without removing redundant spots.</p>
 <p><img src="images/SpotFOVDistribution.png" width="100%" style="display: block; margin: auto;" /></p>
 </div>
 <div id="cosinespatialdistribution" class="section level3 unnumbered hasAnchor">
 <h3><code>CosineSpatialDistribution</code><a href="synthesis.html#cosinespatialdistribution" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>This plot shows the average cosine distances per 2D bin, across the entire tissue. Ideally, spatial location should not influence confidence in spot calls.</p>
+<p>Note that – like <code>SpotFOVDistribution</code> – this plot was created from all <code>SPOTCALL</code> files, without removing redundant spots.</p>
 <p><img src="images/CosineSpatialDistribution.png" width="100%" style="display: block; margin: auto;" /></p>
 </div>
 <div id="bitdetectionrate" class="section level3 unnumbered hasAnchor">
@@ -519,22 +519,22 @@ div.csl-indent {
 <p>Users may alternatively, or simultaneously, wish to consider physical Euclidean distances (i.e. genes within 5 microns of a coordinate, within 10 microns etc). This method is typically slower and more memory intensive.</p>
 <p>Both can be accomplished with our <code>getPNNMatrix</code> function (PNN stands for “Point’s Nearest Neighbour”).</p>
 <p>[Note: when run inside <code>plotQC</code>, the output of <code>getPNNMatrix</code> is saved as its own <code>.csv</code> file.]</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="synthesis.html#cb24-1" aria-hidden="true" tabindex="-1"></a>nearestNeighbourMatrix <span class="ot">&lt;-</span> <span class="fu">getPNNMatrix</span>(</span>
-<span id="cb24-2"><a href="synthesis.html#cb24-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb24-3"><a href="synthesis.html#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> spotcalldf<span class="sc">$</span>Xm, <span class="co"># The x coordinate</span></span>
-<span id="cb24-4"><a href="synthesis.html#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> spotcalldf<span class="sc">$</span>Ym, <span class="co"># The y coordinate</span></span>
-<span id="cb24-5"><a href="synthesis.html#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">label =</span> spotcalldf<span class="sc">$</span>g, <span class="co"># The category that a given spot belongs to</span></span>
-<span id="cb24-6"><a href="synthesis.html#cb24-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb24-7"><a href="synthesis.html#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">delaunayTriangulation =</span> T, <span class="co"># Whether to use Delaunay Triangulation approach</span></span>
-<span id="cb24-8"><a href="synthesis.html#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">delaunayDistanceThreshold =</span> <span class="dv">20</span>, <span class="co"># Ignore links longer than this distance (Xm is in microns, so this is 20 microns) </span></span>
-<span id="cb24-9"><a href="synthesis.html#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">delaunayNNDegrees =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="co"># Consider 1st, 1st + 2nd, and 1st + 2nd + 3rd order neighbours</span></span>
-<span id="cb24-10"><a href="synthesis.html#cb24-10" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb24-11"><a href="synthesis.html#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">euclideanDistances =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">10</span>), <span class="co"># Consider spots &lt;5, and &lt;10 microns away</span></span>
-<span id="cb24-12"><a href="synthesis.html#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> F <span class="co"># Turn off messages</span></span>
-<span id="cb24-13"><a href="synthesis.html#cb24-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb24-14"><a href="synthesis.html#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>( <span class="fu">paste0</span>(<span class="st">&#39;Dimensions of nearest neighbour matrix: &#39;</span>, <span class="fu">paste</span>(<span class="fu">dim</span>(nearestNeighbourMatrix), <span class="at">collapse =</span> <span class="st">&#39; x &#39;</span>) ))</span></code></pre></div>
-<pre><code>## [1] &quot;Dimensions of nearest neighbour matrix: 13146 x 735&quot;</code></pre>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="synthesis.html#cb26-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>( nearestNeighbourMatrix[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">format =</span> <span class="st">&#39;html&#39;</span>, <span class="at">booktabs =</span> <span class="cn">TRUE</span> )</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="synthesis.html#cb21-1" aria-hidden="true" tabindex="-1"></a>nearestNeighbourMatrix <span class="ot">&lt;-</span> <span class="fu">getPNNMatrix</span>(</span>
+<span id="cb21-2"><a href="synthesis.html#cb21-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-3"><a href="synthesis.html#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> spotcalldf<span class="sc">$</span>Xm, <span class="co"># The x coordinate</span></span>
+<span id="cb21-4"><a href="synthesis.html#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> spotcalldf<span class="sc">$</span>Ym, <span class="co"># The y coordinate</span></span>
+<span id="cb21-5"><a href="synthesis.html#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">label =</span> spotcalldf<span class="sc">$</span>g, <span class="co"># The category that a given spot belongs to</span></span>
+<span id="cb21-6"><a href="synthesis.html#cb21-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-7"><a href="synthesis.html#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">delaunayTriangulation =</span> T, <span class="co"># Whether to use Delaunay Triangulation approach</span></span>
+<span id="cb21-8"><a href="synthesis.html#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">delaunayDistanceThreshold =</span> <span class="dv">20</span>, <span class="co"># Ignore links longer than this distance (Xm is in microns, so this is 20 microns) </span></span>
+<span id="cb21-9"><a href="synthesis.html#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">delaunayNNDegrees =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="co"># Consider 1st, 1st + 2nd, and 1st + 2nd + 3rd order neighbours</span></span>
+<span id="cb21-10"><a href="synthesis.html#cb21-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-11"><a href="synthesis.html#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">euclideanDistances =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">10</span>), <span class="co"># Consider spots &lt;5, and &lt;10 microns away</span></span>
+<span id="cb21-12"><a href="synthesis.html#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> F <span class="co"># Turn off messages</span></span>
+<span id="cb21-13"><a href="synthesis.html#cb21-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-14"><a href="synthesis.html#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>( <span class="fu">paste0</span>(<span class="st">&#39;Dimensions of nearest neighbour matrix: &#39;</span>, <span class="fu">paste</span>(<span class="fu">dim</span>(nearestNeighbourMatrix), <span class="at">collapse =</span> <span class="st">&#39; x &#39;</span>) ))</span></code></pre></div>
+<pre><code>## [1] &quot;Dimensions of nearest neighbour matrix: 13145 x 735&quot;</code></pre>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="synthesis.html#cb23-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>( nearestNeighbourMatrix[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">format =</span> <span class="st">&#39;html&#39;</span>, <span class="at">booktabs =</span> <span class="cn">TRUE</span> )</span></code></pre></div>
 <table>
 <thead>
 <tr>
@@ -652,14 +652,14 @@ DT1_Blank-2
 </ul>
 <p>[Note: we chose NMF because of the speed of the <code>RcppML</code> package. Users may also explore other approaches to clustering: e.g. hierarchical clustering, leiden etc.]</p>
 <p>To do so, users can use our <code>getPNNLatentFactors</code> function. This function not only runs NMF, but also merges similar factors together (based on a Pearson correlation threshold indicated by <code>correlationThreshold</code>).</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="synthesis.html#cb27-1" aria-hidden="true" tabindex="-1"></a>resultsOfNMF <span class="ot">&lt;-</span> <span class="fu">getPNNLatentFactors</span>(</span>
-<span id="cb27-2"><a href="synthesis.html#cb27-2" aria-hidden="true" tabindex="-1"></a>  nearestNeighbourMatrix,</span>
-<span id="cb27-3"><a href="synthesis.html#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">nFactors =</span> <span class="dv">4</span>, <span class="co">#Number of factors specified here</span></span>
-<span id="cb27-4"><a href="synthesis.html#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">mergeSimilarFactors =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb27-5"><a href="synthesis.html#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">correlationThreshold =</span> <span class="fl">0.1</span>, <span class="co">#If correlation &gt;0.1 in W matrix (&#39;point_scores&#39;), merge</span></span>
-<span id="cb27-6"><a href="synthesis.html#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> F</span>
-<span id="cb27-7"><a href="synthesis.html#cb27-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb27-8"><a href="synthesis.html#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>( <span class="fu">names</span>(resultsOfNMF) )</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="synthesis.html#cb24-1" aria-hidden="true" tabindex="-1"></a>resultsOfNMF <span class="ot">&lt;-</span> <span class="fu">getPNNLatentFactors</span>(</span>
+<span id="cb24-2"><a href="synthesis.html#cb24-2" aria-hidden="true" tabindex="-1"></a>  nearestNeighbourMatrix,</span>
+<span id="cb24-3"><a href="synthesis.html#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">nFactors =</span> <span class="dv">4</span>, <span class="co">#Number of factors specified here</span></span>
+<span id="cb24-4"><a href="synthesis.html#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">mergeSimilarFactors =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb24-5"><a href="synthesis.html#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">correlationThreshold =</span> <span class="fl">0.1</span>, <span class="co">#If correlation &gt;0.1 in W matrix (&#39;point_scores&#39;), merge</span></span>
+<span id="cb24-6"><a href="synthesis.html#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> F</span>
+<span id="cb24-7"><a href="synthesis.html#cb24-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-8"><a href="synthesis.html#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>( <span class="fu">names</span>(resultsOfNMF) )</span></code></pre></div>
 <pre><code>## [1] &quot;n_factors&quot;    &quot;point_scores&quot; &quot;coefficients&quot;</code></pre>
 <p>What is returned is a list of three objects:</p>
 <ul>

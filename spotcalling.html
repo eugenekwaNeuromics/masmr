@@ -23,7 +23,7 @@
 <meta name="author" content="Eugene Kwa" />
 
 
-<meta name="date" content="2025-06-13" />
+<meta name="date" content="2025-06-23" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -1567,7 +1567,7 @@ ASCL1
 ##     result &lt;- imsBrightnessMin(im, ...)
 ##     return(result)
 ## }
-## &lt;bytecode: 0x000001e5d6d6ae18&gt;
+## &lt;bytecode: 0x0000019826a76ee8&gt;
 ## &lt;environment: namespace:masmr&gt;</code></pre>
 <p>Users wishing to process Z slices individually are encouraged refer to Troubleshooting (Chapter <a href="troubleshooting.html#troubleshooting">8</a>) for details.</p>
 </div>
@@ -1623,7 +1623,7 @@ ASCL1
 <span id="cb79-2"><a href="spotcalling.html#cb79-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(imList)){</span>
 <span id="cb79-3"><a href="spotcalling.html#cb79-3" aria-hidden="true" tabindex="-1"></a>  forReg[[i]] <span class="ot">&lt;-</span> <span class="fu">imNormalise</span>( imMetrics<span class="sc">$</span>COARSE[[i]] <span class="sc">+</span> imMetrics<span class="sc">$</span>DECODE[[i]] )</span>
 <span id="cb79-4"><a href="spotcalling.html#cb79-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb79-5"><a href="spotcalling.html#cb79-5" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(forReg) <span class="ot">&lt;-</span> <span class="fu">names</span>(imList)</span>
+<span id="cb79-5"><a href="spotcalling.html#cb79-5" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(forReg) <span class="ot">&lt;-</span> <span class="fu">names</span>(imList) <span class="co">#Always keep the names from imList</span></span>
 <span id="cb79-6"><a href="spotcalling.html#cb79-6" aria-hidden="true" tabindex="-1"></a>norm <span class="ot">&lt;-</span> forReg[[<span class="dv">1</span>]]</span>
 <span id="cb79-7"><a href="spotcalling.html#cb79-7" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
 <span id="cb79-8"><a href="spotcalling.html#cb79-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( imager<span class="sc">::</span><span class="fu">as.cimg</span>(norm), <span class="at">main =</span> <span class="st">&#39;Band pass&#39;</span> )</span></code></pre></div>
