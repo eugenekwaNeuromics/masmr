@@ -520,14 +520,14 @@ plotQC <- function(
     plotName <- 'SpotFOVDistribution'
     if(verbose){ message( paste0(plotName, '...') ) }
 
-    df <- spotcalldf
+    df <- spotcalldf_full
     plotTitle <- paste0(
       'Spot spatial distributions'
     )
     suppressWarnings({
       p <-
         ggplot2::ggplot(
-          spotcalldf_full,
+          df,
           ggplot2::aes(
             y= WY,
             x= WX
@@ -552,7 +552,7 @@ plotQC <- function(
     plotName <- 'CosineSpatialDistribution'
     if(verbose){ message( paste0(plotName, '...') ) }
 
-    df <- spotcalldf
+    df <- spotcalldf_full
     plotTitle <- paste0(
       'Mean cosine distance across spatial bins'
     )
