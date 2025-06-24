@@ -151,7 +151,7 @@ fovs_belonging_to_sample <- c(
 synthesiseData(removeRedundancy = T, cellOverlapFraction = 0.25, subsetFOV = fovs_belonging_to_sample)
 ```
 
-Note that by subsetting, subdirectories within `\OUT` are created named in the `SUBSET_{ Reference FOV }` format. **WARNING:** It is assumed that no two subsets will have the same Reference FOV.
+Note that by subsetting, subdirectories within `\OUT` are created named in the `SUBSET_{ Reference FOV }` format. **WARNING:** It is assumed that no two subsets will have the same Reference FOV. [For more control over folder names, users can use the `customOutDirName` parameter in `synthesiseData`.] 
 
 ```{r syn-showingsubdirectoriescreatedbysubsetFOV}
 print( params$out_dir )
@@ -188,7 +188,7 @@ cowplot::plot_grid( plotlist=list(
 
 We have provided a `plotQC` function that returns several default QC plots as `.png` files. This function depends on parameters input during `establishParams`: e.g. if `fpkmFileName` is missing, then FPKM correlations will not be plotted. Additionally, if users ran `prepareCodebook` with `exhaustiveBlanks`, the newly added blanks will be flagged. [Users wishing to ignore these new blanks can set `includeNewBlanks` in `plotQC` to `FALSE` (see below).]
 
-```{r syn-plotqc}
+```{r syn-plotqc, warning=FALSE}
 plotQC( 
   includeNewBlanks=T,
   synthesisDir = 'C:/Users/kwaje/Downloads/JYOUT/OUT/' #To refer to previously generated (un-subset) output
@@ -220,7 +220,9 @@ knitr::include_graphics( paste0('./images/', 'CosineDistanceDistribution', '.png
 
 ### `SpotFOVDistribution` {-}
 
-This shows the distribution of spots, averaged across FOVs. This is used to check if spot coordinate in a given FOV influences its detection rate -- ideally, this should not occur. This plot is less useful if only a handful of FOVs were processed. 
+This shows the distribution of spots, averaged across FOVs. This is used to check if spot coordinate in a given FOV influences its detection rate -- ideally, this should not occur. If e.g. spots are more frequently detected in the centre of the FOV than the edges, this could suggest uneven lighting and a need to correct for that during image processing. [This plot is less useful if only a handful of FOVs were processed.] 
+
+Note that this plot was created from all `SPOTCALL` files, without removing redundant spots.
 
 ```{r syn-spotfovdistribution, echo=FALSE, fig.align='center', out.width='100%'}
 knitr::include_graphics( paste0('./images/', 'SpotFOVDistribution', '.png') )
@@ -229,6 +231,8 @@ knitr::include_graphics( paste0('./images/', 'SpotFOVDistribution', '.png') )
 ### `CosineSpatialDistribution` {-}
 
 This plot shows the average cosine distances per 2D bin, across the entire tissue. Ideally, spatial location should not influence confidence in spot calls.
+
+Note that -- like `SpotFOVDistribution` -- this plot was created from all `SPOTCALL` files, without removing redundant spots.
 
 ```{r syn-cosspatialdist, echo=FALSE, fig.align='center', out.width='100%'}
 knitr::include_graphics( paste0('./images/', 'CosineSpatialDistribution', '.png') )

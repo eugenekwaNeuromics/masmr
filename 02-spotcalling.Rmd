@@ -385,7 +385,7 @@ forReg <- list()
 for(i in 1:length(imList)){
   forReg[[i]] <- imNormalise( imMetrics$COARSE[[i]] + imMetrics$DECODE[[i]] )
 }
-names(forReg) <- names(imList)
+names(forReg) <- names(imList) #Always keep the names from imList
 norm <- forReg[[1]]
 par(mfrow=c(1,2))
 plot( imager::as.cimg(norm), main = 'Band pass' )
