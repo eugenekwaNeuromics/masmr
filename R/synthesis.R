@@ -145,7 +145,7 @@ synthesiseData <- function(
     stop('Unable to find SPOTCALL_{FOV}.csv.gz files!')
   }
   if( length(cellsegfs)== 0 ){
-    stop('Unable to find CELLSEG_{FOV}.csv.gz files!')
+    warning('Unable to find CELLSEG_{FOV}.csv.gz files! Assuming no cell assignment to consider!')
   }
   if( length(spotcallfs)== 0 ){
     stop('Unable to find STITCH_{FOV}.csv files!')
@@ -604,7 +604,7 @@ synthesiseData <- function(
 
     ## Load cell segment information
     cellsegfx <- cellsegfs[grepl( paste0(fovName, '.csv'), cellsegfs )]
-    if(length(cellsegfx)==0){
+    if(length(cellsegfx)==0 | is.null(cellsegfx)){
       if(verbose) { message('No cell segmentation file found...Skipping cell annotation...', appendLF = F) }
       spotcalldf$CELLNAME <- NA
     }
@@ -612,6 +612,7 @@ synthesiseData <- function(
       warning( paste0('More than one cell segmentation file specified for this FOV! Picking first: ', basename(cellsegfx[1]), '...'))
       cellsegfx <- cellsegfx[1]
     }
+    cellsegdf <- data.frame()
     if(length(cellsegfx)==1){
       cellsegdf <- try(data.table::fread(cellsegfx, data.table = F, showProgress =F))
       if(inherits(cellsegdf, 'try-error')){
@@ -814,10 +815,13 @@ synthesiseData <- function(
       spotcalldf,
       paste0(params$out_dir, 'OUT_SPOTCALL_PIXELS.csv', ifelse(gZip, '.gz', '')),
       row.names = F, append = T, showProgress = F)
-    data.table::fwrite(
-      cellsegdf,
-      paste0(params$out_dir, 'OUT_CELLSEG_PIXELS.csv', ifelse(gZip, '.gz', '')),
-      row.names = F, append = T, showProgress = F)
+    if(nrow(cellsegdf)>0){
+      data.table::fwrite(
+        cellsegdf,
+        paste0(params$out_dir, 'OUT_CELLSEG_PIXELS.csv', ifelse(gZip, '.gz', '')),
+        row.names = F, append = T, showProgress = F)
+    }
+
 
     ## Summarise info per cell
     if(!all(is.na(spotcalldf$CELLNAME)) & nrow(cellsegdf) > 0){
@@ -856,66 +860,69 @@ synthesiseData <- function(
   if(file.exists(winLoseFile)){ file.remove( winLoseFile ) }
   if(file.exists(cellDropFile)){ file.remove( cellDropFile ) }
 
-  cellMetaClean <- cellMeta <- try( data.table::fread(
-    paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
-    data.table = F, showProgress = F) )
-  if( inherits(cellMeta, 'try-error') ){
-    warning('OUT_CELLS file was not created / could not be read! Unable to perform clean up!')
-  }else{
-    if( any(duplicated(cellMeta$CELLNAME)) ){
-      duplicatedCells <- sort(unique( cellMeta[duplicated(cellMeta$CELLNAME), 'CELLNAME'] ))
-      cellMetaClean <- cellMeta[!(cellMeta$CELLNAME %in% duplicatedCells), ]
-      dupMeta <- cellMeta[(cellMeta$CELLNAME %in% duplicatedCells), ]
-      for( dupCelli in duplicatedCells ){
-        npix <- sum( as.numeric(dupMeta[dupMeta$CELLNAME==dupCelli, 'nPixels']) )
-        weightedX <- sum( dupMeta[dupMeta$CELLNAME==dupCelli, 'nPixels'] * dupMeta[dupMeta$CELLNAME==dupCelli, 'Xm'] / npix )
-        weightedY <- sum( dupMeta[dupMeta$CELLNAME==dupCelli, 'nPixels'] * dupMeta[dupMeta$CELLNAME==dupCelli, 'Ym'] / npix )
-        res <- data.frame(
-          'CELLNAME' = dupCelli,
-          'Xm' =  weightedX,
-          'Ym' = weightedY,
-          'nPixels' = npix,
-          'nCounts' = sum(as.numeric(dupMeta[dupMeta$CELLNAME==dupCelli, 'nCounts']))
-        )
-        cellMetaClean <- rbind(cellMetaClean, res)
-      }
-    }
-    ## Remove cells with 0 counts, since those were filtered as a result of redundancy filtering
-    cellMeta <- cellMetaClean[cellMetaClean$nCounts>0,]
-    data.table::fwrite(
-      cellMeta,
+  if(file.exists(paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')))){
+    cellMetaClean <- cellMeta <- try( data.table::fread(
       paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
-      row.names = T, append = F, showProgress = F)
-    suppressWarnings(rm(list=c('cellMetaClean', 'npix', 'weightedX', 'weightedY', 'res', 'duplicatedCells')))
-  }
+      data.table = F, showProgress = F) )
 
-  cellExp <- try( data.table::fread(
-    paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')),
-    data.table = F, showProgress = F) )
-  if( inherits(cellExp, 'try-error') ){
-    warning('OUT_CELLEXPRESSION file was not created / could not be read! Unable to perform clean up!')
-  }else{
-    duplicatedCells <- sort(unique(cellExp[duplicated(cellExp[,1]),1]))
-    dupCellExp <- cellExp[(cellExp[,1] %in% duplicatedCells),]
-    cellExpClean <- cellExp[!(cellExp[,1] %in% duplicatedCells),]
-    rownames(cellExpClean) <- cellExpClean[,1]
-    cellExpClean[,1] <- NULL
-    if( nrow(dupCellExp) > 0){
-      newVals <- data.frame(matrix(0, nrow=length(duplicatedCells), ncol=ncol(cellExp)-1), row.names = duplicatedCells)
-      colnames(newVals) <- colnames(cellExp)[-1]
-      for( dupCelli in duplicatedCells ){
-        newVals[dupCelli,] <- colSums( dupCellExp[dupCellExp[,1]==dupCelli,-1] )
+    if( inherits(cellMeta, 'try-error') ){
+      warning('OUT_CELLS file was not created / could not be read! Unable to perform clean up!')
+    }else{
+      if( any(duplicated(cellMeta$CELLNAME)) ){
+        duplicatedCells <- sort(unique( cellMeta[duplicated(cellMeta$CELLNAME), 'CELLNAME'] ))
+        cellMetaClean <- cellMeta[!(cellMeta$CELLNAME %in% duplicatedCells), ]
+        dupMeta <- cellMeta[(cellMeta$CELLNAME %in% duplicatedCells), ]
+        for( dupCelli in duplicatedCells ){
+          npix <- sum( as.numeric(dupMeta[dupMeta$CELLNAME==dupCelli, 'nPixels']) )
+          weightedX <- sum( dupMeta[dupMeta$CELLNAME==dupCelli, 'nPixels'] * dupMeta[dupMeta$CELLNAME==dupCelli, 'Xm'] / npix )
+          weightedY <- sum( dupMeta[dupMeta$CELLNAME==dupCelli, 'nPixels'] * dupMeta[dupMeta$CELLNAME==dupCelli, 'Ym'] / npix )
+          res <- data.frame(
+            'CELLNAME' = dupCelli,
+            'Xm' =  weightedX,
+            'Ym' = weightedY,
+            'nPixels' = npix,
+            'nCounts' = sum(as.numeric(dupMeta[dupMeta$CELLNAME==dupCelli, 'nCounts']))
+          )
+          cellMetaClean <- rbind(cellMetaClean, res)
+        }
       }
-      cellExpClean <- rbind(cellExpClean, newVals)
+      ## Remove cells with 0 counts, since those were filtered as a result of redundancy filtering
+      cellMeta <- cellMetaClean[cellMetaClean$nCounts>0,]
+      data.table::fwrite(
+        cellMeta,
+        paste0(params$out_dir, 'OUT_CELLS.csv', ifelse(gZip, '.gz', '')),
+        row.names = T, append = F, showProgress = F)
+      suppressWarnings(rm(list=c('cellMetaClean', 'npix', 'weightedX', 'weightedY', 'res', 'duplicatedCells')))
     }
-    cellExpClean <- cellExpClean[match(cellMeta$CELLNAME, rownames(cellExpClean)),]
-    cellExpClean[is.na(cellExpClean)] <- 0
-    rownames(cellExpClean) <- cellMeta$CELLNAME
 
-    data.table::fwrite(
-      cellExpClean,
+    cellExp <- try( data.table::fread(
       paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')),
-      row.names = T, append = F, showProgress = F)
+      data.table = F, showProgress = F) )
+    if( inherits(cellExp, 'try-error') ){
+      warning('OUT_CELLEXPRESSION file was not created / could not be read! Unable to perform clean up!')
+    }else{
+      duplicatedCells <- sort(unique(cellExp[duplicated(cellExp[,1]),1]))
+      dupCellExp <- cellExp[(cellExp[,1] %in% duplicatedCells),]
+      cellExpClean <- cellExp[!(cellExp[,1] %in% duplicatedCells),]
+      rownames(cellExpClean) <- cellExpClean[,1]
+      cellExpClean[,1] <- NULL
+      if( nrow(dupCellExp) > 0){
+        newVals <- data.frame(matrix(0, nrow=length(duplicatedCells), ncol=ncol(cellExp)-1), row.names = duplicatedCells)
+        colnames(newVals) <- colnames(cellExp)[-1]
+        for( dupCelli in duplicatedCells ){
+          newVals[dupCelli,] <- colSums( dupCellExp[dupCellExp[,1]==dupCelli,-1] )
+        }
+        cellExpClean <- rbind(cellExpClean, newVals)
+      }
+      cellExpClean <- cellExpClean[match(cellMeta$CELLNAME, rownames(cellExpClean)),]
+      cellExpClean[is.na(cellExpClean)] <- 0
+      rownames(cellExpClean) <- cellMeta$CELLNAME
+
+      data.table::fwrite(
+        cellExpClean,
+        paste0(params$out_dir, 'OUT_CELLEXPRESSION.csv', ifelse(gZip, '.gz', '')),
+        row.names = T, append = F, showProgress = F)
+    }
   }
 
   if(verbose){
