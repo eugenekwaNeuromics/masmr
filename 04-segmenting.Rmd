@@ -99,7 +99,7 @@ Once the necessary parameters have been established, we are ready to run our cel
 
 An example of how to run the model within `masmr` is shown below. [As default, only the `mask` output is returned; this can be turned off by setting `masksOnly` to `FALSE`.]
 
-```{r cellseg-cellpose-defaultperformance}
+```{r cellseg-cellpose-defaultperformance, warning=FALSE}
 cellMask <- runCellSegModel(im, masksOnly = TRUE)
 df <- as.data.frame(imager::as.cimg(cellMask))
 ggplot() +
@@ -117,6 +117,54 @@ ggplot() +
 ```
 
 The default `nuclei` model called for `cellpose` does not seem to be working very well for these images. There are several ways to troubleshoot:
+
+#### Dilating existing masks {-}
+
+If the issue is that cell masks are accurate, but too small -- which would lower the number of counts assigned to each cell -- one quick solution would be to dilate the existing masks. 
+
+There are several ways to do this. Below is an example of how to do this quickly with `imager` -- which is a dependency of `masmr`. [Possible alternatives: Voronoi tessellation, setting a radius threshold from the cell segmentation mask centre.]
+
+```{r cellseg-cellpose-dilateexistingmasks, warning=FALSE}
+dilation_sizes <- c(0L, 50L)
+plotList <- list()
+for(i in 1:length(dilation_sizes)){
+  
+  ## Dilate a cellMask by a certain size
+  original_cellMask <- imager::as.cimg(cellMask)
+  dilated_cellMask <- imager::dilate_square(original_cellMask, size = dilation_sizes[i] )
+  
+  ## Plot the masks atop the original image
+  df <- as.data.frame(dilated_cellMask)
+  plotList[[i]] <- ggplot() +
+    geom_raster( data = as.data.frame(imager::as.cimg(im)), 
+                 aes(x=x, y=y, fill=value) ) +
+    scale_fill_gradient(low='black', high='white') +
+    geom_point( data=df[df$value>0,], 
+                aes(x=x, y=y, colour=factor(value)),
+                shape = '.') +
+    scale_colour_viridis_d( option='turbo' ) +
+    theme_void( base_size = 14 ) +
+    scale_y_reverse() +
+    coord_fixed() +
+    theme(legend.position = 'none') +
+    ggtitle( paste0('Dilate size: ', dilation_sizes[i] ))
+}
+cowplot::plot_grid(plotlist = plotList)
+```
+
+Note: the choice of the `size` parameter for `imager::dilate_square` is slightly non-intuitive: (1) input values are rounded down to the nearest integer, and (2) odd numbers provide isotropic dilations (even values dilate to the bottom right).
+
+```{r cellseg-cellpose-explainingisotropicdilations, fig.width=8, fig.height=8}
+pretendImage <- imager::as.cimg( array(0, dim=c(9, 9)) )
+pretendImage[5,5] <- 1
+dilation_sizes <- c(0, 1, 2, 3, 3.9, 4, 5, 6, 7)
+par(mfrow=c(3,3))
+for( i in 1:length(dilation_sizes) ){
+  plot( imager::dilate_square(pretendImage, size=dilation_sizes[i]), interpolate=F,
+        main = paste0('Size: ', dilation_sizes[i]) )
+}
+par(mfrow=c(1,1))
+```
 
 #### Altering model parameters {-}
 
