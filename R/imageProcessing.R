@@ -183,6 +183,152 @@ imLaplacianOfGaussian <- function(
 
 ##
 
+imTVDenoise <- function(
+    im,
+    denoisingWeight = 0.001,
+    stopThreshold = 1,
+    maxIterations = 200,
+    returnIntermediateImages = F,
+    verbose = NULL
+){
+  if(is.null(verbose)){
+    verbose <- get('params', globalenv())$verbose
+  }
+  if(is.null(verbose)){
+    verbose <- TRUE
+  }
+
+  ## We will call images u, as in the original ROF paper
+  if( length(dim(im))>3 | is.list(im) | length(dim(im)) < 2 ){
+    stop('imTVDenoise can only accept a 2D matrix or 3D array')
+  }
+  if( length(dim(im))==3 ){
+
+    resultArray <- array(0, dim=dim(im))
+    resultList <- list()
+    for(zi in dim(im)[3]){
+      resultx <- imTVDenoise(
+        im[,,zi],
+        denoisingWeight = denoisingWeight,
+        eps = eps,
+        maxIterations = maxIterations,
+        returnIntermediateImages = returnIntermediateImages,
+        verbose = verbose
+      )
+      if(returnIntermediateImages){
+        resultList[[zi]] <- resultx
+      }else{
+        resultArray[,,zi] <- resultx
+      }
+    }
+    if(returnIntermediateImages){
+      return( resultList )
+    }else{
+      return( resultArray )
+    }
+
+  }
+
+  if( length(dim(im))==2 ){
+
+    g <- im #The observed image is 'g' and the cleaned image is 'u'
+    px <- py <- array(0, dim=dim(g))
+    i = 1
+    converged = F
+    if(returnIntermediateImages){
+      imList <- list()
+      imList[[i]] <- g
+    }
+
+    ## Now let's define some functions as per Chambolle
+    ## The nabla function: getting gradients
+    nabla <- function( u ){
+      gradx = rbind( u[-1,], u[nrow(u),] ) - u #when i=N, gx = 0
+      grady = cbind( u[,-1], u[,ncol(u)] ) - u
+      return( list('x' = gradx, 'y' = grady) )
+    }
+
+    ## The modulus function: getting norms
+    modulus <- function( xylist ){
+      sqrt( xylist[['x']]^2 + xylist[['y']]^2 )
+    }
+
+    ## The div function: getting divergence
+    div <- function( xylist ){
+      # p is a list / vector
+      x <- xylist[['x']]
+      y <- xylist[['y']]
+
+      trim <- rbind(x[-nrow(x),], 0)
+      shift <- rbind(0, x[-nrow(x),])
+      divpx <- trim - shift
+
+      trim <- cbind(y[,-ncol(y)], 0)
+      shift <- cbind(0, y[,-ncol(y)])
+      divpy <- trim - shift
+
+      divp = divpx + divpy
+
+      return(divp)
+    }
+
+    ## Now we can start looping
+    TV_init = TV_previous = sum(modulus(nabla(g)))
+    ubest <- u <- g
+    while( (i < maxIterations) & !converged ){
+
+      if(verbose){ message(paste0('\nEpoch: ', i, '...'), appendLF = F) }
+
+      ## We are updating p every cycle (p starts off as 0)
+      divp <- div( list('x' = px, 'y' = py) )
+
+      ## Now calculate the next p(n+1)
+      ## Image fidelity is our lambda term
+      tau = 1/4 # Recommended in Chambolle to ensure convergence
+      forUpdating <- nabla(divp - g / denoisingWeight)
+      denominator <- 1 + tau * modulus(forUpdating)
+
+      ## Update px and py
+      px <- (px + tau * forUpdating$x) / denominator
+      py <- (py + tau * forUpdating$y) / denominator
+
+      ## Estimate nonlinear project plk(g)
+      ## Which converges to lambda * div( pn )
+      plkg <- div( list('x' = px, 'y' = py) ) * denoisingWeight
+      u = g - plkg
+      TV = sum( modulus(nabla(u)) )
+
+      ## Check for convergence
+      if(verbose){
+        message(paste0(
+          'TV: ', TV, ' ( ', round( 100 * TV / TV_previous, digits=3), '% previous TV )...'
+        ), appendLF = F)
+      }
+      if( (TV / TV_previous) >= stopThreshold ){
+        converged = T
+        if(verbose){message('\nConverged!', appendLF = T)}
+      }
+      TV_previous = TV
+
+      if(!converged){
+        ubest <- u
+        if( returnIntermediateImages ){
+          imList[[i+1]] <- ubest
+        }
+      }
+
+      i = i + 1
+    }
+
+    if(returnIntermediateImages){
+      return(imList)
+    }
+    return(ubest)
+  }
+}
+
+##
+
 imForDecode <- function(
     im,
     smallBlur,
@@ -266,8 +412,4 @@ imForMask <- function(
 
   return(mask)
 }
-
-
-
-
-
+###
