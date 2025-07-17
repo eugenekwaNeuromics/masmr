@@ -210,7 +210,7 @@ imTVDenoise <- function(
       resultx <- imTVDenoise(
         im[,,zi],
         denoisingWeight = denoisingWeight,
-        eps = eps,
+        stopThreshold = stopThreshold,
         maxIterations = maxIterations,
         returnIntermediateImages = returnIntermediateImages,
         verbose = verbose
