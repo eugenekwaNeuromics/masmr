@@ -31,6 +31,7 @@ imTVDenoise(
   Convergence occurs when TV no longer decreases significantly with new iterations. The default threshold is that the new TV must be <100\% of the previous iteration's TV (indicated by 1 for \code{stopThreshold}).
 
   [1] Chambolle, A. (2004). An algorithm for total variation minimization and applications. \emph{Journal of Mathematical imaging and vision, 20(1)}, 89-97.
+
   [2] Duran, J., Coll, B., & Sbert, C. (2013). Chambolle's projection algorithm for total variation denoising. \emph{Image processing on Line, 2013}, 311-331.
 }
 \seealso{
