@@ -438,14 +438,16 @@ readImage <- function(
         imx <- RBioFormats::read.image(
           fileName, normalize = normalise,
           subset = list(c = ci, z = zi),
-          ...)@.Data
+          ...)
+        imx <- imx@.Data
         unloadNamespace("RBioFormats")
+        gc()
+        
         imz[[ length(imz) + 1 ]] <- imx
       }
       imz <- array(unlist(imz), dim=c(dim(imz[[1]]), length(imz)))
       imcz[[ length(imcz) + 1 ]] <- imz
     }
-
 
   }
   return(imcz)
