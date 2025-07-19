@@ -593,7 +593,10 @@ synthesiseData <- function(
         }else{
           redundancyWinnersLosers <- rbind( redundancyWinnersLosers, newWinLose )
         }
-        data.table::fwrite(redundancyWinnersLosers, file = winLoseFile, row.names = F, append = F, quote = F, showProgress =F)
+        ## For redundancy files -- don't have to report failure to write
+        suppressWarnings(
+          data.table::fwrite(redundancyWinnersLosers, file = winLoseFile, row.names = F, append = F, quote = F, showProgress =F)
+        )
       }
       ## OLDER ##
     }
@@ -788,15 +791,20 @@ synthesiseData <- function(
             }
 
             ## Remember which cells to drop in future
-            data.table::fwrite(data.frame('CELLNAME' = unique(cellDropCheck)), cellDropFile,
-                               row.names = F, quote = F, append = F, showProgress = F)
+            ## If none, won't write (just turn warnings off)
+            suppressWarnings(
+              data.table::fwrite(data.frame('CELLNAME' = unique(cellDropCheck)), cellDropFile,
+                                 row.names = F, quote = F, append = F, showProgress = F)
+            )
 
           }
         }
 
         cellDropCheck <- unique( c(cellDropCheck, unique(orig_cell_names)) )
-        data.table::fwrite(data.frame('CELLNAME' = unique(cellDropCheck)), cellDropFile,
-                           row.names = F, quote = F, append = F, showProgress = F)
+        suppressWarnings(
+          data.table::fwrite(data.frame('CELLNAME' = unique(cellDropCheck)), cellDropFile,
+                             row.names = F, quote = F, append = F, showProgress = F)
+        )
 
 
       }
