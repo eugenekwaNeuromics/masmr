@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>6 Stitching | masmr: Modular Algorithms for Spotcalling in MERFISH in R</title>
+<meta name="author" content="Eugene Kwa">
+<meta name="description" content="Stitching is the task of aligning adjacent overlapping FOVs, to obtain a coherent coordinate system across all FOVs. It can be done on DAPI images, or on the reference bit in MERFISH (i.e. the...">
+<meta name="generator" content="bookdown 0.43.2 with bs4_book()">
+<meta property="og:title" content="6 Stitching | masmr: Modular Algorithms for Spotcalling in MERFISH in R">
+<meta property="og:type" content="book">
+<meta property="og:image" content="/./images/masmr.png">
+<meta property="og:description" content="Stitching is the task of aligning adjacent overlapping FOVs, to obtain a coherent coordinate system across all FOVs. It can be done on DAPI images, or on the reference bit in MERFISH (i.e. the...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="6 Stitching | masmr: Modular Algorithms for Spotcalling in MERFISH in R">
+<meta name="twitter:description" content="Stitching is the task of aligning adjacent overlapping FOVs, to obtain a coherent coordinate system across all FOVs. It can be done on DAPI images, or on the reference bit in MERFISH (i.e. the...">
+<meta name="twitter:image" content="/./images/masmr.png">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.9.0/transition.js"></script><script src="libs/bs3compat-0.9.0/tabs.js"></script><script src="libs/bs3compat-0.9.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="libs/bslib-component-js-0.9.0/components.min.js"></script><script src="libs/bslib-component-js-0.9.0/web-components.min.js" type="module"></script><link href="libs/bslib-component-css-0.9.0/components.css" rel="stylesheet">
+<script src="libs/bslib-tag-require-0.9.0/tag-require.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<style type="text/css">
+    /* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+        }
+    .hanging div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
+  </style>
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">masmr: Modular Algorithms for Spotcalling in MERFISH in R</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"><span class="header-section-number">1</span> About masmr</a></li>
+<li><a class="" href="introduction.html"><span class="header-section-number">2</span> Introduction</a></li>
+<li><a class="" href="spotcalling.html"><span class="header-section-number">3</span> Spotcalling</a></li>
+<li><a class="" href="image-processing.html"><span class="header-section-number">4</span> Image processing</a></li>
+<li><a class="" href="cell-segmentation.html"><span class="header-section-number">5</span> Cell segmentation</a></li>
+<li><a class="active" href="stitching.html"><span class="header-section-number">6</span> Stitching</a></li>
+<li><a class="" href="synthesis.html"><span class="header-section-number">7</span> Synthesis</a></li>
+<li><a class="" href="troubleshooting.html"><span class="header-section-number">8</span> Troubleshooting</a></li>
+</ul>
+
+        <div class="book-extra">
+          
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="stitching" class="section level1" number="6">
+<h1>
+<span class="header-section-number">6</span> Stitching<a class="anchor" aria-label="anchor" href="#stitching"><i class="fas fa-link"></i></a>
+</h1>
+<p>Stitching is the task of aligning adjacent overlapping FOVs, to obtain a coherent coordinate system across all FOVs. It can be done on DAPI images, or on the reference bit in MERFISH (i.e. the image that registration is performed with respect to – typically the first bit). It can thus be done in parallel with the previous two tasks.</p>
+<p>Alternatively, recall that as part of spotcalling (Chapter <a href="spotcalling.html#image-registration">3.4.2</a>) and cell segmentation (Chapter <a href="cell-segmentation.html#saving-cell-masks">5.4</a>), reference images are returned as <code>REGIM_{ FOV Name }.png</code>. Users may wish to use these instead; and so stitching will have to be performed <em>after</em> the previous two tasks.</p>
+<div class="sourceCode" id="cb312"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">masmr</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
+<div id="pre-processing-3" class="section level2" number="6.1">
+<h2>
+<span class="header-section-number">6.1</span> Pre-processing<a class="anchor" aria-label="anchor" href="#pre-processing-3"><i class="fas fa-link"></i></a>
+</h2>
+<p>Parameters established as before.</p>
+<div class="sourceCode" id="cb313"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data_dir</span> <span class="op">=</span> <span class="st">'C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishParams.html">establishParams</a></span><span class="op">(</span></span>
+<span>  </span>
+<span>  <span class="co">## User to fill in</span></span>
+<span>  imageDirs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">'S10/'</span><span class="op">)</span>,</span>
+<span>  imageFormat <span class="op">=</span> <span class="st">'.ome.tif'</span>,</span>
+<span>  outDir <span class="op">=</span> <span class="st">'C:/Users/kwaje/Downloads/JYOUT/'</span>,</span>
+<span>  codebookFileName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>,<span class="st">'codebook/'</span><span class="op">)</span>,pattern<span class="op">=</span><span class="st">'codebook'</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>  dapiDir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">'DAPI_1/'</span><span class="op">)</span>,</span>
+<span>  </span>
+<span>  <span class="co">## Will attempt automatic fill</span></span>
+<span>  <span class="co"># metaFormat = '.ome.tif',</span></span>
+<span>  <span class="co"># dapiFormat = '.ome.tif',</span></span>
+<span>  codebookColumnNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">'_'</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'cy3'</span>,<span class="st">'alexa594'</span>,<span class="st">'cy5'</span>,<span class="st">'cy7'</span><span class="op">)</span>,each<span class="op">=</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  pythonLocation <span class="op">=</span> <span class="st">'C:/Users/kwaje/AppData/Local/miniforge3/envs/scipyenv/'</span>,</span>
+<span>  </span>
+<span>  <span class="co">## Automatically filled</span></span>
+<span>  <span class="co"># seed = 12345,</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="co"># resumeMode = TRUE,</span></span>
+<span>  </span>
+<span>  <span class="co">## Optional (but recommended for QC checks)</span></span>
+<span>  fpkmFileName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"FPKM_data/Jin_FPKMData_B.tsv"</span><span class="op">)</span>,</span>
+<span>  nProbesFileName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"ProbesPerGene.csv"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Assuming .ome.tif is extension for meta files...</code></pre>
+<p>At this stage, relevant metadata files (<code>META_RESOLUTION.txt</code> and <code>GLOBALCOORD.csv</code>) should have been created for both DAPI and MERFISH data using the <code>readImageMetaData</code> function (see previous Chapters). This is the <strong>minimum requirement</strong> for stitching with {masmr}. [Both are generated early in their respective pipelines.]</p>
+<p>There should thus be two subdirectories as this stage, one for MERFISH data and one for DAPI data. Both should have the metadata files.</p>
+<div class="sourceCode" id="cb315"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span> <span class="va">params</span><span class="op">$</span><span class="va">parent_out_dir</span>, pattern <span class="op">=</span> <span class="st">'GLOBALCOORD.csv'</span>, recursive <span class="op">=</span> <span class="cn">T</span>, full.names <span class="op">=</span> <span class="cn">T</span> <span class="op">)</span></span></code></pre></div>
+<pre><code>## [1] "C:/Users/kwaje/Downloads/JYOUT/DAPI/GLOBALCOORD.csv" "C:/Users/kwaje/Downloads/JYOUT/IM/GLOBALCOORD.csv"</code></pre>
+<div class="sourceCode" id="cb317"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span> <span class="va">params</span><span class="op">$</span><span class="va">parent_out_dir</span>, pattern <span class="op">=</span> <span class="st">'META_RESOLUTION.txt'</span>, recursive <span class="op">=</span> <span class="cn">T</span>, full.names <span class="op">=</span> <span class="cn">T</span> <span class="op">)</span></span></code></pre></div>
+<pre><code>## [1] "C:/Users/kwaje/Downloads/JYOUT/DAPI/META_RESOLUTION.txt" "C:/Users/kwaje/Downloads/JYOUT/IM/META_RESOLUTION.txt"</code></pre>
+</div>
+<div id="loading-images-for-stitching" class="section level2" number="6.2">
+<h2>
+<span class="header-section-number">6.2</span> Loading images for stitching<a class="anchor" aria-label="anchor" href="#loading-images-for-stitching"><i class="fas fa-link"></i></a>
+</h2>
+<p>For stitching, we will need to load a reference FOV, and the FOVs immediately surrounding it. For instance, let’s select the same FOV processed in previous Chapters. From one of the <code>GLOBALCOORD.csv</code> files, we expect to load the four FOVs in blue below, alongside our reference FOV (red).</p>
+<div class="sourceCode" id="cb319"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">params</span><span class="op">$</span><span class="va">current_fov</span> <span class="op">&lt;-</span> <span class="st">'MMStack_1-Pos_002_003'</span></span>
+<span><span class="va">gcx</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html">fread</a></span><span class="op">(</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span> <span class="va">params</span><span class="op">$</span><span class="va">parent_out_dir</span>, pattern <span class="op">=</span> <span class="st">'GLOBALCOORD.csv'</span>, recursive <span class="op">=</span> <span class="cn">T</span>, full.names <span class="op">=</span> <span class="cn">T</span> <span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
+<span>  data.table <span class="op">=</span> <span class="cn">F</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">gcx</span> <span class="op">&lt;-</span> <span class="va">gcx</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html">duplicated</a></span><span class="op">(</span><span class="va">gcx</span><span class="op">$</span><span class="va">fov</span><span class="op">)</span>,<span class="op">]</span></span>
+<span><span class="va">gcx</span><span class="op">$</span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">gcx</span><span class="op">$</span><span class="va">x_microns</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">gcx</span><span class="op">$</span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">gcx</span><span class="op">$</span><span class="va">y_microns</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">gcx</span><span class="op">$</span><span class="va">CX</span> <span class="op">&lt;-</span> <span class="va">gcx</span><span class="op">$</span><span class="va">X</span> <span class="op">+</span> <span class="fl">1i</span> <span class="op">*</span> <span class="va">gcx</span><span class="op">$</span><span class="va">Y</span></span>
+<span><span class="va">gcx</span><span class="op">$</span><span class="va">fov_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span></span>
+<span>  <span class="va">gcx</span><span class="op">$</span><span class="va">fov</span><span class="op">==</span><span class="va">params</span><span class="op">$</span><span class="va">current_fov</span>, <span class="st">'Reference'</span>, </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/complex.html">Mod</a></span><span class="op">(</span> <span class="va">gcx</span><span class="op">$</span><span class="va">CX</span> <span class="op">-</span> <span class="va">gcx</span><span class="op">$</span><span class="va">CX</span><span class="op">[</span><span class="va">gcx</span><span class="op">$</span><span class="va">fov</span><span class="op">==</span><span class="va">params</span><span class="op">$</span><span class="va">current_fov</span><span class="op">]</span> <span class="op">)</span> <span class="op">==</span> <span class="fl">1</span>,</span>
+<span>    <span class="st">'Neighbour'</span>, <span class="st">'Other'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">gcx</span><span class="op">$</span><span class="va">short_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span><span class="op">(</span><span class="st">'MMStack_1-Pos_|00'</span>, <span class="st">''</span>, <span class="va">gcx</span><span class="op">$</span><span class="va">fov</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span> <span class="va">gcx</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html">geom_text</a></span><span class="op">(</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x_microns</span>, y<span class="op">=</span><span class="va">y_microns</span>, label<span class="op">=</span><span class="va">short_name</span>, colour <span class="op">=</span> <span class="va">fov_type</span><span class="op">)</span>,</span>
+<span>             size <span class="op">=</span> <span class="fl">5</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_colour_manual</a></span><span class="op">(</span> name<span class="op">=</span><span class="st">''</span>, values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'Reference'</span> <span class="op">=</span> <span class="st">'red'</span>, <span class="st">'Neighbour'</span> <span class="op">=</span> <span class="st">'blue'</span>, <span class="st">'Other'</span> <span class="op">=</span> <span class="st">'black'</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">'X (microns)'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">'Y (microns)'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span>base_size<span class="op">=</span><span class="fl">14</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/stitch-loadimages-1.png" width="672"></div>
+<p>The actual loading is accomplished with the <code>readImagesForStitch</code> function. The default is to load MERFISH images.</p>
+<div class="sourceCode" id="cb320"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## params$current_fov specifies which image to load</span></span>
+<span><span class="va">imList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/readImagesForStitch.html">readImagesForStitch</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">imList</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">imList</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, main<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">imList</span><span class="op">)</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="sourceCode" id="cb322"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/stitch-readimagesforstitch-1.png" width="672"></div>
+<p>The <code>subDirectory</code> parameter allows for easy swapping between DAPI and MERFISH images.</p>
+<div class="sourceCode" id="cb323"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">imList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/readImagesForStitch.html">readImagesForStitch</a></span><span class="op">(</span> subDirectory <span class="op">=</span> <span class="st">'DAPI'</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">imList</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">imList</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, main<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">imList</span><span class="op">)</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="sourceCode" id="cb325"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/stitch-swappingsubdirectory-1.png" width="672"></div>
+<div class="sourceCode" id="cb326"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dapiList</span> <span class="op">&lt;-</span> <span class="va">imList</span></span></code></pre></div>
+<p>Every time <code>readImagesForStitch</code> is run, a <code>stitchParams</code> environment object is generated. This functions similarly to <code>params</code>: it houses parameters for image handling and file saving. It also copies <code>params$current_fov</code> [It is separate from <code>params</code> owing to users possibly wishing to handle both MERFISH and DAPI images.]</p>
+<div class="sourceCode" id="cb327"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/ls.html">ls</a></span><span class="op">(</span> envir <span class="op">=</span> <span class="va">stitchParams</span> <span class="op">)</span></span></code></pre></div>
+<pre><code>##  [1] "current_fov"             "fov_names"               "fovs_loaded"             "global_coords"           "im_format"              
+##  [6] "out_dir"                 "processed_images_loaded" "resolutions"             "sub_directory"           "verbose"</code></pre>
+<p>From above, it is apparent that raw MERFISH images may require some image processing prior to stitching (e.g. brightening of image). We recommend the same image processing as done during image registration (Chapter <a href="spotcalling.html#image-registration">3.4.2</a>).</p>
+<p>If stitching is done <em>after</em> spotcalling is complete for all FOVs, processed images for the reference bit are accessible by setting <code>loadProcessedImages</code> to <code>TRUE</code>. As default, the <code>loadProcessedImages</code> parameter is <code>FALSE</code>. If <code>TRUE</code>, the function will first attempt to search for <code>REGIM_{ FOV Name }.png</code> images and load those instead. If unable to, <code>loadProcessedImages</code> is switched back to <code>FALSE</code>, and raw images loaded instead (failure to find processed images returned as a warning).</p>
+<p>Otherwise, we can reprocess the raw images by specifying the <code>imageFunction</code> parameter. [The minimum and maximum brightness below come from outputs of <code>getAnchorParams</code>; this done early during the spotcalling pipeline (see Chapter <a href="spotcalling.html#establishing-global-image-parameters">3.2.2</a>).]</p>
+<div class="sourceCode" id="cb329"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">imFunction</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span> <span class="va">im</span> <span class="op">)</span><span class="op">{</span></span>
+<span>  </span>
+<span>  <span class="va">minBrightness</span> <span class="op">=</span> <span class="fl">0.0370383157674109</span> <span class="co">#First bit floor</span></span>
+<span>  <span class="va">maxBrightness</span> <span class="op">=</span> <span class="fl">0.288414576071673</span>  <span class="co">#First bit cap</span></span>
+<span>  </span>
+<span>  <span class="va">norm</span> <span class="op">&lt;-</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/imLowPass.html">imLowPass</a></span><span class="op">(</span><span class="va">im</span>, floorVal <span class="op">=</span> <span class="va">minBrightness</span>, ceilVal <span class="op">=</span> <span class="va">maxBrightness</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/imForDecode.html">imForDecode</a></span><span class="op">(</span><span class="va">im</span>, floorVal <span class="op">=</span> <span class="va">minBrightness</span>, ceilVal <span class="op">=</span> <span class="va">maxBrightness</span><span class="op">)</span></span>
+<span>  <span class="va">norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/imNormalise.html">imNormalise</a></span><span class="op">(</span><span class="va">norm</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span> <span class="va">norm</span> <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">imList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/readImagesForStitch.html">readImagesForStitch</a></span><span class="op">(</span> subDirectory <span class="op">=</span> <span class="st">'IM'</span>, imageFunction <span class="op">=</span> <span class="va">imFunction</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">imList</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">imList</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, main<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">imList</span><span class="op">)</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(imList[[i]]): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="sourceCode" id="cb331"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/stitch-customprocessingfunction-1.png" width="672"></div>
+<div class="sourceCode" id="cb332"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">merList</span> <span class="op">&lt;-</span> <span class="va">imList</span></span></code></pre></div>
+</div>
+<div id="performing-stitching" class="section level2" number="6.3">
+<h2>
+<span class="header-section-number">6.3</span> Performing stitching<a class="anchor" aria-label="anchor" href="#performing-stitching"><i class="fas fa-link"></i></a>
+</h2>
+<p>The task of stitching is similar to image registration and our stitching algorithm <code>stitchImages</code> similarly relies on cross-correlation to a reference image. As default, the first image in the list – which should also be the current FOV being processed – is used.</p>
+<div class="sourceCode" id="cb333"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">stitchResults</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/stitchImages.html">stitchImages</a></span><span class="op">(</span><span class="va">merList</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in stitchImages(merList): Z stack detected...Defaulting to MIP...</code></pre>
+<div class="sourceCode" id="cb335"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">stitchResults</span>, format <span class="op">=</span> <span class="st">'html'</span>, booktabs <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-table"><table class="table table-sm">
+<thead><tr>
+<th style="text-align:left;">
+fov
+</th>
+<th style="text-align:left;">
+shift_pixel
+</th>
+</tr></thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+MMStack_1-Pos_001_003
+</td>
+<td style="text-align:left;">
+-2673+27i
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MMStack_1-Pos_002_002
+</td>
+<td style="text-align:left;">
+-28-2651i
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MMStack_1-Pos_002_004
+</td>
+<td style="text-align:left;">
+26+2660i
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MMStack_1-Pos_003_003
+</td>
+<td style="text-align:left;">
+2657-27i
+</td>
+</tr>
+</tbody>
+</table></div>
+<p>Users may wish to stitch both DAPI and MERFISH images to compare.</p>
+<div class="sourceCode" id="cb336"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## Keep the old stitch vector</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="va">stitchResults</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">'merfish_'</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">stitchResults</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Re-run stitching but with DAPI images</span></span>
+<span><span class="va">stitchResults</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/stitchImages.html">stitchImages</a></span><span class="op">(</span><span class="va">dapiList</span>, returnTroubleShootPlots <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> </span></code></pre></div>
+<pre><code>## Warning in stitchImages(dapiList, returnTroubleShootPlots = TRUE): Z stack detected...Defaulting to MIP...</code></pre>
+<div class="sourceCode" id="cb338"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">stitchResults</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">'dapi_'</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">stitchResults</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">stitchResults</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html">match</a></span><span class="op">(</span><span class="va">stitchResults</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">df</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span>,<span class="fl">2</span><span class="op">]</span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">stitchResults</span>, format <span class="op">=</span> <span class="st">'html'</span>, booktabs <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-table"><table class="table table-sm">
+<thead><tr>
+<th style="text-align:left;">
+fov
+</th>
+<th style="text-align:left;">
+dapi_shift_pixel
+</th>
+<th style="text-align:left;">
+merfish_shift_pixel
+</th>
+</tr></thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+MMStack_1-Pos_001_003
+</td>
+<td style="text-align:left;">
+-2664+25i
+</td>
+<td style="text-align:left;">
+-2673+27i
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MMStack_1-Pos_002_002
+</td>
+<td style="text-align:left;">
+-25-2664i
+</td>
+<td style="text-align:left;">
+-28-2651i
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MMStack_1-Pos_002_004
+</td>
+<td style="text-align:left;">
+27+2664i
+</td>
+<td style="text-align:left;">
+26+2660i
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MMStack_1-Pos_003_003
+</td>
+<td style="text-align:left;">
+2664-27i
+</td>
+<td style="text-align:left;">
+2657-27i
+</td>
+</tr>
+</tbody>
+</table></div>
+<p>Stitching can be evaluated visually. These can be obtained by setting <code>returnTroubleShootPlots</code> in <code>stitchImages</code> to <code>TRUE</code>, or through manual use of the <code>stitch_troubleshootPlots</code> function (see documentation). The reference FOV is shown in red, while the neighbour is in blue.</p>
+<div class="sourceCode" id="cb339"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## Plots are returned for each neihgbour, will show just one below</span></span>
+<span><span class="va">p_unstitched</span> <span class="op">&lt;-</span> <span class="va">troubleshootPlots</span><span class="op">[[</span><span class="st">'STITCH_EVAL'</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">'UNSTITCHED'</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">p_stitched</span> <span class="op">&lt;-</span> <span class="va">troubleshootPlots</span><span class="op">[[</span><span class="st">'STITCH_EVAL'</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">'STITCHED'</span><span class="op">]</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co">## Re-scale alpha so that low brightness is more solid</span></span>
+<span><span class="co">## We find this makes the stitch visually clearer for DAPI images</span></span>
+<span><span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html">plot_grid</a></span><span class="op">(</span> plotlist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>  <span class="va">p_unstitched</span>  <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">'Unstitched'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_alpha.html">scale_alpha</a></span><span class="op">(</span>range<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.75</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="va">p_stitched</span>  <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">'Stitched'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_alpha.html">scale_alpha</a></span><span class="op">(</span>range<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.75</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/stitch-visualchecking-1.png" width="672"></div>
+</div>
+<div id="saving-stitch-vectors" class="section level2" number="6.4">
+<h2>
+<span class="header-section-number">6.4</span> Saving stitch vectors<a class="anchor" aria-label="anchor" href="#saving-stitch-vectors"><i class="fas fa-link"></i></a>
+</h2>
+<p>Finally, users may save the dataframe output using the <code>saveStitch</code> function. This is strictly <em>not</em> necessary, but is recommended, as it would ensure standardised file names and compatability with the rest of {masmr}.</p>
+<div class="sourceCode" id="cb340"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/saveStitch.html">saveStitch</a></span><span class="op">(</span> <span class="va">stitchResults</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">stitchParams</span><span class="op">$</span><span class="va">out_dir</span>, <span class="st">'STITCH_'</span>, <span class="va">stitchParams</span><span class="op">$</span><span class="va">current_fov</span>, <span class="st">'.csv'</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="cell-segmentation.html"><span class="header-section-number">5</span> Cell segmentation</a></div>
+<div class="next"><a href="synthesis.html"><span class="header-section-number">7</span> Synthesis</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#stitching"><span class="header-section-number">6</span> Stitching</a></li>
+<li><a class="nav-link" href="#pre-processing-3"><span class="header-section-number">6.1</span> Pre-processing</a></li>
+<li><a class="nav-link" href="#loading-images-for-stitching"><span class="header-section-number">6.2</span> Loading images for stitching</a></li>
+<li><a class="nav-link" href="#performing-stitching"><span class="header-section-number">6.3</span> Performing stitching</a></li>
+<li><a class="nav-link" href="#saving-stitch-vectors"><span class="header-section-number">6.4</span> Saving stitch vectors</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+          
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>masmr: Modular Algorithms for Spotcalling in MERFISH in R</strong>" was written by Eugene Kwa. It was last built on 2025-07-18.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>

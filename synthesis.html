@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>7 Synthesis | masmr: Modular Algorithms for Spotcalling in MERFISH in R</title>
+<meta name="author" content="Eugene Kwa">
+<meta name="description" content="Synthesis involves the consolidation of disparate outputs and is the final task. This will be the focus of this Chapter. library(masmr) library(ggplot2)  7.1 Unifying outputs As a consequence of...">
+<meta name="generator" content="bookdown 0.43.2 with bs4_book()">
+<meta property="og:title" content="7 Synthesis | masmr: Modular Algorithms for Spotcalling in MERFISH in R">
+<meta property="og:type" content="book">
+<meta property="og:image" content="/./images/masmr.png">
+<meta property="og:description" content="Synthesis involves the consolidation of disparate outputs and is the final task. This will be the focus of this Chapter. library(masmr) library(ggplot2)  7.1 Unifying outputs As a consequence of...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="7 Synthesis | masmr: Modular Algorithms for Spotcalling in MERFISH in R">
+<meta name="twitter:description" content="Synthesis involves the consolidation of disparate outputs and is the final task. This will be the focus of this Chapter. library(masmr) library(ggplot2)  7.1 Unifying outputs As a consequence of...">
+<meta name="twitter:image" content="/./images/masmr.png">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.9.0/transition.js"></script><script src="libs/bs3compat-0.9.0/tabs.js"></script><script src="libs/bs3compat-0.9.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="libs/bslib-component-js-0.9.0/components.min.js"></script><script src="libs/bslib-component-js-0.9.0/web-components.min.js" type="module"></script><link href="libs/bslib-component-css-0.9.0/components.css" rel="stylesheet">
+<script src="libs/bslib-tag-require-0.9.0/tag-require.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<style type="text/css">
+    /* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+        }
+    .hanging div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
+  </style>
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">masmr: Modular Algorithms for Spotcalling in MERFISH in R</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"><span class="header-section-number">1</span> About masmr</a></li>
+<li><a class="" href="introduction.html"><span class="header-section-number">2</span> Introduction</a></li>
+<li><a class="" href="spotcalling.html"><span class="header-section-number">3</span> Spotcalling</a></li>
+<li><a class="" href="image-processing.html"><span class="header-section-number">4</span> Image processing</a></li>
+<li><a class="" href="cell-segmentation.html"><span class="header-section-number">5</span> Cell segmentation</a></li>
+<li><a class="" href="stitching.html"><span class="header-section-number">6</span> Stitching</a></li>
+<li><a class="active" href="synthesis.html"><span class="header-section-number">7</span> Synthesis</a></li>
+<li><a class="" href="troubleshooting.html"><span class="header-section-number">8</span> Troubleshooting</a></li>
+</ul>
+
+        <div class="book-extra">
+          
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="synthesis" class="section level1" number="7">
+<h1>
+<span class="header-section-number">7</span> Synthesis<a class="anchor" aria-label="anchor" href="#synthesis"><i class="fas fa-link"></i></a>
+</h1>
+<p>Synthesis involves the consolidation of disparate outputs and is the final task. This will be the focus of this Chapter.</p>
+<div class="sourceCode" id="cb342"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">masmr</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
+<div id="unifying-outputs" class="section level2" number="7.1">
+<h2>
+<span class="header-section-number">7.1</span> Unifying outputs<a class="anchor" aria-label="anchor" href="#unifying-outputs"><i class="fas fa-link"></i></a>
+</h2>
+<p>As a consequence of running scripts from preceding chapters, we expect three subdirectories in the user-specified output directory: one for spotcalling outputs (<code>IM</code>), one for cell segmentation (<code>DAPI</code>), and one for stitching (<code>STITCH</code>). The outputs from these three subdirectories will be combined, and output into a final <code>OUT</code> subdirectory.</p>
+<p>For illustrative purposes, we have processed just nine FOVs below. Also note the <code>removeRedundancy</code> parameter currently set to <code>FALSE</code> – this will be explained later.</p>
+<div class="sourceCode" id="cb343"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data_dir</span> <span class="op">=</span> <span class="st">'C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishParams.html">establishParams</a></span><span class="op">(</span></span>
+<span>  </span>
+<span>  <span class="co">## User to fill in</span></span>
+<span>  imageDirs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">'S10/'</span><span class="op">)</span>,</span>
+<span>  imageFormat <span class="op">=</span> <span class="st">'.ome.tif'</span>,</span>
+<span>  outDir <span class="op">=</span> <span class="st">'C:/Users/kwaje/Downloads/JYOUT/'</span>,</span>
+<span>  codebookFileName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>,<span class="st">'codebook/'</span><span class="op">)</span>,pattern<span class="op">=</span><span class="st">'codebook'</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>  dapiDir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">'DAPI_1/'</span><span class="op">)</span>,</span>
+<span>  </span>
+<span>  <span class="co">## Will attempt automatic fill</span></span>
+<span>  <span class="co"># metaFormat = '.ome.tif',</span></span>
+<span>  <span class="co"># dapiFormat = '.ome.tif',</span></span>
+<span>  codebookColumnNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">'_'</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'cy3'</span>,<span class="st">'alexa594'</span>,<span class="st">'cy5'</span>,<span class="st">'cy7'</span><span class="op">)</span>,each<span class="op">=</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  pythonLocation <span class="op">=</span> <span class="st">'C:/Users/kwaje/AppData/Local/miniforge3/envs/scipyenv/'</span>,</span>
+<span>  </span>
+<span>  <span class="co">## Automatically filled</span></span>
+<span>  <span class="co"># seed = 12345,</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="co"># resumeMode = TRUE,</span></span>
+<span>  </span>
+<span>  <span class="co">## Optional (but recommended for QC checks)</span></span>
+<span>  fpkmFileName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"FPKM_data/Jin_FPKMData_B.tsv"</span><span class="op">)</span>,</span>
+<span>  nProbesFileName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"ProbesPerGene.csv"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Assuming .ome.tif is extension for meta files...</code></pre>
+<div class="sourceCode" id="cb345"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## The synthesiseData function</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/synthesiseData.html">synthesiseData</a></span><span class="op">(</span>removeRedundancy <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<p>The files created in the <code>OUT</code> subdirectory are as follows:</p>
+<ul>
+<li>
+<code>OUT_CELLEXPRESSION.csv.gz</code>: Gene expression per cell. [Only created if there are matching spotcall and cell segmentation files for that FOV.]</li>
+<li>
+<code>OUT_CELLS.csv.gz</code>: Cellular coordinates, sizes, and other metadata.</li>
+<li>
+<code>OUT_CELLSEG_PIXELS.csv.gz</code>: Concatenated cell segmentation masks across all FOVs, with a unified coordinate system.</li>
+<li>
+<code>OUT_GLOBALCOORD.csv</code>: Updated global coordinates for each FOV.</li>
+<li>
+<code>OUT_SPOTCALL_PIXELS.csv.gz</code>: Concatenated spotcall dataframes across all FOVs, with a unified coordinate system.</li>
+</ul>
+<div class="sourceCode" id="cb346"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">parent_out_dir</span>, <span class="st">'/OUT/'</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
+<pre><code>## [1] "OUT_CELLEXPRESSION.csv.gz"  "OUT_CELLS.csv.gz"           "OUT_CELLSEG_PIXELS.csv.gz"  "OUT_GLOBALCOORD.csv"        "OUT_SPOTCALL_PIXELS.csv.gz"</code></pre>
+<p>Currently, with <code>removeRedundancy</code> turned off, dataframes are simply concatenated. This is problematic because FOVs overlap, causing spots to be counted more than once. This can be seen at FOV boundaries, that have higher count densities.</p>
+<div class="sourceCode" id="cb348"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html">fread</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">parent_out_dir</span>, <span class="st">'/OUT/OUT_SPOTCALL_PIXELS.csv.gz'</span><span class="op">)</span>, data.table <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html">plot_grid</a></span><span class="op">(</span> plotlist<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_hex.html">geom_hex</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">spotcalldf</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">Xm</span>, y<span class="op">=</span><span class="va">Ym</span><span class="op">)</span>, bins<span class="op">=</span><span class="fl">100</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_fill_viridis_c</a></span><span class="op">(</span>option<span class="op">=</span><span class="st">'turbo'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span>base_size<span class="op">=</span><span class="fl">14</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">'X (microns)'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">'Y (microns)'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">'Spot density'</span><span class="op">)</span>, </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">spotcalldf</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">Xm</span>, y<span class="op">=</span><span class="va">Ym</span>, colour<span class="op">=</span><span class="va">fov</span><span class="op">)</span>, shape<span class="op">=</span><span class="st">'.'</span>, alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">''</span>, option<span class="op">=</span><span class="st">'turbo'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span>base_size<span class="op">=</span><span class="fl">14</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">'X (microns)'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">'Y (microns)'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html">guides</a></span><span class="op">(</span>colour<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size<span class="op">=</span><span class="fl">5</span>, shape<span class="op">=</span><span class="fl">16</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">'Spots by FOV'</span><span class="op">)</span></span>
+<span><span class="op">)</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/syn-removeredundancyjustification-boundaries-1.png" width="672"></div>
+<p>We would expect there to be more cells, and more counts per cell.</p>
+<div class="sourceCode" id="cb349"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cellExp</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html">fread</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">parent_out_dir</span>, <span class="st">'/OUT/OUT_CELLEXPRESSION.csv.gz'</span><span class="op">)</span>, data.table <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">cellExp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">cellExp</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span></span>
+<span><span class="va">cellExp</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log10</a></span><span class="op">(</span><span class="fl">1</span><span class="op">+</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colSums</a></span><span class="op">(</span><span class="va">cellExp</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>     main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span> </span>
+<span>       <span class="st">'Cells x genes: '</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">cellExp</span><span class="op">)</span>, collapse<span class="op">=</span><span class="st">' x '</span><span class="op">)</span>, </span>
+<span>       <span class="st">', Median nCounts: '</span>, <span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colSums</a></span><span class="op">(</span><span class="va">cellExp</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>     breaks<span class="op">=</span><span class="fl">25</span>, xlab <span class="op">=</span> <span class="st">'Log10 nCounts per cell'</span><span class="op">)</span>; </span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html">abline</a></span><span class="op">(</span>v<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log10</a></span><span class="op">(</span><span class="fl">1</span><span class="op">+</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colSums</a></span><span class="op">(</span><span class="va">cellExp</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, col<span class="op">=</span><span class="st">'red'</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/syn-removeredundancyjustification-cellmetrics-1.png" width="672"></div>
+<p>To address this problem, we can turn <code>removeRedundancy</code> on (this is <code>TRUE</code> as default), which has the effect of:</p>
+<ul>
+<li>
+<em>Removing redundant spots:</em> Spots per FOV in the overlapping region are counted. The FOV contributing fewer spots in the overlapping region is ignored.</li>
+<li>
+<em>Removing redundant cells:</em> If cells from different FOVs overlap &lt;<span class="math inline">\(X\)</span>%, overlapping pixels are simply disregarded. However, if overlap &gt;<span class="math inline">\(X\)</span>%, then one of the cells has to be removed. In general, we drop smaller cells or cells that overlap with more than one cell in another FOV. The choice of <span class="math inline">\(X\)</span> depends on the <code>cellOverlapFraction</code> parameter (default is 0.25, i.e. 25%).</li>
+</ul>
+<div class="sourceCode" id="cb350"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/synthesiseData.html">synthesiseData</a></span><span class="op">(</span>removeRedundancy <span class="op">=</span> <span class="cn">T</span>, cellOverlapFraction <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in synthesiseData(removeRedundancy = T, cellOverlapFraction = 0.25): Overwriting existing files</code></pre>
+<pre><code>## Warning in data.table::fwrite(data.frame(CELLNAME = unique(cellDropCheck)), : Input has no columns; creating an empty file at
+## 'C:/Users/kwaje/Downloads/JYOUT/OUT/TEMP_CELLDROP.csv' and exiting.</code></pre>
+<pre><code>## Warning in data.table::fwrite(data.frame(CELLNAME = unique(cellDropCheck)), : Input has no columns; doing nothing.
+## If you intended to overwrite the file at C:/Users/kwaje/Downloads/JYOUT/OUT/TEMP_CELLDROP.csv with an empty one, please use file.remove first.</code></pre>
+<p>Accordingly, removing duplicate calls reduces spot density at FOV boundaries…</p>
+<div class="sourceCode" id="cb354"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html">fread</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">parent_out_dir</span>, <span class="st">'/OUT/OUT_SPOTCALL_PIXELS.csv.gz'</span><span class="op">)</span>, data.table <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html">plot_grid</a></span><span class="op">(</span> plotlist<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_hex.html">geom_hex</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">spotcalldf</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">Xm</span>, y<span class="op">=</span><span class="va">Ym</span><span class="op">)</span>, bins<span class="op">=</span><span class="fl">100</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_fill_viridis_c</a></span><span class="op">(</span>option<span class="op">=</span><span class="st">'turbo'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span>base_size<span class="op">=</span><span class="fl">14</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">'X (microns)'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">'Y (microns)'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">'Spot density'</span><span class="op">)</span>, </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">spotcalldf</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">Xm</span>, y<span class="op">=</span><span class="va">Ym</span>, colour<span class="op">=</span><span class="va">fov</span><span class="op">)</span>, shape<span class="op">=</span><span class="st">'.'</span>, alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">''</span>, option<span class="op">=</span><span class="st">'turbo'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span>base_size<span class="op">=</span><span class="fl">14</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">'X (microns)'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">'Y (microns)'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html">guides</a></span><span class="op">(</span>colour<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size<span class="op">=</span><span class="fl">5</span>, shape<span class="op">=</span><span class="fl">16</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">'Spots by FOV'</span><span class="op">)</span></span>
+<span><span class="op">)</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/syn-synproper-result-1.png" width="672"></div>
+<p>…and reduces the number of cells and counts per cell.</p>
+<div class="sourceCode" id="cb355"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cellExp</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html">fread</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">parent_out_dir</span>, <span class="st">'/OUT/OUT_CELLEXPRESSION.csv.gz'</span><span class="op">)</span>, data.table <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">cellExp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">cellExp</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span></span>
+<span><span class="va">cellExp</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log10</a></span><span class="op">(</span><span class="fl">1</span><span class="op">+</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colSums</a></span><span class="op">(</span><span class="va">cellExp</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>     main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span> </span>
+<span>       <span class="st">'Cells x genes: '</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">cellExp</span><span class="op">)</span>, collapse<span class="op">=</span><span class="st">' x '</span><span class="op">)</span>, </span>
+<span>       <span class="st">', Median nCounts: '</span>, <span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colSums</a></span><span class="op">(</span><span class="va">cellExp</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>     breaks<span class="op">=</span><span class="fl">25</span>, xlab <span class="op">=</span> <span class="st">'Log10 nCounts per cell'</span><span class="op">)</span>; </span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html">abline</a></span><span class="op">(</span>v<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log10</a></span><span class="op">(</span><span class="fl">1</span><span class="op">+</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colSums</a></span><span class="op">(</span><span class="va">cellExp</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, col<span class="op">=</span><span class="st">'red'</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/syn-synproper-cellwise-1.png" width="672"></div>
+<p>One final feature to consider is the use of the <code>subsetFOV</code> field. This is used when your FOVs are disjoint, i.e. not connected to each other (such as when there are multiple samples on the microscopy stage, and the FOVs in between samples are not captured). In such cases, one needs to subset just the FOVs belonging to one intact block.</p>
+<div class="sourceCode" id="cb356"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fovs_belonging_to_sample</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">'MMStack_1-Pos_002_004'</span>,</span>
+<span>  <span class="st">'MMStack_1-Pos_002_002'</span>,</span>
+<span>  <span class="st">'MMStack_1-Pos_002_003'</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/synthesiseData.html">synthesiseData</a></span><span class="op">(</span>removeRedundancy <span class="op">=</span> <span class="cn">T</span>, cellOverlapFraction <span class="op">=</span> <span class="fl">0.25</span>, subsetFOV <span class="op">=</span> <span class="va">fovs_belonging_to_sample</span><span class="op">)</span></span></code></pre></div>
+<p>Note that by subsetting, subdirectories within <code>\OUT</code> are created named in the <code>SUBSET_{ Reference FOV }</code> format. <strong>WARNING:</strong> It is assumed that no two subsets will have the same Reference FOV. [For more control over folder names, users can use the <code>customOutDirName</code> parameter in <code>synthesiseData</code>.]</p>
+<div class="sourceCode" id="cb357"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span> <span class="va">params</span><span class="op">$</span><span class="va">out_dir</span> <span class="op">)</span></span></code></pre></div>
+<pre><code>## [1] "C:/Users/kwaje/Downloads/JYOUT/OUT/SUBSET_MMStack_1-Pos_002_002/"</code></pre>
+<p>Accordingly, the output within this subdirectory is only a subset of all the processed FOVs.</p>
+<div class="sourceCode" id="cb359"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html">fread</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">out_dir</span>, <span class="st">'/OUT_SPOTCALL_PIXELS.csv.gz'</span><span class="op">)</span>, data.table <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html">plot_grid</a></span><span class="op">(</span> plotlist<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_hex.html">geom_hex</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">spotcalldf</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">Xm</span>, y<span class="op">=</span><span class="va">Ym</span><span class="op">)</span>, bins<span class="op">=</span><span class="fl">100</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_fill_viridis_c</a></span><span class="op">(</span>option<span class="op">=</span><span class="st">'turbo'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span>base_size<span class="op">=</span><span class="fl">14</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">'X (microns)'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">'Y (microns)'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">'Spot density'</span><span class="op">)</span>, </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">spotcalldf</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">Xm</span>, y<span class="op">=</span><span class="va">Ym</span>, colour<span class="op">=</span><span class="va">fov</span><span class="op">)</span>, shape<span class="op">=</span><span class="st">'.'</span>, alpha<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">''</span>, option<span class="op">=</span><span class="st">'turbo'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span>base_size<span class="op">=</span><span class="fl">14</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">'X (microns)'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">'Y (microns)'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html">guides</a></span><span class="op">(</span>colour<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size<span class="op">=</span><span class="fl">5</span>, shape<span class="op">=</span><span class="fl">16</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">'Spots by FOV'</span><span class="op">)</span></span>
+<span><span class="op">)</span>, nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/syn-subset-result-1.png" width="672"></div>
+</div>
+<div id="qc-plotting" class="section level2" number="7.2">
+<h2>
+<span class="header-section-number">7.2</span> QC plotting<a class="anchor" aria-label="anchor" href="#qc-plotting"><i class="fas fa-link"></i></a>
+</h2>
+<p>We have provided a <code>plotQC</code> function that returns several default QC plots as <code>.png</code> files. This function depends on parameters input during <code>establishParams</code>: e.g. if <code>fpkmFileName</code> is missing, then FPKM correlations will not be plotted. Additionally, if users ran <code>prepareCodebook</code> with <code>exhaustiveBlanks</code>, the newly added blanks will be flagged. [Users wishing to ignore these new blanks can set <code>includeNewBlanks</code> in <code>plotQC</code> to <code>FALSE</code> (see below).]</p>
+<div class="sourceCode" id="cb360"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/plotQC.html">plotQC</a></span><span class="op">(</span> </span>
+<span>  includeNewBlanks<span class="op">=</span><span class="cn">T</span>,</span>
+<span>  synthesisDir <span class="op">=</span> <span class="st">'C:/Users/kwaje/Downloads/JYOUT/OUT/'</span> <span class="co">#To refer to previously generated (un-subset) output</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<p>The interpretation of these plots will be covered briefly below.</p>
+<div id="fpkmcorrelation" class="section level3 unnumbered">
+<h3>
+<code>FPKMCorrelation</code><a class="anchor" aria-label="anchor" href="#fpkmcorrelation"><i class="fas fa-link"></i></a>
+</h3>
+<p>This plot returns the correlation between expected expression and the number of spots actually observed (bot log-transformed); strong correlations are ideal. In the title of this plot, we also report the percentage of spots that are blanks (specifically those with <code>blank</code> in their names), and the percentage of spots that overlap a cell mask.</p>
+<div class="inline-figure"><img src="images/FPKMCorrelation.png" width="100%" style="display: block; margin: auto;"></div>
+</div>
+<div id="cosinedistancedistribution" class="section level3 unnumbered">
+<h3>
+<code>CosineDistanceDistribution</code><a class="anchor" aria-label="anchor" href="#cosinedistancedistribution"><i class="fas fa-link"></i></a>
+</h3>
+<p>This shows a distribution of cosine distances (<code>COS</code>) per gene. Lower cosine distances implies higher confidence in the decoding of that spot.</p>
+<div class="inline-figure"><img src="images/CosineDistanceDistribution.png" width="100%" style="display: block; margin: auto;"></div>
+</div>
+<div id="spotfovdistribution" class="section level3 unnumbered">
+<h3>
+<code>SpotFOVDistribution</code><a class="anchor" aria-label="anchor" href="#spotfovdistribution"><i class="fas fa-link"></i></a>
+</h3>
+<p>This shows the distribution of spots, averaged across FOVs. This is used to check if spot coordinate in a given FOV influences its detection rate – ideally, this should not occur. If e.g. spots are more frequently detected in the centre of the FOV than the edges, this could suggest uneven lighting and a need to correct for that during image processing. [This plot is less useful if only a handful of FOVs were processed.]</p>
+<p>Note that this plot was created from all <code>SPOTCALL</code> files, without removing redundant spots.</p>
+<div class="inline-figure"><img src="images/SpotFOVDistribution.png" width="100%" style="display: block; margin: auto;"></div>
+</div>
+<div id="cosinespatialdistribution" class="section level3 unnumbered">
+<h3>
+<code>CosineSpatialDistribution</code><a class="anchor" aria-label="anchor" href="#cosinespatialdistribution"><i class="fas fa-link"></i></a>
+</h3>
+<p>This plot shows the average cosine distances per 2D bin, across the entire tissue. Ideally, spatial location should not influence confidence in spot calls.</p>
+<p>Note that – like <code>SpotFOVDistribution</code> – this plot was created from all <code>SPOTCALL</code> files, without removing redundant spots.</p>
+<div class="inline-figure"><img src="images/CosineSpatialDistribution.png" width="100%" style="display: block; margin: auto;"></div>
+</div>
+<div id="bitdetectionrate" class="section level3 unnumbered">
+<h3>
+<code>BitDetectionRate</code><a class="anchor" aria-label="anchor" href="#bitdetectionrate"><i class="fas fa-link"></i></a>
+</h3>
+<p>This shows how the ON / OFF status for each bit influences the number of spots called. We tabulate the number of spots per gene, and then split the genes into two groups for each bit: if they have a ON (1), or an OFF (0). This provides some indication as to whether separation of 0 vs 1 is clearer / more ambiguous for certain bits. Ideally, there should be no obvious bias in detection rate for any bits.</p>
+<div class="inline-figure"><img src="images/BitDetectionRateAll.png" width="100%" style="display: block; margin: auto;"></div>
+<p>Below shows the same, but this time for spots that are non-blanks (<code>BitDetectionRateNonBlank.png</code>, instead of <code>BitDetectionRateAll.png</code>).</p>
+<div class="inline-figure"><img src="images/BitDetectionRateNonBlank.png" width="100%" style="display: block; margin: auto;"></div>
+</div>
+<div id="bitwiseerrorrates" class="section level3 unnumbered">
+<h3>
+<code>BitwiseErrorRates</code><a class="anchor" aria-label="anchor" href="#bitwiseerrorrates"><i class="fas fa-link"></i></a>
+</h3>
+<p>This barplot shows the percentage of ON to OFF and OFF to ON errors for every bit. Only reported if <code>bitsFromDecode</code> was run during spotcalling.</p>
+<p>From <span class="citation">(<a href="troubleshooting.html#ref-chen2015spatially" role="doc-biblioref">Chen et al. 2015</a>)</span>, ON to OFF error rate is expected to be about 10%, and OFF to ON is about 4%. Of course, this might vary depending on data set and choice of hyperparameters during decoding.</p>
+<div class="inline-figure"><img src="images/BitwiseErrorRates.png" width="100%" style="display: block; margin: auto;"></div>
+</div>
+<div id="fovmetrics" class="section level3 unnumbered">
+<h3>
+<code>FOVMetrics</code><a class="anchor" aria-label="anchor" href="#fovmetrics"><i class="fas fa-link"></i></a>
+</h3>
+<p>This shows some statistics averaged per FOV. Useful for determining if there are systematic failures in spot calling for certain FOVs.</p>
+<div class="inline-figure"><img src="images/FOVMetrics.png" width="100%" style="display: block; margin: auto;"></div>
+</div>
+<div id="cellmetrics" class="section level3 unnumbered">
+<h3>
+<code>CellMetrics</code><a class="anchor" aria-label="anchor" href="#cellmetrics"><i class="fas fa-link"></i></a>
+</h3>
+<p>This shows cell-wise metrics. Below, we show average cell size (in pixels) per 2D bin.</p>
+<div class="inline-figure"><img src="images/CellMetrics_CellSize.png" width="100%" style="display: block; margin: auto;"></div>
+<p>Below shows average number of spots per 2D bin.</p>
+<div class="inline-figure"><img src="images/CellMetrics_nCounts.png" width="100%" style="display: block; margin: auto;"></div>
+</div>
+<div id="spatialpatterns" class="section level3 unnumbered">
+<h3>
+<code>SpatialPatterns</code><a class="anchor" aria-label="anchor" href="#spatialpatterns"><i class="fas fa-link"></i></a>
+</h3>
+<p>This comprises two related plots. The first comprises the <code>SpatialPatterns</code> themselves. As default, we typically return four or fewer spatial patterns.</p>
+<div class="inline-figure"><img src="images/SpatialPatterns_SpatialPatterns.png" width="100%" style="display: block; margin: auto;"></div>
+<p>The second is <code>GeneMembership</code>, and is used to determine how much each spatial pattern contributes to a given gene’s expression pattern.</p>
+<div class="inline-figure"><img src="images/SpatialPatterns_GeneMembership.png" width="100%" style="display: block; margin: auto;"></div>
+<p>These plots provide a quick way for users to determine if their genes are adopting spatial patterns of expression that matches their expectations.</p>
+<p>We also acknowledge that this analysis may have applications beyond QC. For users wishing to tune this analysis for their own downstream use (e.g. including more/fewer factors etc), we will now explain how these plots are generated under the hood.</p>
+</div>
+</div>
+<div id="explaining-how-spatial-patterns-were-identified" class="section level2" number="7.3">
+<h2>
+<span class="header-section-number">7.3</span> Explaining how spatial patterns were identified<a class="anchor" aria-label="anchor" href="#explaining-how-spatial-patterns-were-identified"><i class="fas fa-link"></i></a>
+</h2>
+<p>We first generate a table indicating how often a given gene X is a neighbour of gene Y. There are several ways to do this; we have found a fast and scaleable solution by creating a graph of spots with Delaunay triangulation, then scanning for neighbours at increasing degrees. For each spot belonging to gene X, calculate how often it is a neighbour of gene Y. [A first degree neighbour of a spot is immediately connected to that reference spot in a graph. Second degree neighbours are connected to first degree etc.]</p>
+<p>Users may alternatively, or simultaneously, wish to consider physical Euclidean distances (i.e. genes within 5 microns of a coordinate, within 10 microns etc). This method is typically slower and more memory intensive.</p>
+<p>Both can be accomplished with our <code>getPNNMatrix</code> function (PNN stands for “Point’s Nearest Neighbour”).</p>
+<p>[Note: when run inside <code>plotQC</code>, the output of <code>getPNNMatrix</code> is saved as its own <code>.csv</code> file.]</p>
+<div class="sourceCode" id="cb361"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">nearestNeighbourMatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/getPNNMatrix.html">getPNNMatrix</a></span><span class="op">(</span></span>
+<span>  </span>
+<span>  x <span class="op">=</span> <span class="va">spotcalldf</span><span class="op">$</span><span class="va">Xm</span>, <span class="co"># The x coordinate</span></span>
+<span>  y <span class="op">=</span> <span class="va">spotcalldf</span><span class="op">$</span><span class="va">Ym</span>, <span class="co"># The y coordinate</span></span>
+<span>  label <span class="op">=</span> <span class="va">spotcalldf</span><span class="op">$</span><span class="va">g</span>, <span class="co"># The category that a given spot belongs to</span></span>
+<span>  </span>
+<span>  delaunayTriangulation <span class="op">=</span> <span class="cn">T</span>, <span class="co"># Whether to use Delaunay Triangulation approach</span></span>
+<span>  delaunayDistanceThreshold <span class="op">=</span> <span class="fl">20</span>, <span class="co"># Ignore links longer than this distance (Xm is in microns, so this is 20 microns) </span></span>
+<span>  delaunayNNDegrees <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, <span class="co"># Consider 1st, 1st + 2nd, and 1st + 2nd + 3rd order neighbours</span></span>
+<span>  </span>
+<span>  euclideanDistances <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">10</span><span class="op">)</span>, <span class="co"># Consider spots &lt;5, and &lt;10 microns away</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">F</span> <span class="co"># Turn off messages</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">'Dimensions of nearest neighbour matrix: '</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">nearestNeighbourMatrix</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">' x '</span><span class="op">)</span> <span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## [1] "Dimensions of nearest neighbour matrix: 13145 x 735"</code></pre>
+<div class="sourceCode" id="cb363"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span> <span class="va">nearestNeighbourMatrix</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, format <span class="op">=</span> <span class="st">'html'</span>, booktabs <span class="op">=</span> <span class="cn">TRUE</span> <span class="op">)</span></span></code></pre></div>
+<div class="inline-table"><table class="table table-sm">
+<thead><tr>
+<th style="text-align:right;">
+DT1_ASCL1
+</th>
+<th style="text-align:right;">
+DT1_ASPM
+</th>
+<th style="text-align:right;">
+DT1_BCL11B
+</th>
+<th style="text-align:right;">
+DT1_Blank-1
+</th>
+<th style="text-align:right;">
+DT1_Blank-2
+</th>
+</tr></thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table></div>
+<p>The end product is a table with spots as rows, and how often it gene Y is its neighbour for a given distance as columns. This table has many uses: e.g. users can look to see how the probability of gene X is a neighbour of gene Y changes with distance. For our plots, we use this matrix to cluster genes into spatial patterns.</p>
+<p>[Note: <code>getPNNMatrix</code> is not just confined to looking at spatial patterns of genes, but can be applied to any point data (e.g. cell coordinates and cell types).]</p>
+<p>Clustering is accomplished here with non-negative matrix factorization (NMF). The number of ‘clusters’ (aka ‘factors’) is defined by the user. How to choose the appropriate number of factors is more of a personal decision, but the literature provides some helpful guidelines:</p>
+<ul>
+<li>Estimate from the number of Principle Components that explain X% variance of your data (or use an elbow plot).</li>
+<li>Try different numbers of factors and find the elbow where the reduction in residuals (e.g. sum of squared error) plateaus.</li>
+</ul>
+<p>[Note: we chose NMF because of the speed of the <code>RcppML</code> package. Users may also explore other approaches to clustering: e.g. hierarchical clustering, leiden etc.]</p>
+<p>To do so, users can use our <code>getPNNLatentFactors</code> function. This function not only runs NMF, but also merges similar factors together (based on a Pearson correlation threshold indicated by <code>correlationThreshold</code>).</p>
+<div class="sourceCode" id="cb364"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">resultsOfNMF</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/getPNNLatentFactors.html">getPNNLatentFactors</a></span><span class="op">(</span></span>
+<span>  <span class="va">nearestNeighbourMatrix</span>,</span>
+<span>  nFactors <span class="op">=</span> <span class="fl">4</span>, <span class="co">#Number of factors specified here</span></span>
+<span>  mergeSimilarFactors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  correlationThreshold <span class="op">=</span> <span class="fl">0.1</span>, <span class="co">#If correlation &gt;0.1 in W matrix ('point_scores'), merge</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">F</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">resultsOfNMF</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
+<pre><code>## [1] "n_factors"    "point_scores" "coefficients"</code></pre>
+<p>What is returned is a list of three objects:</p>
+<ul>
+<li>
+<code>n_factors</code>: the number of factors (after merging, if merging occured).</li>
+<li>
+<code>point_scores</code>: the “score” for each row of <code>nearestNeighbourMatrix</code> (i.e. spot) in each of the factors (aka the W matrix). These have undergone min-max scaling per factor.</li>
+<li>
+<code>coefficients</code>: the “score” for each column of <code>nearestNeighbourMatrix</code> in each of the factors (aka the H matrix). These have undergone min-max scaling per factor.</li>
+</ul>
+<p><code>point_scores</code> is most relevant here, and can be appended to <code>spotcalldf</code> to tell us the score for each spot – which we then plot in <code>SpatialPatterns</code> (averaging over 2D bins) and <code>GeneMembership</code> (averaging per gene).</p>
+<p>[Note: <code>getPNNLatentFactors</code> can actually be applied on any non-negative matrix, not just the one returned by <code>getPNNMatrix</code>.]</p>
+</div>
+<div id="next-steps" class="section level2" number="7.4">
+<h2>
+<span class="header-section-number">7.4</span> Next steps<a class="anchor" aria-label="anchor" href="#next-steps"><i class="fas fa-link"></i></a>
+</h2>
+<p>Yay! Your MERFISH pipeline is now done. If satisfied with the results, downstream analysis can be done on <code>OUT_CELLEXPRESSION.csv.gz</code> matrix – which contains cell-wise gene expression – using standard single cell RNA-sequencing pipelines. [More advanced bioinformaticians may wish to perform custom analysis to address e.g. lower counts per cell in spatial technologies (that violates assumptions of some normalisation algorithms used in scRNA-seq).]</p>
+<p>If unsatisfied, users can go back and re-process their data with tweaked parameters. Suggestions for troubleshooting are provided in the next chapter.</p>
+
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="stitching.html"><span class="header-section-number">6</span> Stitching</a></div>
+<div class="next"><a href="troubleshooting.html"><span class="header-section-number">8</span> Troubleshooting</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#synthesis"><span class="header-section-number">7</span> Synthesis</a></li>
+<li><a class="nav-link" href="#unifying-outputs"><span class="header-section-number">7.1</span> Unifying outputs</a></li>
+<li>
+<a class="nav-link" href="#qc-plotting"><span class="header-section-number">7.2</span> QC plotting</a><ul class="nav navbar-nav">
+<li><a class="nav-link" href="#fpkmcorrelation">FPKMCorrelation</a></li>
+<li><a class="nav-link" href="#cosinedistancedistribution">CosineDistanceDistribution</a></li>
+<li><a class="nav-link" href="#spotfovdistribution">SpotFOVDistribution</a></li>
+<li><a class="nav-link" href="#cosinespatialdistribution">CosineSpatialDistribution</a></li>
+<li><a class="nav-link" href="#bitdetectionrate">BitDetectionRate</a></li>
+<li><a class="nav-link" href="#bitwiseerrorrates">BitwiseErrorRates</a></li>
+<li><a class="nav-link" href="#fovmetrics">FOVMetrics</a></li>
+<li><a class="nav-link" href="#cellmetrics">CellMetrics</a></li>
+<li><a class="nav-link" href="#spatialpatterns">SpatialPatterns</a></li>
+</ul>
+</li>
+<li><a class="nav-link" href="#explaining-how-spatial-patterns-were-identified"><span class="header-section-number">7.3</span> Explaining how spatial patterns were identified</a></li>
+<li><a class="nav-link" href="#next-steps"><span class="header-section-number">7.4</span> Next steps</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+          
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>masmr: Modular Algorithms for Spotcalling in MERFISH in R</strong>" was written by Eugene Kwa. It was last built on 2025-07-18.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>

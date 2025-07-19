@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>8 Troubleshooting | masmr: Modular Algorithms for Spotcalling in MERFISH in R</title>
+<meta name="author" content="Eugene Kwa">
+<meta name="description" content="The {masmr} package is designed to enable users to build their own custom pipelines. Users are encouraged to play around with an FOV or two, to determine optimal parameter choices, before looping...">
+<meta name="generator" content="bookdown 0.43.2 with bs4_book()">
+<meta property="og:title" content="8 Troubleshooting | masmr: Modular Algorithms for Spotcalling in MERFISH in R">
+<meta property="og:type" content="book">
+<meta property="og:image" content="/./images/masmr.png">
+<meta property="og:description" content="The {masmr} package is designed to enable users to build their own custom pipelines. Users are encouraged to play around with an FOV or two, to determine optimal parameter choices, before looping...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="8 Troubleshooting | masmr: Modular Algorithms for Spotcalling in MERFISH in R">
+<meta name="twitter:description" content="The {masmr} package is designed to enable users to build their own custom pipelines. Users are encouraged to play around with an FOV or two, to determine optimal parameter choices, before looping...">
+<meta name="twitter:image" content="/./images/masmr.png">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.9.0/transition.js"></script><script src="libs/bs3compat-0.9.0/tabs.js"></script><script src="libs/bs3compat-0.9.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="libs/bslib-component-js-0.9.0/components.min.js"></script><script src="libs/bslib-component-js-0.9.0/web-components.min.js" type="module"></script><link href="libs/bslib-component-css-0.9.0/components.css" rel="stylesheet">
+<script src="libs/bslib-tag-require-0.9.0/tag-require.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<style type="text/css">
+    /* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+        }
+    .hanging div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
+  </style>
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">masmr: Modular Algorithms for Spotcalling in MERFISH in R</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"><span class="header-section-number">1</span> About masmr</a></li>
+<li><a class="" href="introduction.html"><span class="header-section-number">2</span> Introduction</a></li>
+<li><a class="" href="spotcalling.html"><span class="header-section-number">3</span> Spotcalling</a></li>
+<li><a class="" href="image-processing.html"><span class="header-section-number">4</span> Image processing</a></li>
+<li><a class="" href="cell-segmentation.html"><span class="header-section-number">5</span> Cell segmentation</a></li>
+<li><a class="" href="stitching.html"><span class="header-section-number">6</span> Stitching</a></li>
+<li><a class="" href="synthesis.html"><span class="header-section-number">7</span> Synthesis</a></li>
+<li><a class="active" href="troubleshooting.html"><span class="header-section-number">8</span> Troubleshooting</a></li>
+</ul>
+
+        <div class="book-extra">
+          
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="troubleshooting" class="section level1" number="8">
+<h1>
+<span class="header-section-number">8</span> Troubleshooting<a class="anchor" aria-label="anchor" href="#troubleshooting"><i class="fas fa-link"></i></a>
+</h1>
+<p>The {masmr} package is designed to enable users to build their own custom pipelines. Users are encouraged to play around with an FOV or two, to determine optimal parameter choices, before looping through their entire data set.</p>
+<p>Below, we provide some suggestions for users seeking to improve their pipelines. This has been organised by potential problems, possible causes (and how to identify them), and potential solutions.</p>
+<div id="too-few-spots" class="section level2 unnumbered">
+<h2>Too few spots<a class="anchor" aria-label="anchor" href="#too-few-spots"><i class="fas fa-link"></i></a>
+</h2>
+<ul>
+<li>
+<strong>Poor choice of image processing</strong>. This is best identified during the spotcalling script itself, rather than the synthesis step at the end. Users are encouraged to plot their processed images using <code>plot(imager::as.cimg( imageMatrix ))</code>. [The <code>as.cimg</code> offers considerable speed up.] Users may attempt manual decoding on a small region of one or two FOVs (i.e. look at images and determine the sequence of pixel ON/OFF), and ensure that their pipeline returns results that agree with their manual decoding. This pipeline – optimised on a subset of FOVs – can then be looped through <em>all</em> FOVs to apply consistent spotcalling standards.
+<ul>
+<li>
+<strong>Potential solution</strong>: Changing the function used to return <code>MASK</code> in <code>getImageMetrics</code>. Larger masks means more pixels are brought forwards for subsequent decoding.</li>
+<li>
+<strong>Potential solution</strong>: Changing the function used to return <code>DECODE</code> in <code>getImageMetrics</code>. As far as possible, attempt to return a bimodal distribution where there is clear separation of OFF and ON bits by intensity.</li>
+</ul>
+</li>
+<li>
+<strong>Filtering criteria are too strict</strong>. This is also best identified during the spotcalling script itself. Users are encouraged to use the <code>filterDF</code> function to keep track of how spot profiles per FOV are changing with each filter step.
+<ul>
+<li>
+<strong>Potential solution</strong>: Do not add more blanks during <code>prepareCodebook</code> – i.e. set <code>exhaustiveBlanks = F</code> – or increase strictness for criteria in calling blanks with <code>scoreBlanks</code>. This is because many subsequent steps rely on blank detection: more blanks likely increases strictness of filtering pixels.<br>
+</li>
+<li>
+<strong>Potential solution</strong>: During <code>bitsFromDecode</code>, swapping from the default <code>f1</code> to <code>fb</code> allows users to upweight / downweight recall with respect to precision using <code>fBeta</code>. E.g. <code>fBeta</code> &gt;1 upweights recall and minimises false negatives. Alternatively, users <em>may</em> skip <code>bitsFromDecode</code> entirely (though this is not recommended).</li>
+<li>
+<strong>Potential solution</strong>: If filtering with <code>thresh_Quantile</code>, consider tuning <code>quantileFalse</code> and <code>quantileTrue</code>. E.g. if labels is a vector where a pixel being a blank is <code>TRUE</code>, and the metric is a vector of probability of being a blank (e.g. returned from <code>scoreClassifier</code>), decreasing <code>quantileTrue</code> from the default of 0.5 to 0.25 increases the tolerance for keeping in blanks. [The direction to move <code>quantileFalse</code> and <code>quantileTrue</code> depends on the metric in question, and how the labels are coded.]</li>
+<li>
+<strong>Potential solution</strong>: Reduce the number filtering steps. This is perhaps best done when several steps may be redundant given later filtering: e.g. filtering using <code>DFF0</code> metrics may be redundant if there is a later <code>scoreClassifier</code> step that uses <code>DFF0</code> as a covariate.</li>
+<li>
+<strong>Potential solution</strong>: Increase the <code>maxInterSpotDistancePixels</code> during <code>spatialClusterLeiden</code> so that more distal spots are considered per cluster. [In general, this has a larger impact than filtering using HNN distances – which similarly removes loner spots (though both can be tweaked).] Alternatively, users could also reduce the minimum number of pixels required per cluster (default = 3).</li>
+</ul>
+</li>
+</ul>
+</div>
+<div id="too-few-cellular-spots" class="section level2 unnumbered">
+<h2>Too few cellular spots<a class="anchor" aria-label="anchor" href="#too-few-cellular-spots"><i class="fas fa-link"></i></a>
+</h2>
+<ul>
+<li><p>See above recommendations for “Too few spots”.</p></li>
+<li>
+<p><strong>Too few cell masks returned during cell segmentation.</strong> This can be evaluated from <code>CellMetrics</code> plots, and the percent of counts deemed cellular in <code>FPKMCorrelation</code>. Users should also plot cell masks for a chosen FOV.</p>
+<ul>
+<li>
+<strong>Potential solution</strong>: For <code>cellpose</code>, retrain models or relax cell segmentation parameters.</li>
+<li>
+<strong>Potential solution</strong>: For <code>stardist</code> – which returns masks faster than <code>cellpose</code> – input variously brightened images and consolidate cell masks using <code>consolidateCellSegMasks</code>. Cell segmentation parameters can also be relaxed for <code>stardist</code>, but brightness seems to be a larger contributor to detection rate.</li>
+</ul>
+</li>
+<li>
+<p><strong>Cells too small.</strong> In this scenario, we expect there to be low percent of counts deemed cellular in <code>FPKMCorrelation</code>, despite there being sufficient numbers of cells per unit area.</p>
+<ul>
+<li>
+<strong>Potential solution</strong>: Retrain <code>cellpose</code> models to return larger masks. Run <code>cellpose</code> with different diameter parameters, and consolidate with <code>consolidateCellSegMasks</code>.<br>
+</li>
+<li>
+<strong>Potential solution</strong>: Dilate existing masks prior to saving using <code>imager::dilate_square(cellMask, X)</code>. [<code>X</code> should be at least 3 for isotropic dilation by 1 pixel.] This works for both cell segmentation models.</li>
+<li>
+<strong>Potential solution</strong>: Instead of dilating cells, non-cellular spots may be assigned to cell centroids by proximity. Functionally similar to dilating cell masks.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div id="weak-correlation-to-fpkm-high-blank" class="section level2 unnumbered">
+<h2>Weak correlation to FPKM / high blank %<a class="anchor" aria-label="anchor" href="#weak-correlation-to-fpkm-high-blank"><i class="fas fa-link"></i></a>
+</h2>
+<ul>
+<li><p>Suggests high false positive rate. Do the opposite of recommendations for “Too few spots”: i.e. increase strictness of filtering criteria. If possible, users may attempt manual decoding on a small region of one or two FOVs, and ensure that their pipeline returns similar results: make use of the troubleshoot plots returned by <code>filterDF</code>.</p></li>
+<li>
+<p><strong>Bit-specific differences in detection rate.</strong> This can be evaluated from <code>BitwiseErrorRates</code> and <code>BitDetectionRate</code> plots after synthesis. [This may also cause too few spots to be returned – but in general, there tends to be variation across genes: where some genes are too few, and some too abundant.]</p>
+<ul>
+<li>
+<strong>Potential solution</strong>: Ensure that <code>getAnchorParams</code> is returning reasonable intensity ceilings and floors for each bit. Users should <em>not</em> use empty FOVs as anchor FOVs.</li>
+<li>
+<strong>Potential solution</strong>: Sometimes, bit-specific differences may be expected if there is uneven representation of counts across bits (e.g. when abundant genes have an ON first bit, while rare genes have OFF). [This is best avoided during data acquisition: by ensuring even bit representation when designing the probe library.] Users may need to have custom image processing per bit (as opposed to looping a consistent function across all bits).</li>
+</ul>
+</li>
+</ul>
+</div>
+<div id="issues-with-image-handling" class="section level2 unnumbered">
+<h2>Issues with image handling<a class="anchor" aria-label="anchor" href="#issues-with-image-handling"><i class="fas fa-link"></i></a>
+</h2>
+<ul>
+<li>
+<strong><code>java.lang.OutOfMemoryError</code>.</strong> This will be likely flagged when reading images during spotcalling, but may crop up during cell segmentation. This is an error that accompanies the <code>RBioFormats</code> package; loading <code>.dax</code> files uses the inbuilt <code>readBin</code> function in R and should thus <em>not</em> return this error.
+<ul>
+<li>
+<strong>Potential solution</strong>: Increasing memory prior to running your scripts with <code>options(java.parameters = "-Xmx8g")</code>.</li>
+<li>
+<strong>Potential solution</strong>: Unloading the <code>RBioFormats</code> with <code>unloadNamespace(RBioFormats)</code> every so often, and avoid attaching or loading the package (e.g. with <code><a href="https://github.com/aoles/RBioFormats">library(RBioFormats)</a></code>).</li>
+<li>
+<strong>Potential solution</strong>: Ensure images are loaded one by one (done by specifying <code>series</code> parameter). Also ideally load images one channel or slice at a time (done by including a <code>subset = list()</code> parameter). [Details can be found in the Chapter on spotcalling, and the documentation for <code><a href="https://rdrr.io/pkg/RBioFormats/man/read.image.html">RBioFormats::read.image()</a></code> and <code><a href="https://rdrr.io/pkg/masmr/man/readImage.html">masmr::readImage</a></code>.] In the worst case, images can be loaded into memory as tiles (by subsetting on <code>x</code> and <code>y</code>) for better memory management.</li>
+</ul>
+</li>
+<li>
+<strong>Images look like noise when loaded.</strong> We expect this to be more likely for <code>.dax</code> images and may be due to incorrect image size input, or incorrect endian-ness (default: <code>little</code>). Alternatively, user has attempted to load a 3D image stack as 2D image – which will cause problems regardless of image file format.
+<ul>
+<li>
+<strong>Potential solution</strong>: Hard code image sizes by specifying <code>nrows</code> and <code>ncols</code> in <code>readImage</code>/<code>readImageList</code>. Similarly, set <code>endian</code> to <code>big</code> if needed (depends on instrument, and should be recorded in image metadata files).</li>
+<li>
+<strong>Potential solution</strong>: A less likely alternative reason is that the wrong number of bytes has been assigned to each element in the <code>.dax</code> file. This is default <code>2</code> (for 16 bit integers); but should be reduced to <code>1</code> if data was saved as an integer value between 0 and 255 (i.e. 8 bit integer). [Most microscopes no longer use 8 bit integers.]</li>
+</ul>
+</li>
+<li>
+<strong>Wanting to work with individual Z slices.</strong> For various reasons (e.g. Z slice distances are large, desiring high resolution spot localisation etc), users may wish to process individual Z slices rather than relying on the default maximum intensity projection (MIP).
+<ul>
+<li>
+<strong>Potential solution</strong>: Z slices can be loaded one at a time by specifying the <code>zIndex</code> in <code>readImage</code>/<code>readImageList</code>. <code>getAnchorParams</code> – which aims to find reasonable thresholds across multiple FOVs – should have its <code>imageFunctions</code> modified to avoid MIP as a pre-processing step, and instead have a specific Z slice loaded (example code provided below). <code>registerImages</code> has a <code>chosenZslice</code> parameter that allows users to specify a specific Z slice to perform registration against (that said, MIP should still be optimal here because position shifts affect the whole Z stack, and not just a single Z slice). Downstream functions (e.g. <code>getImageMetrics</code>, <code>consolidateImageMetrics</code>, and functions that work on <code>spotcalldf</code> rather than images) should not be affected and can remain unaltered.</li>
+</ul>
+</li>
+</ul>
+<p>Below is an example of how to create a function that returns the brightness floor for a single Z slice, for input into <code>imageFunctions</code> of <code>getAnchorParams</code>:</p>
+<div class="sourceCode" id="cb366"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb366-1"><a href="troubleshooting.html#cb366-1" aria-hidden="true" tabindex="-1"></a><span class="do">## This function is looped across FOVs</span></span>
+<span id="cb366-2"><a href="troubleshooting.html#cb366-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Its input is an image / image stack called im</span></span>
+<span id="cb366-3"><a href="troubleshooting.html#cb366-3" aria-hidden="true" tabindex="-1"></a><span class="do">## The ellipsis is used in R to allow your function to take in more unnamed parameters</span></span>
+<span id="cb366-4"><a href="troubleshooting.html#cb366-4" aria-hidden="true" tabindex="-1"></a>imsBrightnessMin_OneZSlice <span class="ot">&lt;-</span> <span class="cf">function</span>( im, <span class="at">userChosenZSlice =</span> <span class="dv">1</span>, ... ){</span>
+<span id="cb366-5"><a href="troubleshooting.html#cb366-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb366-6"><a href="troubleshooting.html#cb366-6" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Check that image is indeed a stack</span></span>
+<span id="cb366-7"><a href="troubleshooting.html#cb366-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>( <span class="fu">length</span>(<span class="fu">dim</span>(im)) <span class="sc">&gt;</span> <span class="dv">2</span> ){</span>
+<span id="cb366-8"><a href="troubleshooting.html#cb366-8" aria-hidden="true" tabindex="-1"></a>    <span class="do">## If yes, subset the chosen zSlice</span></span>
+<span id="cb366-9"><a href="troubleshooting.html#cb366-9" aria-hidden="true" tabindex="-1"></a>    im <span class="ot">&lt;-</span> im[,,userChosenZSlice]</span>
+<span id="cb366-10"><a href="troubleshooting.html#cb366-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb366-11"><a href="troubleshooting.html#cb366-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb366-12"><a href="troubleshooting.html#cb366-12" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Make use of the default way of getting minimum brightness</span></span>
+<span id="cb366-13"><a href="troubleshooting.html#cb366-13" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Note that parameters specified by ellipsis are fed forwards into this function</span></span>
+<span id="cb366-14"><a href="troubleshooting.html#cb366-14" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> <span class="fu">imsBrightnessMin</span>(im, ...)</span>
+<span id="cb366-15"><a href="troubleshooting.html#cb366-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(result)</span>
+<span id="cb366-16"><a href="troubleshooting.html#cb366-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb366-17"><a href="troubleshooting.html#cb366-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb366-18"><a href="troubleshooting.html#cb366-18" aria-hidden="true" tabindex="-1"></a><span class="do">## Do the same for max brightness, and input your new functions into getAnchorParams</span></span>
+<span id="cb366-19"><a href="troubleshooting.html#cb366-19" aria-hidden="true" tabindex="-1"></a>zi <span class="ot">=</span> <span class="dv">1</span> <span class="co"># The first z Slice = 1, second = 2 etc</span></span>
+<span id="cb366-20"><a href="troubleshooting.html#cb366-20" aria-hidden="true" tabindex="-1"></a><span class="fu">getAnchorParams</span>(</span>
+<span id="cb366-21"><a href="troubleshooting.html#cb366-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">out_dir =</span> <span class="fu">paste0</span>(params<span class="sc">$</span>out_dir, <span class="st">'ZSlice'</span>, zi, <span class="st">'/'</span>) <span class="co">#Save results in its own folder</span></span>
+<span id="cb366-22"><a href="troubleshooting.html#cb366-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">imageFunctions =</span> <span class="fu">list</span>(</span>
+<span id="cb366-23"><a href="troubleshooting.html#cb366-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">'brightness_min'</span> <span class="ot">=</span> imsBrightnessMin_OneZSlice,</span>
+<span id="cb366-24"><a href="troubleshooting.html#cb366-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">'brightness_max'</span> <span class="ot">=</span> imsBrightnessMax_OneZSlice</span>
+<span id="cb366-25"><a href="troubleshooting.html#cb366-25" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb366-26"><a href="troubleshooting.html#cb366-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">userChosenZSlice =</span> zi <span class="co">#Parameters for your image function can be fed from getAnchorParams itself</span></span>
+<span id="cb366-27"><a href="troubleshooting.html#cb366-27" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-chambolle2004algorithm" class="csl-entry">
+Chambolle, Antonin. 2004. <span>“An Algorithm for Total Variation Minimization and Applications.”</span> <em>Journal of Mathematical Imaging and Vision</em> 20 (1): 89–97.
+</div>
+<div id="ref-chambolle2010introduction" class="csl-entry">
+Chambolle, Antonin, Vicent Caselles, Daniel Cremers, Matteo Novaga, Thomas Pock, et al. 2010. <span>“An Introduction to Total Variation for Image Analysis.”</span> <em>Theoretical Foundations and Numerical Methods for Sparse Recovery</em> 9 (263-340): 227.
+</div>
+<div id="ref-chen2015spatially" class="csl-entry">
+Chen, Kok Hao, Alistair N Boettiger, Jeffrey R Moffitt, Siyuan Wang, and Xiaowei Zhuang. 2015. <span>“Spatially Resolved, Highly Multiplexed RNA Profiling in Single Cells.”</span> <em>Science</em> 348 (6233): aaa6090.
+</div>
+<div id="ref-duran2013chambolle" class="csl-entry">
+Duran, Joan, Bartomeu Coll, and Catalina Sbert. 2013. <span>“Chambolle’s Projection Algorithm for Total Variation Denoising.”</span> <em>Image Processing on Line</em> 2013: 311–31.
+</div>
+<div id="ref-pachitariu2022cellpose" class="csl-entry">
+Pachitariu, Marius, and Carsen Stringer. 2022. <span>“Cellpose 2.0: How to Train Your Own Model.”</span> <em>Nature Methods</em> 19 (12): 1634–41.
+</div>
+<div id="ref-roscani2020comparative" class="csl-entry">
+Roscani, Valerio, Silvia Tozza, Marco Castellano, Emiliano Merlin, Daniele Ottaviani, Maurizio Falcone, and Adriano Fontana. 2020. <span>“A Comparative Analysis of Denoising Algorithms for Extragalactic Imaging Surveys.”</span> <em>Astronomy &amp; Astrophysics</em> 643: A43.
+</div>
+<div id="ref-rudin1992nonlinear" class="csl-entry">
+Rudin, Leonid I, Stanley Osher, and Emad Fatemi. 1992. <span>“Nonlinear Total Variation Based Noise Removal Algorithms.”</span> <em>Physica D: Nonlinear Phenomena</em> 60 (1-4): 259–68.
+</div>
+<div id="ref-schmidt2018cell" class="csl-entry">
+Schmidt, Uwe, Martin Weigert, Coleman Broaddus, and Gene Myers. 2018. <span>“Cell Detection with Star-Convex Polygons.”</span> In <em>Medical Image Computing and Computer Assisted Intervention–MICCAI 2018: 21st International Conference, Granada, Spain, September 16-20, 2018, Proceedings, Part II 11</em>, 265–73. Springer.
+</div>
+<div id="ref-stringer2021cellpose" class="csl-entry">
+Stringer, Carsen, Tim Wang, Michalis Michaelos, and Marius Pachitariu. 2021. <span>“Cellpose: A Generalist Algorithm for Cellular Segmentation.”</span> <em>Nature Methods</em> 18 (1): 100–106.
+</div>
+<div id="ref-weigert2022nuclei" class="csl-entry">
+Weigert, Martin, and Uwe Schmidt. 2022. <span>“Nuclei Instance Segmentation and Classification in Histopathology Images with Stardist.”</span> In <em>2022 IEEE International Symposium on Biomedical Imaging Challenges (ISBIC)</em>, 1–4. IEEE.
+</div>
+</div>
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="synthesis.html"><span class="header-section-number">7</span> Synthesis</a></div>
+<div class="empty"></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#troubleshooting"><span class="header-section-number">8</span> Troubleshooting</a></li>
+<li><a class="nav-link" href="#too-few-spots">Too few spots</a></li>
+<li><a class="nav-link" href="#too-few-cellular-spots">Too few cellular spots</a></li>
+<li><a class="nav-link" href="#weak-correlation-to-fpkm-high-blank">Weak correlation to FPKM / high blank %</a></li>
+<li><a class="nav-link" href="#issues-with-image-handling">Issues with image handling</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+          
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>masmr: Modular Algorithms for Spotcalling in MERFISH in R</strong>" was written by Eugene Kwa. It was last built on 2025-07-18.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>

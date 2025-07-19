@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>2 Introduction | masmr: Modular Algorithms for Spotcalling in MERFISH in R</title>
+<meta name="author" content="Eugene Kwa">
+<meta name="description" content="2.1 Why do you need {masmr}? Existing MERFISH decoding workflows are typically designed to be “plug and play”: requiring minimal manual adjustment or re-parameterisation. These one-size-fits-all...">
+<meta name="generator" content="bookdown 0.43.2 with bs4_book()">
+<meta property="og:title" content="2 Introduction | masmr: Modular Algorithms for Spotcalling in MERFISH in R">
+<meta property="og:type" content="book">
+<meta property="og:image" content="/./images/masmr.png">
+<meta property="og:description" content="2.1 Why do you need {masmr}? Existing MERFISH decoding workflows are typically designed to be “plug and play”: requiring minimal manual adjustment or re-parameterisation. These one-size-fits-all...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="2 Introduction | masmr: Modular Algorithms for Spotcalling in MERFISH in R">
+<meta name="twitter:description" content="2.1 Why do you need {masmr}? Existing MERFISH decoding workflows are typically designed to be “plug and play”: requiring minimal manual adjustment or re-parameterisation. These one-size-fits-all...">
+<meta name="twitter:image" content="/./images/masmr.png">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.9.0/transition.js"></script><script src="libs/bs3compat-0.9.0/tabs.js"></script><script src="libs/bs3compat-0.9.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="libs/bslib-component-js-0.9.0/components.min.js"></script><script src="libs/bslib-component-js-0.9.0/web-components.min.js" type="module"></script><link href="libs/bslib-component-css-0.9.0/components.css" rel="stylesheet">
+<script src="libs/bslib-tag-require-0.9.0/tag-require.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<style type="text/css">
+    /* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+        }
+    .hanging div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
+  </style>
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">masmr: Modular Algorithms for Spotcalling in MERFISH in R</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"><span class="header-section-number">1</span> About masmr</a></li>
+<li><a class="active" href="introduction.html"><span class="header-section-number">2</span> Introduction</a></li>
+<li><a class="" href="spotcalling.html"><span class="header-section-number">3</span> Spotcalling</a></li>
+<li><a class="" href="image-processing.html"><span class="header-section-number">4</span> Image processing</a></li>
+<li><a class="" href="cell-segmentation.html"><span class="header-section-number">5</span> Cell segmentation</a></li>
+<li><a class="" href="stitching.html"><span class="header-section-number">6</span> Stitching</a></li>
+<li><a class="" href="synthesis.html"><span class="header-section-number">7</span> Synthesis</a></li>
+<li><a class="" href="troubleshooting.html"><span class="header-section-number">8</span> Troubleshooting</a></li>
+</ul>
+
+        <div class="book-extra">
+          
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="introduction" class="section level1" number="2">
+<h1>
+<span class="header-section-number">2</span> Introduction<a class="anchor" aria-label="anchor" href="#introduction"><i class="fas fa-link"></i></a>
+</h1>
+<div id="why-do-you-need-masmr" class="section level2" number="2.1">
+<h2>
+<span class="header-section-number">2.1</span> Why do you need {masmr}?<a class="anchor" aria-label="anchor" href="#why-do-you-need-masmr"><i class="fas fa-link"></i></a>
+</h2>
+<p>Existing MERFISH decoding workflows are typically designed to be “plug and play”: requiring minimal manual adjustment or re-parameterisation. These one-size-fits-all approaches work well when their assumptions about data hold true, but return dramatically reduced performance and erroneous decoding when not.</p>
+<p>{masmr} was thus designed because we wanted more control over the MERFISH decoding, beyond what was offered by existing software. Our package is also designed to have an intuitive syntax, so that users can adapt the software without needing deep technical expertise. We also provide numerous plots and quality check (QC) metrics to help users design their own pipelines.</p>
+<p>While technically designed with a focus on MERFISH, the image processing fundamentals introduced by {masmr} can be applied to many other data sets and contexts. We thus further hope that {masmr} (and this accompanying book) can further serve as a user-friendly teaching tool; especially for the under-served community of R coders seeking to analyse image data.</p>
+</div>
+<div id="background" class="section level2" number="2.2">
+<h2>
+<span class="header-section-number">2.2</span> Background<a class="anchor" aria-label="anchor" href="#background"><i class="fas fa-link"></i></a>
+</h2>
+<p>For most MERFISH pipelines, one wants to accomplish the following tasks:</p>
+<ol style="list-style-type: decimal">
+<li><p>Spotcalling: This involves reading each fluorescence image, performing the necessary image processing steps, decoding, and returning of spot coordinates. This is typically performed one image / field-of-view (FOV) at a time. Ideally, users optimise their spotcalling pipeline on one FOV before looping through all the other FOVs, applying the same spotcalling criteria.</p></li>
+<li><p>Cell segmentation: Cell segmentation involves identifying nuclei or cells in an image and recording locations of each cell mask. Again, this is typically performed one FOV at a time.</p></li>
+<li><p>Stitching: Stitching involves the alignment of partially overlapping FOVs, so that a coherent image and coordinate system is obtained.</p></li>
+<li><p>Synthesis: Having processed every FOV, the final step is to consolidate all outputs into an easy-to-read format. Care must be taken to ensure coordinate information is comparable between spots and cell masks, and spots are assigned to the correct cells.</p></li>
+</ol>
+<p>It is recommended that each of the above tasks be accomplished with separate scripts. Furthermore, time-saving is possible by performing tasks (1), (2), and (3) in parallel, before consolidation in step (4).</p>
+</div>
+<div id="quick-start-scripts" class="section level2" number="2.3">
+<h2>
+<span class="header-section-number">2.3</span> Quick start scripts<a class="anchor" aria-label="anchor" href="#quick-start-scripts"><i class="fas fa-link"></i></a>
+</h2>
+<p>Below, we provide several quick start scripts for users who wish to immediately proceed with a default MERFISH pipeline. Details on what each step is doing is provided in the subsequent chapters.</p>
+<p>Spotcalling and Cell segmentation scripts can be run in parallel to save time. Stitching can also be run alongside Spotcalling and Cell segmentation, or after the previous two scripts. Finally, the Synthesis script is run to consolidate outputs of the previous three scripts.</p>
+<p>For 3D image stacks, our default processing is to perform a maximum intensity projection. But users may simply loop through each Z plane if they so wish. Kindly refer to Troubleshooting (Chapter <a href="troubleshooting.html#troubleshooting">8</a>) for details.</p>
+<div id="quick-start-spotcalling" class="section level3" number="2.3.1">
+<h3>
+<span class="header-section-number">2.3.1</span> Quick start: Spotcalling<a class="anchor" aria-label="anchor" href="#quick-start-spotcalling"><i class="fas fa-link"></i></a>
+</h3>
+<p>In the Spotcalling script, we loop through FOVs, performing default image processing (with <code>getImageMetrics</code>). Processed images are registered to a reference image (with <code>registerImages</code>) so that pixels from the same spots are maximally overlapped. Information from the same FOV are then consolidated into a dataframe (with <code>consolidateImageMetrics</code>) that has pixels in rows and metrics (e.g. pixel intensity per image) in columns. Pixels are then assigned an identity on decoding (with <code>decode</code>). This dataframe is then successively filtered through a series of recommended filters; users may add / drop filters as needed.</p>
+<p>Per FOV, the final output is a dataframe containing spot locations as rows (a single pixel per spot), and accumulated meta data in columns.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## If runnning into Java Heap Issues try increasing your memory </span></span>
+<span><span class="co">## This needs to be done in a fresh R session: .rs.restartR()</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span><span class="op">(</span>java.parameters <span class="op">=</span> <span class="st">"-Xmx16g"</span><span class="op">)</span> <span class="co">#16Gb (which may be overkill)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.rforge.net/rJava/">rJava</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/rJava/man/jinit.html">.jinit</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">'Available memory: '</span>, <span class="fu"><a href="https://rdrr.io/pkg/rJava/man/jcall.html">.jcall</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/rJava/man/jnew.html">.jnew</a></span><span class="op">(</span><span class="st">"java/lang/Runtime"</span><span class="op">)</span>, <span class="st">"J"</span>, <span class="st">"maxMemory"</span><span class="op">)</span> <span class="op">/</span> <span class="fl">1e9</span>, <span class="st">' Gb...'</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">masmr</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Preparation ahead of looping through FOVs</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishParams.html">establishParams</a></span><span class="op">(</span> <span class="va">...</span> , verbose <span class="op">=</span> <span class="cn">T</span> <span class="op">)</span> <span class="co">#User to input. Verbose = T returns messages keeping track of progress.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/readImageMetaData.html">readImageMetaData</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/prepareCodebook.html">prepareCodebook</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/getAnchorParams.html">getAnchorParams</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishCleanSlate.html">establishCleanSlate</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Alternatively, users can keep verbose = T but send output to messages.Rout</span></span>
+<span><span class="co"># notVerbose = F</span></span>
+<span><span class="co"># if( notVerbose ){</span></span>
+<span><span class="co">#   outMessageFile &lt;- file( paste0(params$out_dir, 'messages.Rout'), open = 'wt' )</span></span>
+<span><span class="co">#   sink(outMessageFile, type = 'message')</span></span>
+<span><span class="co">#   message("\nRedirecting messages to messages.Rout...\n\n")</span></span>
+<span><span class="co"># }</span></span>
+<span></span>
+<span><span class="co">## Start loop</span></span>
+<span><span class="kw">for</span><span class="op">(</span> <span class="va">fovName</span> <span class="kw">in</span> <span class="va">params</span><span class="op">$</span><span class="va">fov_names</span> <span class="op">)</span><span class="op">{</span></span>
+<span>  </span>
+<span>  <span class="co">## Report current FOV / iteration </span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html">message</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span></span>
+<span>    <span class="st">'\n'</span>, <span class="va">fovName</span>, <span class="st">': '</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">fov_names</span><span class="op">==</span><span class="va">fovName</span><span class="op">)</span>, <span class="st">' of '</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">fov_names</span><span class="op">)</span>, <span class="st">'...'</span> <span class="op">)</span> <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Check if file has been created, skip if yes</span></span>
+<span>  <span class="kw">if</span><span class="op">(</span> <span class="va">params</span><span class="op">$</span><span class="va">resumeMode</span> <span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">checkFile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">out_dir</span>, <span class="st">'SPOTCALL_'</span>, <span class="va">fovName</span>, <span class="st">'.csv.gz'</span><span class="op">)</span> <span class="op">)</span></span>
+<span>    <span class="kw">if</span><span class="op">(</span><span class="va">checkFile</span><span class="op">)</span><span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/message.html">message</a></span><span class="op">(</span><span class="st">'FOV has been processed...Skipping...'</span><span class="op">)</span></span>
+<span>      <span class="kw">next</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span></span>
+<span>  </span>
+<span>  <span class="co">## Keep track of the current_fov</span></span>
+<span>  <span class="va">params</span><span class="op">$</span><span class="va">current_fov</span> <span class="op">&lt;-</span> <span class="va">fovName</span></span>
+<span>  </span>
+<span>  <span class="co">## Load current FOV images</span></span>
+<span>  <span class="va">imList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/readImageList.html">readImageList</a></span><span class="op">(</span> <span class="va">params</span><span class="op">$</span><span class="va">current_fov</span> <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## If a Z-stack, maximum intensity projection</span></span>
+<span>  <span class="va">imList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/maxIntensityProject.html">maxIntensityProject</a></span><span class="op">(</span> <span class="va">imList</span> <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Check if image is largely empty, if so, skip</span></span>
+<span>  <span class="va">percBlank</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">imList</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span> <span class="va">imList</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;</span> <span class="va">params</span><span class="op">$</span><span class="va">brightness_min</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">imList</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span> <span class="op">)</span></span>
+<span>  <span class="kw">if</span><span class="op">(</span> <span class="va">percBlank</span> <span class="op">&gt;=</span> <span class="fl">0.95</span> <span class="op">)</span><span class="op">{</span> <span class="kw">next</span> <span class="op">}</span></span>
+<span>  </span>
+<span>  <span class="co">## Get image metrics</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/getImageMetrics.html">getImageMetrics</a></span><span class="op">(</span> <span class="va">imList</span> <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Register</span></span>
+<span>  <span class="va">forReg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">imList</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">forReg</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/imNormalise.html">imNormalise</a></span><span class="op">(</span> <span class="va">imMetrics</span><span class="op">$</span><span class="va">COARSE</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span> <span class="va">imMetrics</span><span class="op">$</span><span class="va">DECODE</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">forReg</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">imList</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/registerImages.html">registerImages</a></span><span class="op">(</span><span class="va">forReg</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Consolidate into pixel wise metric dataframe</span></span>
+<span>  <span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/consolidateImageMetrics.html">consolidateImageMetrics</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/cleanUp.html">cleanUp</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'spotcalldf'</span>, <span class="va">cleanSlate</span><span class="op">)</span> <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Decode and annotate blanks</span></span>
+<span>  <span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/decode.html">decode</a></span><span class="op">(</span><span class="va">spotcalldf</span><span class="op">)</span></span>
+<span>  <span class="va">spotcalldf</span><span class="op">$</span><span class="va">BLANK</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/scoreBlanks.html">scoreBlanks</a></span><span class="op">(</span> <span class="va">spotcalldf</span> <span class="op">)</span> <span class="op">&gt;</span><span class="fl">0</span></span>
+<span>  </span>
+<span>  <span class="co">## Binarise and threshold on Hamming distance</span></span>
+<span>  <span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/bitsFromDecode.html">bitsFromDecode</a></span><span class="op">(</span><span class="va">spotcalldf</span>, trainIndex <span class="op">=</span> <span class="op">!</span><span class="va">spotcalldf</span><span class="op">$</span><span class="va">BLANK</span><span class="op">)</span></span>
+<span>  <span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/filterDF.html">filterDF</a></span><span class="op">(</span><span class="va">spotcalldf</span>, <span class="va">spotcalldf</span><span class="op">$</span><span class="va">HD</span><span class="op">&gt;</span><span class="fl">1</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Distance-based filtering</span></span>
+<span>  <span class="va">filtout</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">spotcalldf</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="kw">for</span><span class="op">(</span> <span class="va">distanceMetric</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'COS'</span>, <span class="st">'EUC'</span>, <span class="st">'L2E'</span><span class="op">)</span> <span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">thresh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/thresh_Quantile.html">thresh_Quantile</a></span><span class="op">(</span> </span>
+<span>      <span class="va">spotcalldf</span><span class="op">[</span>,<span class="va">distanceMetric</span><span class="op">]</span>, </span>
+<span>      label <span class="op">=</span> <span class="va">spotcalldf</span><span class="op">$</span><span class="va">BLANK</span>, </span>
+<span>      quantileFalse <span class="op">=</span> <span class="fl">0.5</span>, quantileTrue <span class="op">=</span> <span class="fl">0.5</span> <span class="op">)</span></span>
+<span>    <span class="va">filtout</span> <span class="op">&lt;-</span> <span class="va">filtout</span> <span class="op">+</span> <span class="va">spotcalldf</span><span class="op">[</span>,<span class="va">distanceMetric</span><span class="op">]</span> <span class="op">&gt;</span> <span class="va">thresh</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/filterDF.html">filterDF</a></span><span class="op">(</span><span class="va">spotcalldf</span>, <span class="va">filtout</span><span class="op">&gt;</span><span class="fl">0</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Filter nonblanks that are next to blanks</span></span>
+<span>  <span class="va">spotcalldf</span><span class="op">$</span><span class="va">NEXTTOBLANK</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/spatialIsAdjacent.html">spatialIsAdjacent</a></span><span class="op">(</span> <span class="va">spotcalldf</span>, <span class="st">'BLANK'</span> <span class="op">)</span></span>
+<span>  <span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/filterDF.html">filterDF</a></span><span class="op">(</span><span class="va">spotcalldf</span>, <span class="va">spotcalldf</span><span class="op">$</span><span class="va">NEXTTOBLANK</span> <span class="op">&amp;</span> <span class="op">!</span><span class="va">spotcalldf</span><span class="op">$</span><span class="va">BLANK</span><span class="op">)</span></span>
+<span> </span>
+<span>  <span class="co">## Filter using DFF0 metrics</span></span>
+<span>  <span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/scoreDeltaF.html">scoreDeltaF</a></span><span class="op">(</span> <span class="va">spotcalldf</span> <span class="op">)</span></span>
+<span>  <span class="va">thresh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/thresh_Quantile.html">thresh_Quantile</a></span><span class="op">(</span> </span>
+<span>    <span class="va">spotcalldf</span><span class="op">[</span>,<span class="st">'DFF0_DECODE'</span><span class="op">]</span>, </span>
+<span>    label <span class="op">=</span> <span class="va">spotcalldf</span><span class="op">$</span><span class="va">BLANK</span>, </span>
+<span>    quantileFalse <span class="op">=</span> <span class="fl">0.25</span>, quantileTrue <span class="op">=</span> <span class="fl">0.25</span> <span class="op">)</span></span>
+<span>  <span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/filterDF.html">filterDF</a></span><span class="op">(</span><span class="va">spotcalldf</span>, <span class="va">spotcalldf</span><span class="op">[</span>,<span class="st">'DFF0_DECODE'</span><span class="op">]</span> <span class="op">&lt;</span> <span class="va">thresh</span> <span class="op">&amp;</span> <span class="va">spotcalldf</span><span class="op">$</span><span class="va">F0_DECODE</span><span class="op">!=</span><span class="fl">0</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Filter based on HNN distance</span></span>
+<span>  <span class="va">spotcalldf</span><span class="op">$</span><span class="va">HNNDIST</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/spatialHNNDist.html">spatialHNNDist</a></span><span class="op">(</span> <span class="va">spotcalldf</span> <span class="op">)</span></span>
+<span>  <span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/filterDF.html">filterDF</a></span><span class="op">(</span> <span class="va">spotcalldf</span>, <span class="va">spotcalldf</span><span class="op">$</span><span class="va">HNNDIST</span> <span class="op">&gt;</span> <span class="fl">5</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">spotcalldf</span><span class="op">$</span><span class="va">HNNDIST</span><span class="op">)</span> <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Filter based on PBLANK  </span></span>
+<span>  <span class="va">forExclusion</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'Xm'</span>, <span class="st">'Ym'</span>, <span class="st">'fov'</span>, <span class="st">'g'</span>, <span class="st">'WX'</span>, <span class="st">'WY'</span>, <span class="st">'IDX'</span>, </span>
+<span>                    <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">spotcalldf</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">'_\\d+$|^DFF0_|^F1_|CV_|LAB$'</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">spotcalldf</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">spotcalldf</span><span class="op">$</span><span class="va">PBLANK</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/scoreClassifier.html">scoreClassifier</a></span><span class="op">(</span><span class="va">spotcalldf</span>, <span class="st">'BLANK'</span>, variablesExcluded <span class="op">=</span> <span class="va">forExclusion</span><span class="op">)</span></span>
+<span>  <span class="va">thresh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/thresh_Quantile.html">thresh_Quantile</a></span><span class="op">(</span><span class="va">spotcalldf</span><span class="op">$</span><span class="va">PBLANK</span>, <span class="va">spotcalldf</span><span class="op">$</span><span class="va">BLANK</span>, quantileFalse <span class="op">=</span> <span class="fl">0.5</span>, quantileTrue <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span>
+<span>  <span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/filterDF.html">filterDF</a></span><span class="op">(</span><span class="va">spotcalldf</span>, <span class="va">spotcalldf</span><span class="op">$</span><span class="va">PBLANK</span> <span class="op">&gt;</span> <span class="va">thresh</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Cluster</span></span>
+<span>  <span class="va">clusterInfo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/spatialClusterLeiden.html">spatialClusterLeiden</a></span><span class="op">(</span> <span class="va">spotcalldf</span>, minNeighbours <span class="op">=</span> <span class="fl">3</span>, maxInterSpotDistancePixels <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span>  <span class="va">spotcalldf</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">clusterInfo</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">clusterInfo</span></span>
+<span>  <span class="va">maxClusterSize</span> <span class="op">=</span> <span class="fl">250</span></span>
+<span>  <span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/filterDF.html">filterDF</a></span><span class="op">(</span><span class="va">spotcalldf</span>, <span class="op">!</span><span class="op">(</span><span class="va">spotcalldf</span><span class="op">$</span><span class="va">CENTROID</span> <span class="op">&amp;</span> <span class="va">spotcalldf</span><span class="op">$</span><span class="va">CLUSTER_SIZE</span> <span class="op">&lt;</span> <span class="va">maxClusterSize</span><span class="op">)</span> <span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/saveDF.html">saveDF</a></span><span class="op">(</span> <span class="va">spotcalldf</span> <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/cleanUp.html">cleanUp</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</div>
+<div id="quick-start-cell-segmentation" class="section level3" number="2.3.2">
+<h3>
+<span class="header-section-number">2.3.2</span> Quick start: Cell segmentation<a class="anchor" aria-label="anchor" href="#quick-start-cell-segmentation"><i class="fas fa-link"></i></a>
+</h3>
+<p>Cell segmentation loops through DAPI images. The default model specified by <code>establishCellSegModel</code> is <code>cellpose</code> (<code>nuclei</code> model).</p>
+<p>Per FOV, the final output is a dataframe with pixels in rows and the cell mask that has been assigned to that pixel.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">masmr</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Preparation ahead of looping through FOVs</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishParams.html">establishParams</a></span><span class="op">(</span> <span class="va">...</span> , verbose <span class="op">=</span> <span class="cn">T</span> <span class="op">)</span> <span class="co">#User to input</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/readImageMetaData.html">readImageMetaData</a></span><span class="op">(</span> <span class="st">'dapi_dir'</span> <span class="op">)</span> <span class="co">#Switch to DAPI images and prepare meta data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishCellSegModel.html">establishCellSegModel</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishCleanSlate.html">establishCleanSlate</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Start loop</span></span>
+<span><span class="kw">for</span><span class="op">(</span> <span class="va">fovName</span> <span class="kw">in</span> <span class="va">params</span><span class="op">$</span><span class="va">fov_names</span> <span class="op">)</span><span class="op">{</span></span>
+<span>  </span>
+<span>  <span class="co">## Report current FOV / iteration </span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html">message</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span></span>
+<span>    <span class="st">'\n'</span>, <span class="va">fovName</span>, <span class="st">': '</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">fov_names</span><span class="op">==</span><span class="va">fovName</span><span class="op">)</span>, <span class="st">' of '</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">fov_names</span><span class="op">)</span>, <span class="st">'...'</span> <span class="op">)</span> <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Check if file has been created, skip if yes</span></span>
+<span>  <span class="kw">if</span><span class="op">(</span> <span class="va">params</span><span class="op">$</span><span class="va">resumeMode</span> <span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">checkFile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span><span class="op">(</span> </span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">out_dir</span>, <span class="st">'CELLSEG_'</span>,</span>
+<span>             <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ls.html">ls</a></span><span class="op">(</span><span class="va">cellSeg</span><span class="op">)</span><span class="op">)</span>, collapse<span class="op">=</span><span class="st">''</span><span class="op">)</span>, <span class="st">'_'</span>, </span>
+<span>             <span class="va">fovName</span>, <span class="st">'.csv.gz'</span><span class="op">)</span> <span class="op">)</span></span>
+<span>    <span class="kw">if</span><span class="op">(</span><span class="va">checkFile</span><span class="op">)</span><span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/message.html">message</a></span><span class="op">(</span><span class="st">'FOV has been processed...Skipping...'</span><span class="op">)</span></span>
+<span>      <span class="kw">next</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span></span>
+<span>  </span>
+<span>  <span class="co">## Keep track of the current_fov</span></span>
+<span>  <span class="va">params</span><span class="op">$</span><span class="va">current_fov</span> <span class="op">&lt;-</span> <span class="va">fovName</span></span>
+<span>  </span>
+<span>  <span class="co">## Load current FOV image</span></span>
+<span>  <span class="va">im</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/readImageList.html">readImageList</a></span><span class="op">(</span> <span class="va">params</span><span class="op">$</span><span class="va">current_fov</span> <span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="co">#List of 1</span></span>
+<span>  </span>
+<span>  <span class="co">## Cell segmentation and saving</span></span>
+<span>  <span class="va">cellMask</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/runCellSegModel.html">runCellSegModel</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/saveCellSegMasks.html">saveCellSegMasks</a></span><span class="op">(</span><span class="va">cellMask</span>, im <span class="op">=</span> <span class="va">im</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/cleanUp.html">cleanUp</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</div>
+<div id="quick-start-stitching" class="section level3" number="2.3.3">
+<h3>
+<span class="header-section-number">2.3.3</span> Quick start: Stitching<a class="anchor" aria-label="anchor" href="#quick-start-stitching"><i class="fas fa-link"></i></a>
+</h3>
+<p>The Stitching script identifies the necessary rigid transformation required so that adjacent FOVs overlap appropriately.</p>
+<p>Per FOV, the final output is a dataframe with neighbouring FOVs in rows, and the vectors needed for moving these FOVs to maximise overlap with the reference FOV. Two vectors are returned in the script below – one for stitching MERFISH images, and one for stitching DAPI images – but only one is required.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">masmr</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Preparation ahead of looping through FOVs</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishParams.html">establishParams</a></span><span class="op">(</span> <span class="va">...</span> , verbose <span class="op">=</span> <span class="cn">T</span> <span class="op">)</span> <span class="co">#User to input</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishCleanSlate.html">establishCleanSlate</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Start loop</span></span>
+<span><span class="kw">for</span><span class="op">(</span> <span class="va">fovName</span> <span class="kw">in</span> <span class="va">params</span><span class="op">$</span><span class="va">fov_names</span> <span class="op">)</span><span class="op">{</span></span>
+<span>  </span>
+<span>  <span class="co">## Report current FOV / iteration </span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html">message</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span></span>
+<span>    <span class="st">'\n'</span>, <span class="va">fovName</span>, <span class="st">': '</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">fov_names</span><span class="op">==</span><span class="va">fovName</span><span class="op">)</span>, <span class="st">' of '</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">fov_names</span><span class="op">)</span>, <span class="st">'...'</span> <span class="op">)</span> <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Check if file has been created, skip if yes</span></span>
+<span>  <span class="kw">if</span><span class="op">(</span> <span class="va">params</span><span class="op">$</span><span class="va">resumeMode</span> <span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">checkFile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">out_dir</span>, <span class="st">'STITCH_'</span>, <span class="va">fovName</span>, <span class="st">'.csv'</span><span class="op">)</span> <span class="op">)</span></span>
+<span>    <span class="kw">if</span><span class="op">(</span><span class="va">checkFile</span><span class="op">)</span><span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">'FOV has been processed...Skipping...'</span><span class="op">)</span></span>
+<span>      <span class="kw">next</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span></span>
+<span>  </span>
+<span>  <span class="co">## Keep track of the current_fov</span></span>
+<span>  <span class="va">params</span><span class="op">$</span><span class="va">current_fov</span> <span class="op">&lt;-</span> <span class="va">fovName</span></span>
+<span>  </span>
+<span>  <span class="co">## Stitch with respect to reference bit</span></span>
+<span>  <span class="va">imList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/readImagesForStitch.html">readImagesForStitch</a></span><span class="op">(</span> subDirectory <span class="op">=</span> <span class="st">'IM'</span>, loadProcessedImages <span class="op">=</span>  <span class="cn">T</span> <span class="op">)</span> <span class="co">#Assume spotcalling done</span></span>
+<span>  <span class="va">stitchResults</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/stitchImages.html">stitchImages</a></span><span class="op">(</span> <span class="va">imList</span> <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Optional: Stitch with respect to DAPI image</span></span>
+<span>  <span class="va">df</span> <span class="op">&lt;-</span> <span class="va">stitchResults</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">'merfish_'</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">stitchResults</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span> <span class="co">#Save the stitch results from merfish in its own column</span></span>
+<span>  <span class="va">imList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/readImagesForStitch.html">readImagesForStitch</a></span><span class="op">(</span> subDirectory <span class="op">=</span> <span class="st">'DAPI'</span>, loadProcessedImages <span class="op">=</span>  <span class="cn">T</span> <span class="op">)</span> <span class="co">#Assume cell segmentation done</span></span>
+<span>  <span class="va">stitchResults</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/stitchImages.html">stitchImages</a></span><span class="op">(</span> <span class="va">imList</span> <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Optional: If have both merfish and cell segmentation stich vectors, consolidate into a single dataframe</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">stitchResults</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">'dapi_'</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">stitchResults</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">stitchResults</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html">match</a></span><span class="op">(</span><span class="va">stitchResults</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">df</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span>,<span class="fl">2</span><span class="op">]</span></span>
+<span>  </span>
+<span>  <span class="co">## Save stitch dataframe</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/saveStitch.html">saveStitch</a></span><span class="op">(</span> <span class="va">stitchResults</span> <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/cleanUp.html">cleanUp</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</div>
+<div id="quick-start-synthesis" class="section level3" number="2.3.4">
+<h3>
+<span class="header-section-number">2.3.4</span> Quick start: Synthesis<a class="anchor" aria-label="anchor" href="#quick-start-synthesis"><i class="fas fa-link"></i></a>
+</h3>
+<p>This is the last script. Synthesis combines all the outputs from the previous three scripts into a series of dataframes, across every processed FOV. Additionally, users can <code>plotQC</code> to return some default QC plots to evaluate their pipeline’s performance.</p>
+<p>Hereafter, should users wish to save space, they can delete the intermediate results returned by the previous three scripts.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">masmr</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Establish params</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishParams.html">establishParams</a></span><span class="op">(</span> <span class="va">...</span> , verbose <span class="op">=</span> <span class="cn">T</span> <span class="op">)</span> <span class="co">#User to input</span></span>
+<span></span>
+<span><span class="co">## Function to synthesise data</span></span>
+<span><span class="fu">synthesizeData</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Function to generate QC plots</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/plotQC.html">plotQC</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+
+</div>
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="index.html"><span class="header-section-number">1</span> About masmr</a></div>
+<div class="next"><a href="spotcalling.html"><span class="header-section-number">3</span> Spotcalling</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#introduction"><span class="header-section-number">2</span> Introduction</a></li>
+<li><a class="nav-link" href="#why-do-you-need-masmr"><span class="header-section-number">2.1</span> Why do you need {masmr}?</a></li>
+<li><a class="nav-link" href="#background"><span class="header-section-number">2.2</span> Background</a></li>
+<li>
+<a class="nav-link" href="#quick-start-scripts"><span class="header-section-number">2.3</span> Quick start scripts</a><ul class="nav navbar-nav">
+<li><a class="nav-link" href="#quick-start-spotcalling"><span class="header-section-number">2.3.1</span> Quick start: Spotcalling</a></li>
+<li><a class="nav-link" href="#quick-start-cell-segmentation"><span class="header-section-number">2.3.2</span> Quick start: Cell segmentation</a></li>
+<li><a class="nav-link" href="#quick-start-stitching"><span class="header-section-number">2.3.3</span> Quick start: Stitching</a></li>
+<li><a class="nav-link" href="#quick-start-synthesis"><span class="header-section-number">2.3.4</span> Quick start: Synthesis</a></li>
+</ul>
+</li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+          
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>masmr: Modular Algorithms for Spotcalling in MERFISH in R</strong>" was written by Eugene Kwa. It was last built on 2025-07-18.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>

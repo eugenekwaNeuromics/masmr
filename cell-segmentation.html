@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>5 Cell segmentation | masmr: Modular Algorithms for Spotcalling in MERFISH in R</title>
+<meta name="author" content="Eugene Kwa">
+<meta name="description" content="Cell / nuclei segmentation is the task of identifying cells / nuclei in an appropriate image (we will be referring to cell and nuclei segmentation interchangeably here). We currently support two...">
+<meta name="generator" content="bookdown 0.43.2 with bs4_book()">
+<meta property="og:title" content="5 Cell segmentation | masmr: Modular Algorithms for Spotcalling in MERFISH in R">
+<meta property="og:type" content="book">
+<meta property="og:image" content="/./images/masmr.png">
+<meta property="og:description" content="Cell / nuclei segmentation is the task of identifying cells / nuclei in an appropriate image (we will be referring to cell and nuclei segmentation interchangeably here). We currently support two...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="5 Cell segmentation | masmr: Modular Algorithms for Spotcalling in MERFISH in R">
+<meta name="twitter:description" content="Cell / nuclei segmentation is the task of identifying cells / nuclei in an appropriate image (we will be referring to cell and nuclei segmentation interchangeably here). We currently support two...">
+<meta name="twitter:image" content="/./images/masmr.png">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.9.0/transition.js"></script><script src="libs/bs3compat-0.9.0/tabs.js"></script><script src="libs/bs3compat-0.9.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="libs/bslib-component-js-0.9.0/components.min.js"></script><script src="libs/bslib-component-js-0.9.0/web-components.min.js" type="module"></script><link href="libs/bslib-component-css-0.9.0/components.css" rel="stylesheet">
+<script src="libs/bslib-tag-require-0.9.0/tag-require.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<style type="text/css">
+    /* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+        }
+    .hanging div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
+  </style>
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">masmr: Modular Algorithms for Spotcalling in MERFISH in R</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"><span class="header-section-number">1</span> About masmr</a></li>
+<li><a class="" href="introduction.html"><span class="header-section-number">2</span> Introduction</a></li>
+<li><a class="" href="spotcalling.html"><span class="header-section-number">3</span> Spotcalling</a></li>
+<li><a class="" href="image-processing.html"><span class="header-section-number">4</span> Image processing</a></li>
+<li><a class="active" href="cell-segmentation.html"><span class="header-section-number">5</span> Cell segmentation</a></li>
+<li><a class="" href="stitching.html"><span class="header-section-number">6</span> Stitching</a></li>
+<li><a class="" href="synthesis.html"><span class="header-section-number">7</span> Synthesis</a></li>
+<li><a class="" href="troubleshooting.html"><span class="header-section-number">8</span> Troubleshooting</a></li>
+</ul>
+
+        <div class="book-extra">
+          
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="cell-segmentation" class="section level1" number="5">
+<h1>
+<span class="header-section-number">5</span> Cell segmentation<a class="anchor" aria-label="anchor" href="#cell-segmentation"><i class="fas fa-link"></i></a>
+</h1>
+<p>Cell / nuclei segmentation is the task of identifying cells / nuclei in an appropriate image (we will be referring to cell and nuclei segmentation interchangeably here). We currently support two popular Python-based models: {cellpose} <span class="citation">(<a href="troubleshooting.html#ref-stringer2021cellpose" role="doc-biblioref">Stringer et al. 2021</a>)</span> and {stardist} <span class="citation">(<a href="troubleshooting.html#ref-schmidt2018cell" role="doc-biblioref">Schmidt et al. 2018</a>; <a href="troubleshooting.html#ref-weigert2022nuclei" role="doc-biblioref">Weigert and Schmidt 2022</a>)</span>. [We hope to provide wholly R-based options in the future.]</p>
+<p>As cell segmentation is performed on DAPI images, it can be performed in parallel with spotcalling.</p>
+<div class="sourceCode" id="cb239"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">masmr</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
+<div id="pre-processing-2" class="section level2" number="5.1">
+<h2>
+<span class="header-section-number">5.1</span> Pre-processing<a class="anchor" aria-label="anchor" href="#pre-processing-2"><i class="fas fa-link"></i></a>
+</h2>
+<div id="establishing-parameters-1" class="section level3" number="5.1.1">
+<h3>
+<span class="header-section-number">5.1.1</span> Establishing parameters<a class="anchor" aria-label="anchor" href="#establishing-parameters-1"><i class="fas fa-link"></i></a>
+</h3>
+<p>Similar to spotcalling, we first need to establish some parameters. The same code used for spotcalling can be repeated here.</p>
+<div class="sourceCode" id="cb240"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data_dir</span> <span class="op">=</span> <span class="st">'C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishParams.html">establishParams</a></span><span class="op">(</span></span>
+<span>  </span>
+<span>  <span class="co">## User to fill in</span></span>
+<span>  imageDirs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">'S10/'</span><span class="op">)</span>,</span>
+<span>  imageFormat <span class="op">=</span> <span class="st">'.ome.tif'</span>,</span>
+<span>  outDir <span class="op">=</span> <span class="st">'C:/Users/kwaje/Downloads/JYOUT/'</span>,</span>
+<span>  codebookFileName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>,<span class="st">'codebook/'</span><span class="op">)</span>,pattern<span class="op">=</span><span class="st">'codebook'</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>  dapiDir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">'DAPI_1/'</span><span class="op">)</span>,</span>
+<span>  </span>
+<span>  <span class="co">## Will attempt automatic fill</span></span>
+<span>  <span class="co"># metaFormat = '.ome.tif',</span></span>
+<span>  <span class="co"># dapiFormat = '.ome.tif',</span></span>
+<span>  codebookColumnNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">'_'</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'cy3'</span>,<span class="st">'alexa594'</span>,<span class="st">'cy5'</span>,<span class="st">'cy7'</span><span class="op">)</span>,each<span class="op">=</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  pythonLocation <span class="op">=</span> <span class="st">'C:/Users/kwaje/AppData/Local/miniforge3/envs/scipyenv/'</span>,</span>
+<span>  </span>
+<span>  <span class="co">## Automatically filled</span></span>
+<span>  <span class="co"># seed = 12345,</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="co"># resumeMode = TRUE,</span></span>
+<span>  </span>
+<span>  <span class="co">## Optional (but recommended for QC checks)</span></span>
+<span>  fpkmFileName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"FPKM_data/Jin_FPKMData_B.tsv"</span><span class="op">)</span>,</span>
+<span>  nProbesFileName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">data_dir</span>, <span class="st">"ProbesPerGene.csv"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Assuming .ome.tif is extension for meta files...</code></pre>
+<p>Of relevance to cell segmentation specifically are the <code>pythonLocation</code> and <code>dapiDir</code> parameters:</p>
+<ul>
+<li>
+<code>dapiDir</code>: location of DAPI images. [Technically, any cell-based imaging will likely work here – not just DAPI – as long as they are compatible with the cell segmentation models.]</li>
+<li>
+<code>pythonLocation</code>: location of the user’s Python environment. The Python environment should contain all the packages necessary to run the cell segmentation model of choice.</li>
+</ul>
+<p>Details on the setting up of the Python environment is beyond the scope of this book. Briefly, there exist various tools (e.g. <code>miniconda</code>, <code>anaconda</code>, <code>miniforge</code>) that allow users to create a Python environment for installing necessary software. We will then interface with that environment through <code>reticulate</code>. Below are a series of commands to set up a Python environment called <code>scipyenv</code> that is compatible with {stardist} and {cellpose}. Users should take note of where the environment is created, and provide the location of the folder in <code>pythonLocation</code>.</p>
+<pre><code>conda create -n scipyenv python=3.9 notebook pandas numpy=1.26.4
+conda activate scipyenv
+conda install pytorch=1.12.1 cudatoolkit=10.2 -c pytorch #1.12.1 is the earliest mps is supported
+pip install cellpose==3.0.11
+pip install tensorflow==2.17.0
+pip install stardist==0.9.1</code></pre>
+<p>Additionally, similar to spotcalling, we also <code>readImageMetaData</code>, though this time for DAPI images specifically. Because there will be no decoding, warnings about codebook column names not matching can be safely ignored.</p>
+<div class="sourceCode" id="cb243"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/readImageMetaData.html">readImageMetaData</a></span><span class="op">(</span> <span class="st">'dapi_dir'</span> <span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in readImageMetaData("dapi_dir"): Assuming this data has been acquired by Triton</code></pre>
+<pre><code>## Warning in readImageMetaData("dapi_dir"): bit_name not matching codebookColumnNames: either edit GLOBALCOORD.csv or params$codebook_colnames (ignore
+## this warning if codebook not needed, e.g. DAPI)</code></pre>
+<pre><code>## Warning in readImageMetaData("dapi_dir"): Updating params$fov_names</code></pre>
+<pre><code>## Warning in readImageMetaData("dapi_dir"): Unsuccessful attempt at correcting placeholder codebook column names (params$codebook_colnames)</code></pre>
+<p>As before, this adds additional metadata to the <code>params</code> object, albeit this time for DAPI images specifically:</p>
+<div class="sourceCode" id="cb248"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span> <span class="va">params</span><span class="op">$</span><span class="va">resolutions</span> <span class="op">)</span></span></code></pre></div>
+<pre><code>## $per_pixel_microns
+## [1] "0.0706" "0.0706"
+## 
+## $xydimensions_pixels
+## [1] "2960" "2960"
+## 
+## $xydimensions_microns
+## [1] "208.976" "208.976"
+## 
+## $channel_order
+## [1] "dapi"
+## 
+## $fov_names
+##   [1] "MMStack_1-Pos_000_000" "MMStack_1-Pos_001_000" "MMStack_1-Pos_002_000" "MMStack_1-Pos_003_000" "MMStack_1-Pos_004_000" "MMStack_1-Pos_005_000"
+##   [7] "MMStack_1-Pos_006_000" "MMStack_1-Pos_007_000" "MMStack_1-Pos_008_000" "MMStack_1-Pos_009_000" "MMStack_1-Pos_009_001" "MMStack_1-Pos_008_001"
+##  [13] "MMStack_1-Pos_007_001" "MMStack_1-Pos_006_001" "MMStack_1-Pos_005_001" "MMStack_1-Pos_004_001" "MMStack_1-Pos_003_001" "MMStack_1-Pos_002_001"
+##  [19] "MMStack_1-Pos_001_001" "MMStack_1-Pos_000_001" "MMStack_1-Pos_000_002" "MMStack_1-Pos_001_002" "MMStack_1-Pos_002_002" "MMStack_1-Pos_003_002"
+##  [25] "MMStack_1-Pos_004_002" "MMStack_1-Pos_005_002" "MMStack_1-Pos_006_002" "MMStack_1-Pos_007_002" "MMStack_1-Pos_008_002" "MMStack_1-Pos_009_002"
+##  [31] "MMStack_1-Pos_009_003" "MMStack_1-Pos_008_003" "MMStack_1-Pos_007_003" "MMStack_1-Pos_006_003" "MMStack_1-Pos_005_003" "MMStack_1-Pos_004_003"
+##  [37] "MMStack_1-Pos_003_003" "MMStack_1-Pos_002_003" "MMStack_1-Pos_001_003" "MMStack_1-Pos_000_003" "MMStack_1-Pos_000_004" "MMStack_1-Pos_001_004"
+##  [43] "MMStack_1-Pos_002_004" "MMStack_1-Pos_003_004" "MMStack_1-Pos_004_004" "MMStack_1-Pos_005_004" "MMStack_1-Pos_006_004" "MMStack_1-Pos_007_004"
+##  [49] "MMStack_1-Pos_008_004" "MMStack_1-Pos_009_004" "MMStack_1-Pos_009_005" "MMStack_1-Pos_008_005" "MMStack_1-Pos_007_005" "MMStack_1-Pos_006_005"
+##  [55] "MMStack_1-Pos_005_005" "MMStack_1-Pos_004_005" "MMStack_1-Pos_003_005" "MMStack_1-Pos_002_005" "MMStack_1-Pos_001_005" "MMStack_1-Pos_000_005"
+##  [61] "MMStack_1-Pos_000_006" "MMStack_1-Pos_001_006" "MMStack_1-Pos_002_006" "MMStack_1-Pos_003_006" "MMStack_1-Pos_004_006" "MMStack_1-Pos_005_006"
+##  [67] "MMStack_1-Pos_006_006" "MMStack_1-Pos_007_006" "MMStack_1-Pos_008_006" "MMStack_1-Pos_009_006" "MMStack_1-Pos_009_007" "MMStack_1-Pos_008_007"
+##  [73] "MMStack_1-Pos_007_007" "MMStack_1-Pos_006_007" "MMStack_1-Pos_005_007" "MMStack_1-Pos_004_007" "MMStack_1-Pos_003_007" "MMStack_1-Pos_002_007"
+##  [79] "MMStack_1-Pos_001_007" "MMStack_1-Pos_000_007" "MMStack_1-Pos_000_008" "MMStack_1-Pos_001_008" "MMStack_1-Pos_002_008" "MMStack_1-Pos_003_008"
+##  [85] "MMStack_1-Pos_004_008" "MMStack_1-Pos_005_008" "MMStack_1-Pos_006_008" "MMStack_1-Pos_007_008" "MMStack_1-Pos_008_008" "MMStack_1-Pos_009_008"
+##  [91] "MMStack_1-Pos_009_009" "MMStack_1-Pos_008_009" "MMStack_1-Pos_007_009" "MMStack_1-Pos_006_009" "MMStack_1-Pos_005_009" "MMStack_1-Pos_004_009"
+##  [97] "MMStack_1-Pos_003_009" "MMStack_1-Pos_002_009" "MMStack_1-Pos_001_009" "MMStack_1-Pos_000_009"
+## 
+## $zslices
+## [1] "1"</code></pre>
+<div class="sourceCode" id="cb250"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span> <span class="va">params</span><span class="op">$</span><span class="va">global_coords</span> <span class="op">)</span>, format <span class="op">=</span> <span class="st">'html'</span>, booktabs <span class="op">=</span> <span class="cn">TRUE</span> <span class="op">)</span></span></code></pre></div>
+<div class="inline-table"><table class="table table-sm">
+<thead><tr>
+<th style="text-align:right;">
+x_microns
+</th>
+<th style="text-align:right;">
+y_microns
+</th>
+<th style="text-align:right;">
+z_microns
+</th>
+<th style="text-align:left;">
+image_file
+</th>
+<th style="text-align:left;">
+fov
+</th>
+<th style="text-align:left;">
+bit_name_full
+</th>
+<th style="text-align:left;">
+bit_name_alias
+</th>
+<th style="text-align:left;">
+bit_name
+</th>
+</tr></thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+-2645.753
+</td>
+<td style="text-align:right;">
+3421.847
+</td>
+<td style="text-align:right;">
+5678.52
+</td>
+<td style="text-align:left;">
+C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/DAPI_1/DAPI_1_MMStack_1-Pos_000_000.ome.tif
+</td>
+<td style="text-align:left;">
+MMStack_1-Pos_000_000
+</td>
+<td style="text-align:left;">
+DAPI_1_dapi
+</td>
+<td style="text-align:left;">
+0_dapi
+</td>
+<td style="text-align:left;">
+DAPI_1_dapi
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+-2645.753
+</td>
+<td style="text-align:right;">
+3609.926
+</td>
+<td style="text-align:right;">
+5678.54
+</td>
+<td style="text-align:left;">
+C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/DAPI_1/DAPI_1_MMStack_1-Pos_000_001.ome.tif
+</td>
+<td style="text-align:left;">
+MMStack_1-Pos_000_001
+</td>
+<td style="text-align:left;">
+DAPI_1_dapi
+</td>
+<td style="text-align:left;">
+0_dapi
+</td>
+<td style="text-align:left;">
+DAPI_1_dapi
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+-2645.753
+</td>
+<td style="text-align:right;">
+3798.004
+</td>
+<td style="text-align:right;">
+5678.56
+</td>
+<td style="text-align:left;">
+C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/DAPI_1/DAPI_1_MMStack_1-Pos_000_002.ome.tif
+</td>
+<td style="text-align:left;">
+MMStack_1-Pos_000_002
+</td>
+<td style="text-align:left;">
+DAPI_1_dapi
+</td>
+<td style="text-align:left;">
+0_dapi
+</td>
+<td style="text-align:left;">
+DAPI_1_dapi
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+-2645.753
+</td>
+<td style="text-align:right;">
+3986.082
+</td>
+<td style="text-align:right;">
+5678.58
+</td>
+<td style="text-align:left;">
+C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/DAPI_1/DAPI_1_MMStack_1-Pos_000_003.ome.tif
+</td>
+<td style="text-align:left;">
+MMStack_1-Pos_000_003
+</td>
+<td style="text-align:left;">
+DAPI_1_dapi
+</td>
+<td style="text-align:left;">
+0_dapi
+</td>
+<td style="text-align:left;">
+DAPI_1_dapi
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+-2645.753
+</td>
+<td style="text-align:right;">
+4174.161
+</td>
+<td style="text-align:right;">
+5678.60
+</td>
+<td style="text-align:left;">
+C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/DAPI_1/DAPI_1_MMStack_1-Pos_000_004.ome.tif
+</td>
+<td style="text-align:left;">
+MMStack_1-Pos_000_004
+</td>
+<td style="text-align:left;">
+DAPI_1_dapi
+</td>
+<td style="text-align:left;">
+0_dapi
+</td>
+<td style="text-align:left;">
+DAPI_1_dapi
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+-2645.753
+</td>
+<td style="text-align:right;">
+4362.239
+</td>
+<td style="text-align:right;">
+5678.38
+</td>
+<td style="text-align:left;">
+C:/Users/kwaje/Downloads/JIN_SIM/20190718_WK_T2_a_B2_R8_12_d50/DAPI_1/DAPI_1_MMStack_1-Pos_000_005.ome.tif
+</td>
+<td style="text-align:left;">
+MMStack_1-Pos_000_005
+</td>
+<td style="text-align:left;">
+DAPI_1_dapi
+</td>
+<td style="text-align:left;">
+0_dapi
+</td>
+<td style="text-align:left;">
+DAPI_1_dapi
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div id="establishing-the-cell-segmentation-model" class="section level3" number="5.1.2">
+<h3>
+<span class="header-section-number">5.1.2</span> Establishing the cell segmentation model<a class="anchor" aria-label="anchor" href="#establishing-the-cell-segmentation-model"><i class="fas fa-link"></i></a>
+</h3>
+<p>Unique to the cell segmentation script, users must load their desired cell segmentation model into the environment. This is accomplished with the <code>establishCellSegModel</code> function, which returns a new environment object called <code>cellSeg</code>.</p>
+<p>If no other parameters are specified, the <code>nuclei</code> model in {cellpose} is loaded. [We will showcase loading different models later in this chapter.] Additionally, GPU acceleration is turned off as default – users able to access their computer’s GPU may turn this on for time saving.</p>
+<div class="sourceCode" id="cb251"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishCellSegModel.html">establishCellSegModel</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## 
+## Preparing cell segmentation model(s)...</code></pre>
+<pre><code>## Cellpose packaged model...</code></pre>
+<p>The <code>cellSeg</code> environment keeps track of which model has been loaded and the outputs expected from that model. Users may load multiple models if they so wish but this will increase the run time: all models in <code>cellSeg</code> will be run on DAPI images. Below, we have a single model <code>CELLPOSE</code>, within which we have the model and the expected outputs.</p>
+<div class="sourceCode" id="cb254"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/ls.html">ls</a></span><span class="op">(</span><span class="va">cellSeg</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## [1] "CELLPOSE"</code></pre>
+<div class="sourceCode" id="cb256"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cellSeg</span><span class="op">$</span><span class="va">CELLPOSE</span></span></code></pre></div>
+<pre><code>## $model
+## &lt;cellpose.models.CellposeModel object at 0x00000241BF7D6B20&gt;
+## 
+## $outputs
+## [1] "masks"  "flows"  "styles" "diams"</code></pre>
+</div>
+</div>
+<div id="running-cell-segmentation" class="section level2" number="5.2">
+<h2>
+<span class="header-section-number">5.2</span> Running cell segmentation<a class="anchor" aria-label="anchor" href="#running-cell-segmentation"><i class="fas fa-link"></i></a>
+</h2>
+<p>For memory management, it is recommended that FOVs are processed as individual tiles. Below, we read in a specific FOV (and as recommended, save the current FOV in <code>params$current_fov</code>). We can use <code>readImage</code> for a specific file, or – if we know which FOV we want – with <code>readImageList</code>.</p>
+<p><strong>NOTE: below may be more complicated for Z-stacks and multiple channels. Process accordingly so that</strong><code>im</code><strong>is a single matrix of the DAPI channel.</strong></p>
+<div class="sourceCode" id="cb258"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">params</span><span class="op">$</span><span class="va">current_fov</span> <span class="op">&lt;-</span> <span class="va">params</span><span class="op">$</span><span class="va">fov_names</span><span class="op">[</span><span class="fl">38</span><span class="op">]</span></span>
+<span><span class="va">im</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/readImageList.html">readImageList</a></span><span class="op">(</span> <span class="va">params</span><span class="op">$</span><span class="va">current_fov</span> <span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="co">#List of 1</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-readimagelist-1.png" width="672"></div>
+</div>
+<div id="running-segmentation-model" class="section level2" number="5.3">
+<h2>
+<span class="header-section-number">5.3</span> Running segmentation model<a class="anchor" aria-label="anchor" href="#running-segmentation-model"><i class="fas fa-link"></i></a>
+</h2>
+<p>Once the necessary parameters have been established, we are ready to run our cell segmentation model with the <code>runCellSegModel</code> function. Further image processing of DAPI images generally is not necessary as these models tend to have in-built image processing functions. However, we have found that modifying image parameters can influence cell segmentation; a more detailed discussion is provided below.</p>
+<div id="cellpose" class="section level3" number="5.3.1">
+<h3>
+<span class="header-section-number">5.3.1</span> Cellpose<a class="anchor" aria-label="anchor" href="#cellpose"><i class="fas fa-link"></i></a>
+</h3>
+<p>{cellpose} is our default choice owing to it being applicable to both nuclei and cellular segmentation. It is a deep-learning based segmentation model trained on a variety of image types including DAPI images alone (<code>nuclei</code>), and multi-channel images with both nuclei and cell boundary stains (<code>cyto</code>, <code>cyto2</code>, and <code>cyto3</code>).</p>
+<p>An example of how to run the model within {masmr} is shown below. [As default, only the <code>mask</code> output is returned; this can be turned off by setting <code>masksOnly</code> to <code>FALSE</code>.]</p>
+<div class="sourceCode" id="cb260"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cellMask</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/runCellSegModel.html">runCellSegModel</a></span><span class="op">(</span><span class="va">im</span>, masksOnly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">cellMask</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster</a></span><span class="op">(</span> data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>               <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, fill<span class="op">=</span><span class="va">value</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_fill_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'black'</span>, high<span class="op">=</span><span class="st">'white'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span> data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="va">df</span><span class="op">$</span><span class="va">value</span><span class="op">&gt;</span><span class="fl">0</span>,<span class="op">]</span>, </span>
+<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, colour<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>              shape <span class="op">=</span> <span class="st">'.'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span> option<span class="op">=</span><span class="st">'turbo'</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span> base_size <span class="op">=</span> <span class="fl">14</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-cellpose-defaultperformance-1.png" width="672"></div>
+<p>The default <code>nuclei</code> model called for {cellpose} does not seem to be working very well for these images. There are several ways to troubleshoot:</p>
+<div id="dilating-existing-masks" class="section level4 unnumbered">
+<h4>Dilating existing masks<a class="anchor" aria-label="anchor" href="#dilating-existing-masks"><i class="fas fa-link"></i></a>
+</h4>
+<p>If the issue is that cell masks are accurate, but too small – which would lower the number of counts assigned to each cell – one quick solution would be to dilate the existing masks.</p>
+<p>There are several ways to do this. Below is an example of how to do this quickly with {imager} – which is a dependency of {masmr}. [Possible alternatives: Voronoi tessellation, setting a radius threshold from the cell segmentation mask centre.]</p>
+<div class="sourceCode" id="cb261"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dilation_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0L</span>, <span class="fl">50L</span><span class="op">)</span></span>
+<span><span class="va">plotList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">dilation_sizes</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
+<span>  </span>
+<span>  <span class="co">## Dilate a cellMask by a certain size</span></span>
+<span>  <span class="va">original_cellMask</span> <span class="op">&lt;-</span> <span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">cellMask</span><span class="op">)</span></span>
+<span>  <span class="va">dilated_cellMask</span> <span class="op">&lt;-</span> <span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/erode.html">dilate_square</a></span><span class="op">(</span><span class="va">original_cellMask</span>, size <span class="op">=</span> <span class="va">dilation_sizes</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">## Plot the masks atop the original image</span></span>
+<span>  <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">dilated_cellMask</span><span class="op">)</span></span>
+<span>  <span class="va">plotList</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster</a></span><span class="op">(</span> data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>                 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, fill<span class="op">=</span><span class="va">value</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_fill_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'black'</span>, high<span class="op">=</span><span class="st">'white'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span> data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="va">df</span><span class="op">$</span><span class="va">value</span><span class="op">&gt;</span><span class="fl">0</span>,<span class="op">]</span>, </span>
+<span>                <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, colour<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                shape <span class="op">=</span> <span class="st">'.'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span> option<span class="op">=</span><span class="st">'turbo'</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span> base_size <span class="op">=</span> <span class="fl">14</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">'Dilate size: '</span>, <span class="va">dilation_sizes</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html">plot_grid</a></span><span class="op">(</span>plotlist <span class="op">=</span> <span class="va">plotList</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-cellpose-dilateexistingmasks-1.png" width="672"></div>
+<p>Note: the choice of the <code>size</code> parameter for <code><a href="https://rdrr.io/pkg/imager/man/erode.html">imager::dilate_square</a></code> is slightly non-intuitive: (1) input values are rounded down to the nearest integer, and (2) odd numbers provide isotropic dilations (even values dilate to the bottom right).</p>
+<div class="sourceCode" id="cb262"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pretendImage</span> <span class="op">&lt;-</span> <span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html">array</a></span><span class="op">(</span><span class="fl">0</span>, dim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">9</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">pretendImage</span><span class="op">[</span><span class="fl">5</span>,<span class="fl">5</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span><span class="va">dilation_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3.9</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">6</span>, <span class="fl">7</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="kw">for</span><span class="op">(</span> <span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">dilation_sizes</span><span class="op">)</span> <span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span> <span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/erode.html">dilate_square</a></span><span class="op">(</span><span class="va">pretendImage</span>, size<span class="op">=</span><span class="va">dilation_sizes</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, interpolate<span class="op">=</span><span class="cn">F</span>,</span>
+<span>        main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">'Size: '</span>, <span class="va">dilation_sizes</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-cellpose-explainingisotropicdilations-1.png" width="768"></div>
+<div class="sourceCode" id="cb263"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div id="altering-model-parameters" class="section level4 unnumbered">
+<h4>Altering model parameters<a class="anchor" aria-label="anchor" href="#altering-model-parameters"><i class="fas fa-link"></i></a>
+</h4>
+<p>The default evaluation for {cellpose} assumes a diameter of 30 pixels. If we wish to increase this value, this can be accomplished by adding model parameters to <code>runCellSegModel</code>. Below, we increase the <code>diameter</code> parameter (specific to the {cellpose} model) to 50. [<code>masksOnly</code> is default <code>TRUE</code>, will not reproduce that parameter below.]</p>
+<div class="sourceCode" id="cb264"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cellMask</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/runCellSegModel.html">runCellSegModel</a></span><span class="op">(</span><span class="va">im</span>, diameter <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">cellMask</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster</a></span><span class="op">(</span> data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>               <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, fill<span class="op">=</span><span class="va">value</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_fill_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'black'</span>, high<span class="op">=</span><span class="st">'white'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span> data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="va">df</span><span class="op">$</span><span class="va">value</span><span class="op">&gt;</span><span class="fl">0</span>,<span class="op">]</span>, </span>
+<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, colour<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>              shape <span class="op">=</span> <span class="st">'.'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span> option<span class="op">=</span><span class="st">'turbo'</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span> base_size <span class="op">=</span> <span class="fl">14</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-cellpose-alteredparams-1.png" width="672"></div>
+</div>
+<div id="image-processing-1" class="section level4 unnumbered">
+<h4>Image processing<a class="anchor" aria-label="anchor" href="#image-processing-1"><i class="fas fa-link"></i></a>
+</h4>
+<p>For some models, altering the intensity values (e.g. by brightening) can influence model performance. For {cellpose}, the model is generally robust to additional image processing. [Compare to {stardist} below.]</p>
+<div class="sourceCode" id="cb266"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">norm</span> <span class="op">&lt;-</span> <span class="va">im</span><span class="op">^</span><span class="fl">0.5</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">'Original image'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="sourceCode" id="cb268"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">norm</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">'Brightened image'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(norm): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-cellpose-imageprocessed-1.png" width="672"></div>
+<div class="sourceCode" id="cb270"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">cellMask</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/runCellSegModel.html">runCellSegModel</a></span><span class="op">(</span> <span class="va">norm</span> <span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">cellMask</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster</a></span><span class="op">(</span> data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>               <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, fill<span class="op">=</span><span class="va">value</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_fill_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'black'</span>, high<span class="op">=</span><span class="st">'white'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span> data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="va">df</span><span class="op">$</span><span class="va">value</span><span class="op">&gt;</span><span class="fl">0</span>,<span class="op">]</span>, </span>
+<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, colour<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>              shape <span class="op">=</span> <span class="st">'.'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span> option<span class="op">=</span><span class="st">'turbo'</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span> base_size <span class="op">=</span> <span class="fl">14</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-cellpose-imageprocessed-2.png" width="672"></div>
+</div>
+<div id="loading-a-retrained-model" class="section level4 unnumbered">
+<h4>Loading a retrained model<a class="anchor" aria-label="anchor" href="#loading-a-retrained-model"><i class="fas fa-link"></i></a>
+</h4>
+<p>If users have the resources to retrain the default {cellpose} model <span class="citation">(<a href="troubleshooting.html#ref-pachitariu2022cellpose" role="doc-biblioref">Pachitariu and Stringer 2022</a>)</span>, this retrained model can be loaded in lieu of the default models. To do so, user’s model can be specified in <code>establishCellSegModel</code>.</p>
+<p>[Model retraining is beyond the scope of this book. Users are encouraged to look up the documentation for {cellpose}.]</p>
+<div class="sourceCode" id="cb272"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishCellSegModel.html">establishCellSegModel</a></span><span class="op">(</span></span>
+<span>  cellposePreTrainedModel <span class="op">=</span></span>
+<span>    <span class="st">'C:/Users/kwaje/OneDrive - A STAR/Documents/Workplace/Liu_Connect/Code/jinyue_cellpose_models/CP_model3_newB4_800epoch_lr0pt01_FINAL'</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code>## 
+## Preparing cell segmentation model(s)...</code></pre>
+<pre><code>## User-pretrained Cellpose model...</code></pre>
+<div class="sourceCode" id="cb275"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cellMask</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/runCellSegModel.html">runCellSegModel</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">cellMask</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster</a></span><span class="op">(</span> data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>               <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, fill<span class="op">=</span><span class="va">value</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_fill_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'black'</span>, high<span class="op">=</span><span class="st">'white'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span> data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="va">df</span><span class="op">$</span><span class="va">value</span><span class="op">&gt;</span><span class="fl">0</span>,<span class="op">]</span>, </span>
+<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, colour<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>              shape <span class="op">=</span> <span class="st">'.'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span> option<span class="op">=</span><span class="st">'turbo'</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span> base_size <span class="op">=</span> <span class="fl">14</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-cellpose-retrained-1.png" width="672"></div>
+</div>
+</div>
+<div id="stardist" class="section level3" number="5.3.2">
+<h3>
+<span class="header-section-number">5.3.2</span> Stardist<a class="anchor" aria-label="anchor" href="#stardist"><i class="fas fa-link"></i></a>
+</h3>
+<p>An alternative for nuclei segmentation is to use {stardist}: a deep-learning segmentation model that relies on star-convex polygons. The model has been trained on DAPI images (<code>2D_versatile_fluo</code>), and H&amp;E stains (<code>2D_versatile_he</code>). It is typically faster than {cellpose}, allowing for looping through multiple hyperparameters – should users be interested.</p>
+<p>[Tip: Windows users have reported running into <code>[WinError 1314] A required privilege is not held by the client</code> error when attempting to load {stardist}. To get around the problem, manually unzip the downloaded model (file location reported in error message). For some reason, <code>2D_versatile_fluo.zip</code> is erroneously unzipped as <code>2D_versatile_fluo_extracted</code> instead of <code>2D_versatile_fluo</code> in some cases.]</p>
+<div class="sourceCode" id="cb277"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/establishCellSegModel.html">establishCellSegModel</a></span><span class="op">(</span> <span class="st">'stardist'</span> <span class="op">)</span></span></code></pre></div>
+<pre><code>## 
+## Preparing cell segmentation model(s)...</code></pre>
+<pre><code>## Stardist packaged model...</code></pre>
+<pre><code>## Found model '2D_versatile_fluo' for 'StarDist2D'.
+## Loading network weights from 'weights_best.h5'.
+## Loading thresholds from 'thresholds.json'.
+## Using default values: prob_thresh=0.479071, nms_thresh=0.3.</code></pre>
+<div class="sourceCode" id="cb281"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cellMask</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/runCellSegModel.html">runCellSegModel</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">cellMask</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster</a></span><span class="op">(</span> data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>               <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, fill<span class="op">=</span><span class="va">value</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_fill_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'black'</span>, high<span class="op">=</span><span class="st">'white'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span> data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="va">df</span><span class="op">$</span><span class="va">value</span><span class="op">&gt;</span><span class="fl">0</span>,<span class="op">]</span>, </span>
+<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, colour<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>              shape <span class="op">=</span> <span class="st">'.'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span> option<span class="op">=</span><span class="st">'turbo'</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span> base_size <span class="op">=</span> <span class="fl">14</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-stardist-default-1.png" width="672"></div>
+<p>As with {cellpose}, there are various ways to troubleshoot base {stardist} performance.</p>
+<p>Like {cellpose}, users can tweak {stardist} model parameters during <code>runCellSegModel</code>. For instance, decreasing <code>prob_thresh</code> (default: 0.48) increases sensitivity.</p>
+<div class="sourceCode" id="cb283"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cellMask</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/runCellSegModel.html">runCellSegModel</a></span><span class="op">(</span><span class="va">im</span>, prob_thresh <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">cellMask</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster</a></span><span class="op">(</span> data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>               <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, fill<span class="op">=</span><span class="va">value</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_fill_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'black'</span>, high<span class="op">=</span><span class="st">'white'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span> data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="va">df</span><span class="op">$</span><span class="va">value</span><span class="op">&gt;</span><span class="fl">0</span>,<span class="op">]</span>, </span>
+<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, colour<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>              shape <span class="op">=</span> <span class="st">'.'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span> option<span class="op">=</span><span class="st">'turbo'</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span> base_size <span class="op">=</span> <span class="fl">14</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-stardist-reparams-1.png" width="672"></div>
+<p>We have also found {stardist} to be more sensitive to brightness values / image processing than {cellpose}. For instance, brightening the image as before greatly impairs nuclei detection:</p>
+<div class="sourceCode" id="cb285"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">norm</span> <span class="op">&lt;-</span> <span class="va">im</span><span class="op">^</span><span class="fl">0.5</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">'Original image'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="sourceCode" id="cb287"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">norm</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">'Brightened image'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(norm): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-stardist-brightnesseffect-1.png" width="672"></div>
+<div class="sourceCode" id="cb289"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">cellMask</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/runCellSegModel.html">runCellSegModel</a></span><span class="op">(</span> <span class="va">norm</span> <span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">cellMask</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster</a></span><span class="op">(</span> data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>               <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, fill<span class="op">=</span><span class="va">value</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_fill_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'black'</span>, high<span class="op">=</span><span class="st">'white'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span> data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="va">df</span><span class="op">$</span><span class="va">value</span><span class="op">&gt;</span><span class="fl">0</span>,<span class="op">]</span>, </span>
+<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, colour<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>              shape <span class="op">=</span> <span class="st">'.'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span> option<span class="op">=</span><span class="st">'turbo'</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span> base_size <span class="op">=</span> <span class="fl">14</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-stardist-brightnesseffect-2.png" width="672"></div>
+<p>And darkening the image greatly increases sensitivity:</p>
+<div class="sourceCode" id="cb291"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">norm</span> <span class="op">&lt;-</span> <span class="va">im</span><span class="op">^</span><span class="fl">1.5</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">'Original image'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="sourceCode" id="cb293"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">norm</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">'Darkened image'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(norm): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-stardist-darkening-1.png" width="672"></div>
+<div class="sourceCode" id="cb295"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">cellMask</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/runCellSegModel.html">runCellSegModel</a></span><span class="op">(</span> <span class="va">norm</span> <span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">cellMask</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster</a></span><span class="op">(</span> data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>               <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, fill<span class="op">=</span><span class="va">value</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_fill_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'black'</span>, high<span class="op">=</span><span class="st">'white'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span> data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="va">df</span><span class="op">$</span><span class="va">value</span><span class="op">&gt;</span><span class="fl">0</span>,<span class="op">]</span>, </span>
+<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, colour<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>              shape <span class="op">=</span> <span class="st">'.'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span> option<span class="op">=</span><span class="st">'turbo'</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span> base_size <span class="op">=</span> <span class="fl">14</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-stardist-darkening-2.png" width="672"></div>
+<p>Given this sensitivity, and the relatively faster speed of {stardist}, users might wish to try different image processing prior to cell segmentation. This can be accomplished as below. Note that <code>runCellSegModel</code> accepts both a single image matrix, and a list of images. [The same is achievable for {cellpose} if desired, but users should be aware of the longer runtime.]</p>
+<div class="sourceCode" id="cb297"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">powerValues</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2</span>, length.out <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">imList</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span> <span class="va">powerValues</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">{</span> </span>
+<span>  <span class="va">norm</span> <span class="op">&lt;-</span> <span class="va">im</span><span class="op">^</span><span class="va">x</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span> <span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">norm</span><span class="op">)</span>, main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">'Image ^ '</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">x</span>, digits<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">)</span> <span class="op">)</span> </span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">norm</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(norm): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(norm): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(norm): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(norm): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(norm): Assuming third dimension corresponds to time/depth
+
+## Warning in as.cimg.array(norm): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-stardist-powerranges-1.png" width="672"></div>
+<div class="sourceCode" id="cb299"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span> <span class="va">imList</span> <span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"Power"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">powerValues</span>, digits<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">cellMasks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/runCellSegModel.html">runCellSegModel</a></span><span class="op">(</span> <span class="va">imList</span> <span class="op">)</span></span>
+<span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">cellMasks</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span> <span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">cellMasks</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">'Masks of '</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">cellMasks</span><span class="op">)</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-stardist-powerranges-2.png" width="672"></div>
+<div class="sourceCode" id="cb300"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>To summarise a list of masks into a single mask matrix, we provide the <code>consolidateCellSegMasks</code> function. This works by overlaying all masks in the list, and only accepting image pixels that have been masked at least <span class="math inline">\(n\)</span> times. As default, <span class="math inline">\(n = 1\)</span>, so if a pixel is masked at least once, it is brought forwards.</p>
+<div class="sourceCode" id="cb301"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cellMask</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/consolidateCellSegMasks.html">consolidateCellSegMasks</a></span><span class="op">(</span> <span class="va">cellMasks</span> <span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">cellMask</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster</a></span><span class="op">(</span> data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>               <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, fill<span class="op">=</span><span class="va">value</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_fill_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'black'</span>, high<span class="op">=</span><span class="st">'white'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span> data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="va">df</span><span class="op">$</span><span class="va">value</span><span class="op">&gt;</span><span class="fl">0</span>,<span class="op">]</span>, </span>
+<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, colour<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>              shape <span class="op">=</span> <span class="st">'.'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span> option<span class="op">=</span><span class="st">'turbo'</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span> base_size <span class="op">=</span> <span class="fl">14</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-stardist-consolidate-1.png" width="672"></div>
+<p>Increasing <span class="math inline">\(n\)</span> means pixels need to be masked more than once, and thus decreases the number of masks identified. Below shows <span class="math inline">\(n = 2\)</span>:</p>
+<div class="sourceCode" id="cb303"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cellMask</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/masmr/man/consolidateCellSegMasks.html">consolidateCellSegMasks</a></span><span class="op">(</span> <span class="va">cellMasks</span>, minFlags <span class="op">=</span> <span class="fl">2</span> <span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">cellMask</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_raster</a></span><span class="op">(</span> data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>               <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, fill<span class="op">=</span><span class="va">value</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_fill_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'black'</span>, high<span class="op">=</span><span class="st">'white'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span> data<span class="op">=</span><span class="va">df</span><span class="op">[</span><span class="va">df</span><span class="op">$</span><span class="va">value</span><span class="op">&gt;</span><span class="fl">0</span>,<span class="op">]</span>, </span>
+<span>              <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, y<span class="op">=</span><span class="va">y</span>, colour<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>              shape <span class="op">=</span> <span class="st">'.'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_colour_viridis_d</a></span><span class="op">(</span> option<span class="op">=</span><span class="st">'turbo'</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span> base_size <span class="op">=</span> <span class="fl">14</span> <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-stardist-consolidaten2-1.png" width="672"></div>
+</div>
+</div>
+<div id="saving-cell-masks" class="section level2" number="5.4">
+<h2>
+<span class="header-section-number">5.4</span> Saving cell masks<a class="anchor" aria-label="anchor" href="#saving-cell-masks"><i class="fas fa-link"></i></a>
+</h2>
+<p>If users are satisfied with model performance, they can use <code>saveCellSegMasks</code> to save masks as a <code>.csv.gz</code> file. Additionally, it is recommended that users save the DAPI image used for cell segmentation. As default, the last image to be processed is stored under <code>params$cell_seg_image</code>, and will be saved if no other images are specified for <code>saveCellSegMasks</code>.</p>
+<div class="sourceCode" id="cb305"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span> <span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">im</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">'Original image'</span> <span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(im): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="sourceCode" id="cb307"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span> <span class="fu">imager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/imager/man/as.cimg.html">as.cimg</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">cell_seg_image</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">'Last image processed'</span> <span class="op">)</span></span></code></pre></div>
+<pre><code>## Warning in as.cimg.array(params$cell_seg_image): Assuming third dimension corresponds to time/depth</code></pre>
+<div class="inline-figure"><img src="_main_files/figure-html/cellseg-currentprocessedimage-1.png" width="672"></div>
+<div class="sourceCode" id="cb309"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Saving cell masks creates a <code>CELLSEG_{ Cell segmentation model }_{ FOV name }.csv.gz</code> file containing masks, and a <code>REGIM_{ FOV Name }.png</code> image (depending on what is input into the <code>im</code> parameter).</p>
+<div class="sourceCode" id="cb310"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/saveCellSegMasks.html">saveCellSegMasks</a></span><span class="op">(</span><span class="va">cellMask</span>, im <span class="op">=</span> <span class="va">im</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">out_dir</span>, <span class="st">'REGIM_'</span>, <span class="va">params</span><span class="op">$</span><span class="va">current_fov</span>, <span class="st">'.png'</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="image-processing.html"><span class="header-section-number">4</span> Image processing</a></div>
+<div class="next"><a href="stitching.html"><span class="header-section-number">6</span> Stitching</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#cell-segmentation"><span class="header-section-number">5</span> Cell segmentation</a></li>
+<li>
+<a class="nav-link" href="#pre-processing-2"><span class="header-section-number">5.1</span> Pre-processing</a><ul class="nav navbar-nav">
+<li><a class="nav-link" href="#establishing-parameters-1"><span class="header-section-number">5.1.1</span> Establishing parameters</a></li>
+<li><a class="nav-link" href="#establishing-the-cell-segmentation-model"><span class="header-section-number">5.1.2</span> Establishing the cell segmentation model</a></li>
+</ul>
+</li>
+<li><a class="nav-link" href="#running-cell-segmentation"><span class="header-section-number">5.2</span> Running cell segmentation</a></li>
+<li>
+<a class="nav-link" href="#running-segmentation-model"><span class="header-section-number">5.3</span> Running segmentation model</a><ul class="nav navbar-nav">
+<li><a class="nav-link" href="#cellpose"><span class="header-section-number">5.3.1</span> Cellpose</a></li>
+<li><a class="nav-link" href="#stardist"><span class="header-section-number">5.3.2</span> Stardist</a></li>
+</ul>
+</li>
+<li><a class="nav-link" href="#saving-cell-masks"><span class="header-section-number">5.4</span> Saving cell masks</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+          
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>masmr: Modular Algorithms for Spotcalling in MERFISH in R</strong>" was written by Eugene Kwa. It was last built on 2025-07-18.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>
