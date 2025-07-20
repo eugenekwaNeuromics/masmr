@@ -418,7 +418,7 @@ stitchImages <- function(
       }
     }
 
-    corr <- crossCorrelate2D(refim, querim, forStitch = TRUE)
+    corr <- crossCorrelate2D(refim, querim, pad = TRUE)
     coord <- getRasterCoords(corr)
     coord <- coord - coord[round(nrow(coord)/2), round(ncol(coord)/2)]
     shift <- coord[which.max(corr)] + epcx

@@ -17,7 +17,7 @@ getRasterCoords <- function( raster, realY = FALSE ){
 }
 
 ## Calculate cross correlation.
-crossCorrelate2D <- function(referenceImageMatrix, queryImageMatrix, forStitch = FALSE){
+crossCorrelate2D <- function(referenceImageMatrix, queryImageMatrix, pad = FALSE){
   x = referenceImageMatrix
   h = queryImageMatrix
 
@@ -26,24 +26,23 @@ crossCorrelate2D <- function(referenceImageMatrix, queryImageMatrix, forStitch =
 
   hdim = dim(as.matrix(h))
   xdim = dim(as.matrix(x))
-  cdim = hdim + xdim - 1 #Cross-correlation dimension
+  cdim = hdim + xdim - 1 # Cross-correlation dimension
 
-  if(forStitch){
-    ## For some reason, our approach for stitching only works for this case
+  if(pad){
+    ## When images are not the same dimension
     hpad = xpad = matrix(0, nrow=cdim[1], ncol=cdim[2])
     xpad[1:xdim[1], 1:xdim[2]] = x
     hpad[1:hdim[1], 1:hdim[2]] = h[hdim[1]:1, hdim[2]:1]
-    fftx = fft(xpad)
-    ffth = fft(hpad)
-    res = fft(fftx * ffth, inverse = TRUE)
   }else{
     if(any(hdim != xdim)){
       stop('Expecting query and reference images to have the same dimensions!')
     }
-    fftx = fft(x)
-    ffth = Conj(fft(h))
-    res = fft(fftx * ffth, inverse = TRUE)
+    xpad = x
+    hpad = h[hdim[1]:1, hdim[2]:1]
   }
+  fftx = fft(xpad)
+  ffth = fft(hpad) # The more accurate version is Conj(fft(unflipped h)), but this works better for some reason
+  res = fft(fftx * ffth, inverse = TRUE)
   return(Re(res))
 }
 
