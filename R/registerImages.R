@@ -202,8 +202,8 @@ registerImages <- function(
     }
 
     ## FAST version: correlate images without padding
-    corra <- crossCorrelate2D(ref_im, quer_im, normalized=FALSE, pad = F)
-    corrb <- crossCorrelate2D(quer_im, ref_im, normalized=FALSE, pad = F)
+    corra <- crossCorrelate2D(ref_im, quer_im, forStitch = FALSE)
+    corrb <- crossCorrelate2D(quer_im, ref_im, forStitch = FALSE)
     if(gaussianWeightedAlignment){
       corra <- corra * w
       corrb <- corrb * w

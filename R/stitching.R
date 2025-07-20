@@ -384,7 +384,6 @@ stitchImages <- function(
 
   if(verbose){ message('\nAligning adjacent FOVs...') }
   shifts <- c()
-  # coord <- getRasterCoords(refx) - sum(dim(refx) * c(1, 1i)) + (1+1i)
   for(imidxi in 1:length(nnlist)){
     if(verbose){ message(paste0(imidxi, ' of ', length(nnlist), '...'), appendLF = F) }
     epcx <- gcxi[gcxi$fov==names(nnlist)[imidxi],c('x_microns', 'y_microns')] - gcxi[gcxi$ref,c('x_microns', 'y_microns')]
@@ -419,7 +418,7 @@ stitchImages <- function(
       }
     }
 
-    corr <- crossCorrelate2D(refim, querim, normalized=FALSE, pad = T)
+    corr <- crossCorrelate2D(refim, querim, forStitch = TRUE)
     coord <- getRasterCoords(corr)
     coord <- coord - coord[round(nrow(coord)/2), round(ncol(coord)/2)]
     shift <- coord[which.max(corr)] + epcx

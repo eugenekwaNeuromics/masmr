@@ -17,7 +17,7 @@ getRasterCoords <- function( raster, realY = FALSE ){
 }
 
 ## Calculate cross correlation.
-crossCorrelate2D <- function(referenceImageMatrix, queryImageMatrix, normalized = FALSE, pad = TRUE){
+crossCorrelate2D <- function(referenceImageMatrix, queryImageMatrix, forStitch = FALSE){
   x = referenceImageMatrix
   h = queryImageMatrix
 
@@ -28,60 +28,23 @@ crossCorrelate2D <- function(referenceImageMatrix, queryImageMatrix, normalized 
   xdim = dim(as.matrix(x))
   cdim = hdim + xdim - 1 #Cross-correlation dimension
 
-  #Pad
-  if(pad){
+  if(forStitch){
+    ## For some reason, our approach for stitching only works for this case
     hpad = xpad = matrix(0, nrow=cdim[1], ncol=cdim[2])
     xpad[1:xdim[1], 1:xdim[2]] = x
-    hpad[1:hdim[1], 1:hdim[2]] = h
+    hpad[1:hdim[1], 1:hdim[2]] = h[hdim[1]:1, hdim[2]:1]
+    fftx = fft(xpad)
+    ffth = fft(hpad)
+    res = fft(fftx * ffth, inverse = TRUE)
   }else{
     if(any(hdim != xdim)){
-      print('ERROR: If pad = FALSE, query and reference images need to have the same dimensions!')
+      stop('Expecting query and reference images to have the same dimensions!')
     }
-    xpad = x
-    hpad = h
+    fftx = fft(x)
+    ffth = Conj(fft(h))
+    res = fft(fftx * ffth, inverse = TRUE)
   }
-
-  fftx = fft(xpad)
-  ffth = Conj(fft(hpad))
-  res = fft(fftx * ffth, inverse = TRUE)
-
-  if(normalized){
-    xdim = dim(as.matrix(x))
-    cdim = xdim + xdim - 1 #Cross-correlation dimension
-    if(pad){
-      xpad_copy = xpad = matrix(0, nrow=cdim[1], ncol=cdim[2])
-      xpad[1:xdim[1], 1:xdim[2]] = x
-      xpad_copy[1:xdim[1], 1:xdim[2]] = x
-    }else{
-      xpad = x
-      xpad_copy = x
-    }
-    fftx = fft(xpad)
-    fftxcopy = Conj(fft(xpad))
-    denx = fft(fftx * fftxcopy, inverse=TRUE)
-    denx = max(Re(denx))
-
-    hdim = dim(as.matrix(h))
-    cdim = hdim + hdim - 1 #Cross-correlation dimension
-    if(pad){
-      hpad_copy = hpad = matrix(0, nrow=cdim[1], ncol=cdim[2])
-      hpad[1:hdim[1], 1:hdim[2]] = h
-      hpad_copy[1:hdim[1], 1:hdim[2]] = h
-    }else{
-      hpad = h
-      hpad_copy = h
-    }
-    ffth = fft(hpad)
-    ffthcopy = Conj(fft(hpad_copy))
-    denh = fft(ffth * ffthcopy, inverse=TRUE)
-    denh = max(Re(denh))
-
-    den = sqrt( denx * denh )
-
-    return(Re(res) / den)
-  }else{
-    return(Re(res))
-  }
+  return(Re(res))
 }
 
 ## Identify local peaks in 2D data.
