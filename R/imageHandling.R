@@ -32,17 +32,17 @@ crossCorrelate2D <- function(referenceImageMatrix, queryImageMatrix, normalized 
   if(pad){
     hpad = xpad = matrix(0, nrow=cdim[1], ncol=cdim[2])
     xpad[1:xdim[1], 1:xdim[2]] = x
-    hpad[1:hdim[1], 1:hdim[2]] = h[hdim[1]:1, hdim[2]:1]
+    hpad[1:hdim[1], 1:hdim[2]] = h
   }else{
     if(any(hdim != xdim)){
       print('ERROR: If pad = FALSE, query and reference images need to have the same dimensions!')
     }
     xpad = x
-    hpad = h[hdim[1]:1, hdim[2]:1]
+    hpad = h
   }
 
   fftx = fft(xpad)
-  ffth = fft(hpad)
+  ffth = Conj(fft(hpad))
   res = fft(fftx * ffth, inverse = TRUE)
 
   if(normalized){
@@ -51,13 +51,13 @@ crossCorrelate2D <- function(referenceImageMatrix, queryImageMatrix, normalized 
     if(pad){
       xpad_copy = xpad = matrix(0, nrow=cdim[1], ncol=cdim[2])
       xpad[1:xdim[1], 1:xdim[2]] = x
-      xpad_copy[1:xdim[1], 1:xdim[2]] = x[xdim[1]:1, xdim[2]:1]
+      xpad_copy[1:xdim[1], 1:xdim[2]] = x
     }else{
       xpad = x
-      xpad_copy = x[xdim[1]:1, xdim[2]:1]
+      xpad_copy = x
     }
     fftx = fft(xpad)
-    fftxcopy = fft(xpad_copy)
+    fftxcopy = Conj(fft(xpad))
     denx = fft(fftx * fftxcopy, inverse=TRUE)
     denx = max(Re(denx))
 
@@ -66,13 +66,13 @@ crossCorrelate2D <- function(referenceImageMatrix, queryImageMatrix, normalized 
     if(pad){
       hpad_copy = hpad = matrix(0, nrow=cdim[1], ncol=cdim[2])
       hpad[1:hdim[1], 1:hdim[2]] = h
-      hpad_copy[1:hdim[1], 1:hdim[2]] = h[hdim[1]:1, hdim[2]:1]
+      hpad_copy[1:hdim[1], 1:hdim[2]] = h
     }else{
       hpad = h
-      hpad_copy = h[hdim[1]:1, hdim[2]:1]
+      hpad_copy = h
     }
     ffth = fft(hpad)
-    ffthcopy = fft(hpad_copy)
+    ffthcopy = Conj(fft(hpad_copy))
     denh = fft(ffth * ffthcopy, inverse=TRUE)
     denh = max(Re(denh))
 
