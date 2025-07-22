@@ -113,7 +113,7 @@
 <span>  <span class="co"># dapiFormat = '.ome.tif',</span></span>
 <span>  codebookColumnNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">'_'</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'cy3'</span>,<span class="st">'alexa594'</span>,<span class="st">'cy5'</span>,<span class="st">'cy7'</span><span class="op">)</span>,each<span class="op">=</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  pythonLocation <span class="op">=</span> <span class="st">'C:/Users/kwaje/AppData/Local/miniforge3/envs/scipyenv/'</span>,</span>
+<span>  pythonLocation <span class="op">=</span> <span class="st">'C:/Users/kwaje/AppData/Local/miniforge3/envs/masmrenv/'</span>,</span>
 <span>  </span>
 <span>  <span class="co">## Automatically filled</span></span>
 <span>  <span class="co"># seed = 12345,</span></span>
@@ -882,9 +882,10 @@ x + yi = r(\cos(theta) + i\sin(\theta)) = re^{i\theta}
 <div class="sourceCode" id="cb218"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>This concludes a very brief introduction to one of the many uses of the FFT algorithm.</p>
-<div id="convolution-of-images-with-kernels" class="section level4 unnumbered">
-<h4>Convolution of images with kernels<a class="anchor" aria-label="anchor" href="#convolution-of-images-with-kernels"><i class="fas fa-link"></i></a>
-</h4>
+</div>
+<div id="convolution-of-images-with-kernels" class="section level3 unnumbered">
+<h3>Convolution of images with kernels<a class="anchor" aria-label="anchor" href="#convolution-of-images-with-kernels"><i class="fas fa-link"></i></a>
+</h3>
 <p>No discussion of image processing would be complete without mentioning the use of kernels. Kernels are small matrices that are applied pixel by pixel on an image. These kernels contain weights that are multiplied by the underlying pixel intensity, then summed to return a new value for the central element of the kernel matrix. The effect is a weighted sum of pixel intensities across a small area. Choosing different kernels perform different calculations.</p>
 <p>Kernel methods are very flexible and can be executed very quickly (with far less computation compared to other approaches).</p>
 <p>For instance, take Gaussian blurring (which we can also accomplish with <code><a href="https://rdrr.io/pkg/imager/man/isoblur.html">imager::isoblur</a></code> or the FFT method above). Using the kernel approach, we calculated a weighted average of pixel intensities.</p>
@@ -950,7 +951,6 @@ x + yi = r(\cos(theta) + i\sin(\theta)) = re^{i\theta}
 <p>See <a href="https://en.wikipedia.org/wiki/Kernel_(image_processing)" class="uri">https://en.wikipedia.org/wiki/Kernel_(image_processing)</a> for more examples of kernels and their uses.</p>
 </div>
 </div>
-</div>
 <div id="combining-building-blocks" class="section level2" number="4.4">
 <h2>
 <span class="header-section-number">4.4</span> Combining building blocks<a class="anchor" aria-label="anchor" href="#combining-building-blocks"><i class="fas fa-link"></i></a>
@@ -984,7 +984,7 @@ x + yi = r(\cos(theta) + i\sin(\theta)) = re^{i\theta}
 ##     norm &lt;- imNormalise(norm)
 ##     return(norm)
 ## }
-## &lt;bytecode: 0x0000020b4f3e4ee8&gt;
+## &lt;bytecode: 0x000002538a26d5b0&gt;
 ## &lt;environment: namespace:masmr&gt;</code></pre>
 <p><strong>ALWAYS plot to check how your image processing has altered your image!</strong></p>
 <div class="sourceCode" id="cb225"><pre class="downlit sourceCode r">
@@ -1073,7 +1073,7 @@ x + yi = r(\cos(theta) + i\sin(\theta)) = re^{i\theta}
 ##     mask[labmask %in% toosmall] &lt;- F
 ##     return(mask)
 ## }
-## &lt;bytecode: 0x0000020e5ffe15c0&gt;
+## &lt;bytecode: 0x000002503be9b2b8&gt;
 ## &lt;environment: namespace:masmr&gt;</code></pre>
 <p>Next, let’s create a new mask function that will be more permissive and flag more pixels. This <code>myCustomMask</code> function is created from copying and editing the default <code>imForMask</code> function above. Briefly, this new function replaces steps 5-7 in the default <code>imForMask</code> function with the union of multiple masks.</p>
 <p>[Note: the use of ellipsis (<code>...</code>) is to allow the passing arguments in <code>myCustomMask</code> to functions <strong>within</strong> <code>myCustomMask</code>: e.g. <code>imLaplacianOfGaussian</code>, <code>imHessianDeterminant</code> etc.]</p>
@@ -1346,6 +1346,7 @@ Rudin, Leonid I, Stanley Osher, and Emad Fatemi. 1992. <span>“Nonlinear Total 
 <a class="nav-link" href="#advanced-creating-your-own-building-blocks"><span class="header-section-number">4.3</span> Advanced: creating your own building blocks</a><ul class="nav navbar-nav">
 <li><a class="nav-link" href="#the-benefits-of-using-complex-numbers-to-represent-coordinates">The benefits of using complex numbers to represent coordinates</a></li>
 <li><a class="nav-link" href="#the-fast-fourier-transform-fft-and-band-pass-filtering">The Fast Fourier Transform (FFT) and band-pass filtering</a></li>
+<li><a class="nav-link" href="#convolution-of-images-with-kernels">Convolution of images with kernels</a></li>
 </ul>
 </li>
 <li><a class="nav-link" href="#combining-building-blocks"><span class="header-section-number">4.4</span> Combining building blocks</a></li>
@@ -1367,7 +1368,7 @@ Rudin, Leonid I, Stanley Osher, and Emad Fatemi. 1992. <span>“Nonlinear Total 
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>masmr: Modular Algorithms for Spotcalling in MERFISH in R</strong>" was written by Eugene Kwa. It was last built on 2025-07-21.</p>
+    <p>"<strong>masmr: Modular Algorithms for Spotcalling in MERFISH in R</strong>" was written by Eugene Kwa. It was last built on 2025-07-22.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

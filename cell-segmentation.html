@@ -118,7 +118,7 @@
 <span>  <span class="co"># dapiFormat = '.ome.tif',</span></span>
 <span>  codebookColumnNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">'_'</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'cy3'</span>,<span class="st">'alexa594'</span>,<span class="st">'cy5'</span>,<span class="st">'cy7'</span><span class="op">)</span>,each<span class="op">=</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  pythonLocation <span class="op">=</span> <span class="st">'C:/Users/kwaje/AppData/Local/miniforge3/envs/scipyenv/'</span>,</span>
+<span>  pythonLocation <span class="op">=</span> <span class="st">'C:/Users/kwaje/AppData/Local/miniforge3/envs/masmrenv/'</span>,</span>
 <span>  </span>
 <span>  <span class="co">## Automatically filled</span></span>
 <span>  <span class="co"># seed = 12345,</span></span>
@@ -137,9 +137,10 @@
 <li>
 <code>pythonLocation</code>: location of the user’s Python environment. The Python environment should contain all the packages necessary to run the cell segmentation model of choice.</li>
 </ul>
-<p>Details on the setting up of the Python environment is beyond the scope of this book. Briefly, there exist various tools (e.g. <code>miniconda</code>, <code>anaconda</code>, <code>miniforge</code>) that allow users to create a Python environment for installing necessary software. We will then interface with that environment through <code>reticulate</code>. Below are a series of commands to set up a Python environment called <code>scipyenv</code> that is compatible with <strong>stardist</strong> and <strong>cellpose</strong>. Users should take note of where the environment is created, and provide the location of the folder in <code>pythonLocation</code>.</p>
-<pre><code>conda create -n scipyenv python=3.9 notebook pandas numpy=1.26.4
-conda activate scipyenv
+<p>Details on the setting up of the Python environment is beyond the scope of this book. Briefly, there exist various tools (e.g. <code>miniconda</code>, <code>anaconda</code>, <code>miniforge</code>) that allow users to create a Python environment for installing necessary software. We will then interface with that environment through <code>reticulate</code>.</p>
+<p>Below are a series of commands to set up a Python environment called <code>masmrenv</code> that is compatible with <strong>stardist</strong> and <strong>cellpose</strong>. Owing to package version clashes, users are strongly encouraged to stick to the package versions below and use <code>masmrenv</code> solely for interfacing with <strong>masmr</strong> (i.e. do <em>not</em> install new packages into <code>masmrenv</code> and start using <code>masmrenv</code> as your “day-to-day” Python environment). Users should also take note of where the environment is created, and provide the location of the folder in <code>pythonLocation</code>.</p>
+<pre><code>conda create -n masmrenv python=3.9 notebook pandas numpy=1.26.4
+conda activate masmrenv
 conda install pytorch=1.12.1 cudatoolkit=10.2 -c pytorch #1.12.1 is the earliest mps is supported
 pip install cellpose==3.0.11
 pip install tensorflow==2.17.0
@@ -148,10 +149,11 @@ pip install stardist==0.9.1</code></pre>
 <div class="sourceCode" id="cb246"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/masmr/man/readImageMetaData.html">readImageMetaData</a></span><span class="op">(</span> <span class="st">'dapi_dir'</span> <span class="op">)</span></span></code></pre></div>
 <pre><code>## Warning in readImageMetaData("dapi_dir"): Assuming this data has been acquired by Triton</code></pre>
-<pre><code>## Warning in readImageMetaData("dapi_dir"): bit_name not matching codebookColumnNames: either edit GLOBALCOORD.csv or params$codebook_colnames (ignore
-## this warning if codebook not needed, e.g. DAPI)</code></pre>
+<pre><code>## Warning in readImageMetaData("dapi_dir"): bit_name not matching codebookColumnNames: either edit GLOBALCOORD.csv or
+## params$codebook_colnames (ignore this warning if codebook not needed, e.g. DAPI)</code></pre>
 <pre><code>## Warning in readImageMetaData("dapi_dir"): Updating params$fov_names</code></pre>
-<pre><code>## Warning in readImageMetaData("dapi_dir"): Unsuccessful attempt at correcting placeholder codebook column names (params$codebook_colnames)</code></pre>
+<pre><code>## Warning in readImageMetaData("dapi_dir"): Unsuccessful attempt at correcting placeholder codebook column names
+## (params$codebook_colnames)</code></pre>
 <p>As before, this adds additional metadata to the <code>params</code> object, albeit this time for DAPI images specifically:</p>
 <div class="sourceCode" id="cb251"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span> <span class="va">params</span><span class="op">$</span><span class="va">resolutions</span> <span class="op">)</span></span></code></pre></div>
@@ -168,22 +170,30 @@ pip install stardist==0.9.1</code></pre>
 ## [1] "dapi"
 ## 
 ## $fov_names
-##   [1] "MMStack_1-Pos_000_000" "MMStack_1-Pos_001_000" "MMStack_1-Pos_002_000" "MMStack_1-Pos_003_000" "MMStack_1-Pos_004_000" "MMStack_1-Pos_005_000"
-##   [7] "MMStack_1-Pos_006_000" "MMStack_1-Pos_007_000" "MMStack_1-Pos_008_000" "MMStack_1-Pos_009_000" "MMStack_1-Pos_009_001" "MMStack_1-Pos_008_001"
-##  [13] "MMStack_1-Pos_007_001" "MMStack_1-Pos_006_001" "MMStack_1-Pos_005_001" "MMStack_1-Pos_004_001" "MMStack_1-Pos_003_001" "MMStack_1-Pos_002_001"
-##  [19] "MMStack_1-Pos_001_001" "MMStack_1-Pos_000_001" "MMStack_1-Pos_000_002" "MMStack_1-Pos_001_002" "MMStack_1-Pos_002_002" "MMStack_1-Pos_003_002"
-##  [25] "MMStack_1-Pos_004_002" "MMStack_1-Pos_005_002" "MMStack_1-Pos_006_002" "MMStack_1-Pos_007_002" "MMStack_1-Pos_008_002" "MMStack_1-Pos_009_002"
-##  [31] "MMStack_1-Pos_009_003" "MMStack_1-Pos_008_003" "MMStack_1-Pos_007_003" "MMStack_1-Pos_006_003" "MMStack_1-Pos_005_003" "MMStack_1-Pos_004_003"
-##  [37] "MMStack_1-Pos_003_003" "MMStack_1-Pos_002_003" "MMStack_1-Pos_001_003" "MMStack_1-Pos_000_003" "MMStack_1-Pos_000_004" "MMStack_1-Pos_001_004"
-##  [43] "MMStack_1-Pos_002_004" "MMStack_1-Pos_003_004" "MMStack_1-Pos_004_004" "MMStack_1-Pos_005_004" "MMStack_1-Pos_006_004" "MMStack_1-Pos_007_004"
-##  [49] "MMStack_1-Pos_008_004" "MMStack_1-Pos_009_004" "MMStack_1-Pos_009_005" "MMStack_1-Pos_008_005" "MMStack_1-Pos_007_005" "MMStack_1-Pos_006_005"
-##  [55] "MMStack_1-Pos_005_005" "MMStack_1-Pos_004_005" "MMStack_1-Pos_003_005" "MMStack_1-Pos_002_005" "MMStack_1-Pos_001_005" "MMStack_1-Pos_000_005"
-##  [61] "MMStack_1-Pos_000_006" "MMStack_1-Pos_001_006" "MMStack_1-Pos_002_006" "MMStack_1-Pos_003_006" "MMStack_1-Pos_004_006" "MMStack_1-Pos_005_006"
-##  [67] "MMStack_1-Pos_006_006" "MMStack_1-Pos_007_006" "MMStack_1-Pos_008_006" "MMStack_1-Pos_009_006" "MMStack_1-Pos_009_007" "MMStack_1-Pos_008_007"
-##  [73] "MMStack_1-Pos_007_007" "MMStack_1-Pos_006_007" "MMStack_1-Pos_005_007" "MMStack_1-Pos_004_007" "MMStack_1-Pos_003_007" "MMStack_1-Pos_002_007"
-##  [79] "MMStack_1-Pos_001_007" "MMStack_1-Pos_000_007" "MMStack_1-Pos_000_008" "MMStack_1-Pos_001_008" "MMStack_1-Pos_002_008" "MMStack_1-Pos_003_008"
-##  [85] "MMStack_1-Pos_004_008" "MMStack_1-Pos_005_008" "MMStack_1-Pos_006_008" "MMStack_1-Pos_007_008" "MMStack_1-Pos_008_008" "MMStack_1-Pos_009_008"
-##  [91] "MMStack_1-Pos_009_009" "MMStack_1-Pos_008_009" "MMStack_1-Pos_007_009" "MMStack_1-Pos_006_009" "MMStack_1-Pos_005_009" "MMStack_1-Pos_004_009"
+##   [1] "MMStack_1-Pos_000_000" "MMStack_1-Pos_001_000" "MMStack_1-Pos_002_000" "MMStack_1-Pos_003_000"
+##   [5] "MMStack_1-Pos_004_000" "MMStack_1-Pos_005_000" "MMStack_1-Pos_006_000" "MMStack_1-Pos_007_000"
+##   [9] "MMStack_1-Pos_008_000" "MMStack_1-Pos_009_000" "MMStack_1-Pos_009_001" "MMStack_1-Pos_008_001"
+##  [13] "MMStack_1-Pos_007_001" "MMStack_1-Pos_006_001" "MMStack_1-Pos_005_001" "MMStack_1-Pos_004_001"
+##  [17] "MMStack_1-Pos_003_001" "MMStack_1-Pos_002_001" "MMStack_1-Pos_001_001" "MMStack_1-Pos_000_001"
+##  [21] "MMStack_1-Pos_000_002" "MMStack_1-Pos_001_002" "MMStack_1-Pos_002_002" "MMStack_1-Pos_003_002"
+##  [25] "MMStack_1-Pos_004_002" "MMStack_1-Pos_005_002" "MMStack_1-Pos_006_002" "MMStack_1-Pos_007_002"
+##  [29] "MMStack_1-Pos_008_002" "MMStack_1-Pos_009_002" "MMStack_1-Pos_009_003" "MMStack_1-Pos_008_003"
+##  [33] "MMStack_1-Pos_007_003" "MMStack_1-Pos_006_003" "MMStack_1-Pos_005_003" "MMStack_1-Pos_004_003"
+##  [37] "MMStack_1-Pos_003_003" "MMStack_1-Pos_002_003" "MMStack_1-Pos_001_003" "MMStack_1-Pos_000_003"
+##  [41] "MMStack_1-Pos_000_004" "MMStack_1-Pos_001_004" "MMStack_1-Pos_002_004" "MMStack_1-Pos_003_004"
+##  [45] "MMStack_1-Pos_004_004" "MMStack_1-Pos_005_004" "MMStack_1-Pos_006_004" "MMStack_1-Pos_007_004"
+##  [49] "MMStack_1-Pos_008_004" "MMStack_1-Pos_009_004" "MMStack_1-Pos_009_005" "MMStack_1-Pos_008_005"
+##  [53] "MMStack_1-Pos_007_005" "MMStack_1-Pos_006_005" "MMStack_1-Pos_005_005" "MMStack_1-Pos_004_005"
+##  [57] "MMStack_1-Pos_003_005" "MMStack_1-Pos_002_005" "MMStack_1-Pos_001_005" "MMStack_1-Pos_000_005"
+##  [61] "MMStack_1-Pos_000_006" "MMStack_1-Pos_001_006" "MMStack_1-Pos_002_006" "MMStack_1-Pos_003_006"
+##  [65] "MMStack_1-Pos_004_006" "MMStack_1-Pos_005_006" "MMStack_1-Pos_006_006" "MMStack_1-Pos_007_006"
+##  [69] "MMStack_1-Pos_008_006" "MMStack_1-Pos_009_006" "MMStack_1-Pos_009_007" "MMStack_1-Pos_008_007"
+##  [73] "MMStack_1-Pos_007_007" "MMStack_1-Pos_006_007" "MMStack_1-Pos_005_007" "MMStack_1-Pos_004_007"
+##  [77] "MMStack_1-Pos_003_007" "MMStack_1-Pos_002_007" "MMStack_1-Pos_001_007" "MMStack_1-Pos_000_007"
+##  [81] "MMStack_1-Pos_000_008" "MMStack_1-Pos_001_008" "MMStack_1-Pos_002_008" "MMStack_1-Pos_003_008"
+##  [85] "MMStack_1-Pos_004_008" "MMStack_1-Pos_005_008" "MMStack_1-Pos_006_008" "MMStack_1-Pos_007_008"
+##  [89] "MMStack_1-Pos_008_008" "MMStack_1-Pos_009_008" "MMStack_1-Pos_009_009" "MMStack_1-Pos_008_009"
+##  [93] "MMStack_1-Pos_007_009" "MMStack_1-Pos_006_009" "MMStack_1-Pos_005_009" "MMStack_1-Pos_004_009"
 ##  [97] "MMStack_1-Pos_003_009" "MMStack_1-Pos_002_009" "MMStack_1-Pos_001_009" "MMStack_1-Pos_000_009"
 ## 
 ## $zslices
@@ -395,7 +405,7 @@ DAPI_1_dapi
 <div class="sourceCode" id="cb259"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cellSeg</span><span class="op">$</span><span class="va">CELLPOSE</span></span></code></pre></div>
 <pre><code>## $model
-## &lt;cellpose.models.CellposeModel object at 0x0000020AAF8E6B20&gt;
+## &lt;cellpose.models.CellposeModel object at 0x000002503A654B20&gt;
 ## 
 ## $outputs
 ## [1] "masks"  "flows"  "styles" "diams"</code></pre>
@@ -796,7 +806,7 @@ Weigert, Martin, and Uwe Schmidt. 2022. <span>“Nuclei Instance Segmentation an
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>masmr: Modular Algorithms for Spotcalling in MERFISH in R</strong>" was written by Eugene Kwa. It was last built on 2025-07-21.</p>
+    <p>"<strong>masmr: Modular Algorithms for Spotcalling in MERFISH in R</strong>" was written by Eugene Kwa. It was last built on 2025-07-22.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

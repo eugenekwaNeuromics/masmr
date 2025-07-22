@@ -114,7 +114,7 @@
 <span>  <span class="co"># dapiFormat = '.ome.tif',</span></span>
 <span>  codebookColumnNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>,<span class="fl">4</span><span class="op">)</span>,<span class="st">'_'</span>,<span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'cy3'</span>,<span class="st">'alexa594'</span>,<span class="st">'cy5'</span>,<span class="st">'cy7'</span><span class="op">)</span>,each<span class="op">=</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  pythonLocation <span class="op">=</span> <span class="st">'C:/Users/kwaje/AppData/Local/miniforge3/envs/scipyenv/'</span>,</span>
+<span>  pythonLocation <span class="op">=</span> <span class="st">'C:/Users/kwaje/AppData/Local/miniforge3/envs/masmrenv/'</span>,</span>
 <span>  </span>
 <span>  <span class="co">## Automatically filled</span></span>
 <span>  <span class="co"># seed = 12345,</span></span>
@@ -144,7 +144,8 @@
 </ul>
 <div class="sourceCode" id="cb316"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">params</span><span class="op">$</span><span class="va">parent_out_dir</span>, <span class="st">'/OUT/'</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
-<pre><code>## [1] "OUT_CELLEXPRESSION.csv.gz"  "OUT_CELLS.csv.gz"           "OUT_CELLSEG_PIXELS.csv.gz"  "OUT_GLOBALCOORD.csv"        "OUT_SPOTCALL_PIXELS.csv.gz"</code></pre>
+<pre><code>## [1] "OUT_CELLEXPRESSION.csv.gz"  "OUT_CELLS.csv.gz"           "OUT_CELLSEG_PIXELS.csv.gz"  "OUT_GLOBALCOORD.csv"       
+## [5] "OUT_SPOTCALL_PIXELS.csv.gz"</code></pre>
 <p>Currently, with <code>removeRedundancy</code> turned off, dataframes are simply concatenated. This is problematic because FOVs overlap, causing spots to be counted more than once. This can be seen at FOV boundaries, that have higher count densities.</p>
 <div class="sourceCode" id="cb318"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spotcalldf</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html">fread</a></span><span class="op">(</span></span>
@@ -599,7 +600,7 @@ Chen, Kok Hao, Alistair N Boettiger, Jeffrey R Moffitt, Siyuan Wang, and Xiaowei
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>masmr: Modular Algorithms for Spotcalling in MERFISH in R</strong>" was written by Eugene Kwa. It was last built on 2025-07-21.</p>
+    <p>"<strong>masmr: Modular Algorithms for Spotcalling in MERFISH in R</strong>" was written by Eugene Kwa. It was last built on 2025-07-22.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
